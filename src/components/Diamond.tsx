@@ -56,15 +56,15 @@ export default function Diamond({ assignments, players, onPositionTap }: Diamond
           {/* Dirt arc around infield */}
           <ellipse cx="50" cy="62" rx="22" ry="20" fill="#8B6B3D" opacity="0.2" />
 
-          {/* Foul lines from home plate to outfield edges */}
+          {/* Foul lines - extend from home through 1st/3rd bases to outfield */}
           <line
             x1={HOME.x} y1={HOME.y}
-            x2="5" y2="5"
+            x2={THIRD.x - (HOME.x - THIRD.x) * 2} y2={THIRD.y - (HOME.y - THIRD.y) * 2}
             stroke="white" strokeWidth="0.4" opacity="0.35"
           />
           <line
             x1={HOME.x} y1={HOME.y}
-            x2="95" y2="5"
+            x2={FIRST.x + (FIRST.x - HOME.x) * 2} y2={FIRST.y - (HOME.y - FIRST.y) * 2}
             stroke="white" strokeWidth="0.4" opacity="0.35"
           />
 
