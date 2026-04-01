@@ -20,7 +20,7 @@ export default function InningNav({
   showRecommendations,
 }: InningNavProps) {
   return (
-    <div className="inline-flex items-center justify-center gap-1.5">
+    <div className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
       {Array.from({ length: numInnings }, (_, i) => i + 1).map(inning => {
         const isActive = !showRecommendations && currentInning === inning;
         const isCompleted = completedInnings.includes(inning);
