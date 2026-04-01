@@ -41,7 +41,7 @@ export default function GameSelector({
         {loading ? (
           <span className="text-sm" style={{ color: 'var(--text-muted)' }}>Loading...</span>
         ) : showNew ? (
-          <div className="flex-1 flex flex-col md:flex-row gap-2 min-w-0">
+          <div className="flex-1 md:flex-none flex flex-col md:flex-row gap-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
               <input
                 type="text"
