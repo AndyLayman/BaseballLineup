@@ -55,7 +55,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen md:h-screen md:overflow-hidden bg-[#1a1410] select-none">
+    <div className="flex flex-col min-h-screen md:h-screen md:overflow-hidden bg-[#1a1410] select-none overflow-y-auto">
       {/* Top bar */}
       <GameSelector
         games={games}
@@ -95,7 +95,7 @@ export default function Home() {
             numInnings={currentGame.num_innings}
           />
         ) : (
-          <div className="flex-1 flex items-start justify-center px-4 pt-1 pb-2 md:items-center md:pt-4 gap-4">
+          <div className="flex-1 flex items-start justify-center px-4 pt-3 pb-2 md:items-center md:pt-4 gap-4">
             <div className="flex-1 max-w-3xl">
               <Diamond
                 assignments={inningAssignments}
