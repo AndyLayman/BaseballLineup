@@ -38,7 +38,7 @@ export default function PositionSlot({ position, label, player, onTap }: Positio
             </span>
           </div>
           <span className="text-white text-xs font-semibold drop-shadow-md leading-tight text-center max-w-[80px] truncate">
-            {player.name}
+            {player.name.split(' ')[0]}
           </span>
           <span className="text-white/70 text-[10px] font-medium drop-shadow-md">
             {label}
