@@ -11,12 +11,17 @@ interface DiamondProps {
 }
 
 // All coordinates in a consistent 100x90 viewBox
-// Home plate at (50, 80), diamond rotated 45deg
 const HOME = { x: 50, y: 80 };
 const FIRST = { x: 68, y: 62 };
 const SECOND = { x: 50, y: 44 };
 const THIRD = { x: 32, y: 62 };
 const MOUND = { x: 50, y: 64 };
+
+// Foul line endpoints — extend from home through 1st/3rd to outfield
+// Home→3rd direction: (-18, -18), extended ~2.5x
+const FOUL_LEFT = { x: 5, y: 35 };
+// Home→1st direction: (18, -18), extended ~2.5x
+const FOUL_RIGHT = { x: 95, y: 35 };
 
 export default function Diamond({ assignments, players, onPositionTap }: DiamondProps) {
   const getPlayerForPosition = (position: Position): Player | null => {
@@ -36,36 +41,57 @@ export default function Diamond({ assignments, players, onPositionTap }: Diamond
           viewBox="0 0 100 90"
           preserveAspectRatio="xMidYMid meet"
         >
-          {/* Outfield grass - semicircle */}
+          {/* Outfield grass — from home, along foul lines, arc across top */}
           <path
-            d="M 5 85 Q 5 5 50 2 Q 95 5 95 85 Z"
+            d={`M ${HOME.x},${HOME.y}
+                L ${FOUL_LEFT.x},${FOUL_LEFT.y}
+                Q 50,2 ${FOUL_RIGHT.x},${FOUL_RIGHT.y}
+                Z`}
             fill="#2d7a3a"
           />
-          {/* Darker grass stripes */}
-          {[15, 30, 45, 60, 75].map(y => (
-            <line key={y} x1="5" y1={y} x2="95" y2={y} stroke="#267032" strokeWidth="3" opacity="0.3" />
-          ))}
 
-          {/* Infield dirt */}
-          <polygon
-            points={`${HOME.x},${HOME.y} ${FIRST.x},${FIRST.y} ${SECOND.x},${SECOND.y} ${THIRD.x},${THIRD.y}`}
-            fill="#8B6B3D"
-            opacity="0.4"
-          />
+          {/* Darker grass stripes */}
+          <defs>
+            <clipPath id="fieldClip">
+              <path d={`M ${HOME.x},${HOME.y}
+                        L ${FOUL_LEFT.x},${FOUL_LEFT.y}
+                        Q 50,2 ${FOUL_RIGHT.x},${FOUL_RIGHT.y}
+                        Z`} />
+            </clipPath>
+          </defs>
+          <g clipPath="url(#fieldClip)">
+            {[20, 30, 40, 50, 60, 70].map(y => (
+              <line key={y} x1="0" y1={y} x2="100" y2={y} stroke="#267032" strokeWidth="2.5" opacity="0.3" />
+            ))}
+          </g>
 
           {/* Dirt arc around infield */}
           <ellipse cx="50" cy="62" rx="22" ry="20" fill="#8B6B3D" opacity="0.2" />
 
-          {/* Foul lines - extend from home through 1st/3rd bases to outfield */}
+          {/* Infield dirt diamond */}
+          <polygon
+            points={`${HOME.x},${HOME.y} ${FIRST.x},${FIRST.y} ${SECOND.x},${SECOND.y} ${THIRD.x},${THIRD.y}`}
+            fill="#8B6B3D"
+            opacity="0.35"
+          />
+
+          {/* Foul lines */}
           <line
             x1={HOME.x} y1={HOME.y}
-            x2={THIRD.x - (HOME.x - THIRD.x) * 2} y2={THIRD.y - (HOME.y - THIRD.y) * 2}
-            stroke="white" strokeWidth="0.4" opacity="0.35"
+            x2={FOUL_LEFT.x} y2={FOUL_LEFT.y}
+            stroke="white" strokeWidth="0.4" opacity="0.4"
           />
           <line
             x1={HOME.x} y1={HOME.y}
-            x2={FIRST.x + (FIRST.x - HOME.x) * 2} y2={FIRST.y - (HOME.y - FIRST.y) * 2}
-            stroke="white" strokeWidth="0.4" opacity="0.35"
+            x2={FOUL_RIGHT.x} y2={FOUL_RIGHT.y}
+            stroke="white" strokeWidth="0.4" opacity="0.4"
+          />
+
+          {/* Outfield arc */}
+          <path
+            d={`M ${FOUL_LEFT.x},${FOUL_LEFT.y} Q 50,2 ${FOUL_RIGHT.x},${FOUL_RIGHT.y}`}
+            fill="none"
+            stroke="white" strokeWidth="0.4" opacity="0.3"
           />
 
           {/* Base paths */}
@@ -87,7 +113,7 @@ export default function Diamond({ assignments, players, onPositionTap }: Diamond
           <rect x={THIRD.x - 1.2} y={THIRD.y - 1.2} width="2.4" height="2.4" fill="white" transform={`rotate(45,${THIRD.x},${THIRD.y})`} />
         </svg>
 
-        {/* Field position slots - positioned using same coordinate system */}
+        {/* Field position slots */}
         {FIELD_POSITIONS.map(pos => (
           <div
             key={pos.key}
