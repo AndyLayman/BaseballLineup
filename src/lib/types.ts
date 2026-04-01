@@ -1,4 +1,4 @@
-export type Position = 'P' | 'C' | '1B' | '2B' | '3B' | 'SS' | 'LF' | 'LC' | 'RC' | 'RF';
+export type Position = 'P' | 'C' | '1B' | '2B' | '3B' | 'SS' | 'LF' | 'LC' | 'RC' | 'RF' | 'BN1' | 'BN2' | 'BN3' | 'BN4';
 
 export interface Player {
   id: number;
