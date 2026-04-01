@@ -33,7 +33,7 @@ export default function PositionSlot({ position, label, player, onTap }: Positio
                 </span>
               </div>
             )}
-            <span className="absolute -top-1 -right-1 bg-yellow-400 text-black text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow">
+            <span className="absolute -top-1 -right-1 bg-[#FFC425] text-[#2F241D] text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow">
               {player.number}
             </span>
           </div>

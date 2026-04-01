@@ -8,16 +8,16 @@ export interface PositionConfig {
 }
 
 export const FIELD_POSITIONS: PositionConfig[] = [
-  { key: 'P',  label: 'Pitcher',       x: 50, y: 60 },
-  { key: 'C',  label: 'Catcher',       x: 50, y: 85 },
-  { key: '1B', label: '1st Base',      x: 73, y: 57 },
-  { key: '2B', label: '2nd Base',      x: 63, y: 42 },
-  { key: 'SS', label: 'Shortstop',     x: 37, y: 42 },
-  { key: '3B', label: '3rd Base',      x: 27, y: 57 },
-  { key: 'LF', label: 'Left Field',    x: 16, y: 22 },
-  { key: 'LC', label: 'Left Center',   x: 36, y: 12 },
-  { key: 'RC', label: 'Right Center',  x: 64, y: 12 },
-  { key: 'RF', label: 'Right Field',   x: 84, y: 22 },
+  { key: 'P',  label: 'Pitcher',       x: 50, y: 55 },
+  { key: 'C',  label: 'Catcher',       x: 50, y: 78 },
+  { key: '1B', label: '1st Base',      x: 76, y: 52 },
+  { key: '2B', label: '2nd Base',      x: 65, y: 37 },
+  { key: 'SS', label: 'Shortstop',     x: 35, y: 37 },
+  { key: '3B', label: '3rd Base',      x: 24, y: 52 },
+  { key: 'LF', label: 'Left Field',    x: 13, y: 20 },
+  { key: 'LC', label: 'Left Center',   x: 34, y: 10 },
+  { key: 'RC', label: 'Right Center',  x: 66, y: 10 },
+  { key: 'RF', label: 'Right Field',   x: 87, y: 20 },
 ];
 
 export const BENCH_POSITIONS: { key: Position; label: string }[] = [
