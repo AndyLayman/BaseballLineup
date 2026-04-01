@@ -10,7 +10,7 @@ interface DiamondProps {
   onPositionTap: (position: Position) => void;
 }
 
-// All coordinates in a consistent 100x90 viewBox
+// All coordinates in a consistent 100x80 viewBox (offset by 10 to crop top)
 const HOME = { x: 50, y: 80 };
 const FIRST = { x: 68, y: 62 };
 const SECOND = { x: 50, y: 44 };
@@ -18,9 +18,7 @@ const THIRD = { x: 32, y: 62 };
 const MOUND = { x: 50, y: 64 };
 
 // Foul line endpoints — extend from home through 1st/3rd to outfield
-// Home→3rd direction: (-18, -18), extended ~2.5x
 const FOUL_LEFT = { x: 5, y: 35 };
-// Home→1st direction: (18, -18), extended ~2.5x
 const FOUL_RIGHT = { x: 95, y: 35 };
 
 export default function Diamond({ assignments, players, onPositionTap }: DiamondProps) {
@@ -34,18 +32,18 @@ export default function Diamond({ assignments, players, onPositionTap }: Diamond
   return (
     <div className="w-full max-w-3xl mx-auto flex flex-col gap-3">
       {/* Field */}
-      <div className="relative w-full" style={{ aspectRatio: '10/9' }}>
+      <div className="relative w-full" style={{ aspectRatio: '10/8' }}>
         {/* SVG field graphic */}
         <svg
           className="absolute inset-0 w-full h-full"
-          viewBox="0 0 100 90"
+          viewBox="0 10 100 80"
           preserveAspectRatio="xMidYMid meet"
         >
           {/* Outfield grass — from home, along foul lines, arc across top */}
           <path
             d={`M ${HOME.x},${HOME.y}
                 L ${FOUL_LEFT.x},${FOUL_LEFT.y}
-                Q 50,2 ${FOUL_RIGHT.x},${FOUL_RIGHT.y}
+                Q 50,12 ${FOUL_RIGHT.x},${FOUL_RIGHT.y}
                 Z`}
             fill="#2d7a3a"
           />
@@ -55,7 +53,7 @@ export default function Diamond({ assignments, players, onPositionTap }: Diamond
             <clipPath id="fieldClip">
               <path d={`M ${HOME.x},${HOME.y}
                         L ${FOUL_LEFT.x},${FOUL_LEFT.y}
-                        Q 50,2 ${FOUL_RIGHT.x},${FOUL_RIGHT.y}
+                        Q 50,12 ${FOUL_RIGHT.x},${FOUL_RIGHT.y}
                         Z`} />
             </clipPath>
           </defs>
@@ -89,7 +87,7 @@ export default function Diamond({ assignments, players, onPositionTap }: Diamond
 
           {/* Outfield arc */}
           <path
-            d={`M ${FOUL_LEFT.x},${FOUL_LEFT.y} Q 50,2 ${FOUL_RIGHT.x},${FOUL_RIGHT.y}`}
+            d={`M ${FOUL_LEFT.x},${FOUL_LEFT.y} Q 50,12 ${FOUL_RIGHT.x},${FOUL_RIGHT.y}`}
             fill="none"
             stroke="white" strokeWidth="0.4" opacity="0.3"
           />
