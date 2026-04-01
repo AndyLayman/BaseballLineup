@@ -8,3 +8,8 @@ export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey && su
 export const supabase: SupabaseClient = isSupabaseConfigured
   ? createClient(supabaseUrl, supabaseAnonKey)
   : (null as unknown as SupabaseClient);
+
+export function getPhotoUrl(photoFile: string | null): string | null {
+  if (!photoFile || !supabaseUrl) return null;
+  return `${supabaseUrl}/storage/v1/object/public/media/${photoFile}`;
+}

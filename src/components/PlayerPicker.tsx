@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Player, Position } from '@/lib/types';
+import { getPhotoUrl } from '@/lib/supabase';
 
 interface PlayerPickerProps {
   players: Player[];
@@ -91,9 +92,9 @@ export default function PlayerPicker({
                     : 'bg-gray-800 active:bg-gray-700'
                 }`}
               >
-                {player.photo_file ? (
+                {getPhotoUrl(player.photo_file) ? (
                   <img
-                    src={player.photo_file}
+                    src={getPhotoUrl(player.photo_file)!}
                     alt={player.name}
                     className="w-12 h-12 rounded-full object-cover"
                   />
