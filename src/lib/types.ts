@@ -1,7 +1,7 @@
 export type Position = 'P' | 'C' | '1B' | '2B' | '3B' | 'SS' | 'LF' | 'LC' | 'RC' | 'RF';
 
 export interface Player {
-  id: string;
+  id: number;
   name: string;
   number: number;
   photo_file: string | null;
@@ -19,6 +19,6 @@ export interface LineupAssignment {
   game_id: string;
   inning: number;
   position: Position;
-  player_id: string;
+  player_id: number;
   player?: Player;
 }

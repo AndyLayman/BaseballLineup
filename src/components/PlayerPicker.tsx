@@ -5,10 +5,10 @@ import { Player, Position } from '@/lib/types';
 
 interface PlayerPickerProps {
   players: Player[];
-  assignedPlayerIds: Set<string>;
+  assignedPlayerIds: Set<number>;
   position: Position;
-  currentPlayerId: string | null;
-  onSelect: (playerId: string) => void;
+  currentPlayerId: number | null;
+  onSelect: (playerId: number) => void;
   onUnassign: () => void;
   onClose: () => void;
 }

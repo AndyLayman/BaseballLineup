@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS lineup_assignments (
   game_id UUID REFERENCES games(id) ON DELETE CASCADE NOT NULL,
   inning INTEGER NOT NULL CHECK (inning >= 1 AND inning <= 9),
   position TEXT NOT NULL CHECK (position IN ('P','C','1B','2B','3B','SS','LF','LC','RC','RF')),
-  player_id UUID REFERENCES players(id) ON DELETE CASCADE NOT NULL,
+  player_id INTEGER REFERENCES players(id) ON DELETE CASCADE NOT NULL,
   UNIQUE(game_id, inning, position)
 );
 
