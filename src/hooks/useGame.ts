@@ -68,9 +68,15 @@ export function useGame() {
   const toggleInningComplete = useCallback(async (inning: number) => {
     if (!isSupabaseConfigured || !currentGame) return;
     const current = currentGame.completed_innings || [];
-    const updated = current.includes(inning)
-      ? current.filter(i => i !== inning)
-      : [...current, inning].sort((a, b) => a - b);
+    let updated: number[];
+    if (current.includes(inning)) {
+      // Unchecking: remove this inning and all after it
+      updated = current.filter(i => i < inning);
+    } else {
+      // Checking: mark this inning and all before it as complete
+      const allUpTo = Array.from({ length: inning }, (_, i) => i + 1);
+      updated = [...new Set([...current, ...allUpTo])].sort((a, b) => a - b);
+    }
 
     const { error } = await supabase
       .from('games')
