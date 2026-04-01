@@ -17,7 +17,7 @@ export default function BattingOrder({ players, leadoffId, onSelectLeadoff }: Ba
   if (sorted.length === 0) return null;
 
   return (
-    <div className="p-3 flex flex-col">
+    <div className="p-3 flex flex-col w-full">
       <p className="text-xs font-semibold uppercase tracking-wide mb-2 text-center" style={{ color: 'var(--accent)' }}>
         Batting Order
       </p>
