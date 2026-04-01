@@ -5,6 +5,7 @@ export interface Player {
   name: string;
   number: number;
   photo_file: string | null;
+  sort_order: number | null;
 }
 
 export interface Game {
