@@ -7,26 +7,26 @@ export interface PositionConfig {
   y: number;
 }
 
-// Coordinates are CSS percentages within the field container.
-// SVG viewBox is "0 20 100 70", so: CSS x% = SVG x, CSS y% = ((SVG y - 20) / 70) * 100
+// Coordinates are CSS percentages within the field container (aspect ratio 10:9).
+// SVG viewBox is 100x90, so: CSS x% = SVG x, CSS y% = (SVG y / 90) * 100
 export const FIELD_POSITIONS: PositionConfig[] = [
-  { key: 'P',  label: 'Pitcher',       x: 50, y: 66 },   // SVG y=66 → 65.7
-  { key: 'C',  label: 'Catcher',       x: 50, y: 91 },   // SVG y=84 → 91.4
-  { key: '1B', label: '1st Base',      x: 76, y: 63 },   // SVG y=64 → 62.9
-  { key: '2B', label: '2nd Base',      x: 64, y: 40 },   // SVG y=48 → 40
-  { key: 'SS', label: 'Shortstop',     x: 36, y: 40 },   // SVG y=48 → 40
-  { key: '3B', label: '3rd Base',      x: 24, y: 63 },   // SVG y=64 → 62.9
-  { key: 'LF', label: 'Left Field',    x: 14, y: 17 },   // SVG y=32 → 17.1
-  { key: 'LC', label: 'Left Center',   x: 34, y: 7 },    // SVG y=25 → 7.1
-  { key: 'RC', label: 'Right Center',  x: 66, y: 7 },    // SVG y=25 → 7.1
-  { key: 'RF', label: 'Right Field',   x: 86, y: 17 },   // SVG y=32 → 17.1
+  { key: 'P',  label: 'Pitcher',       x: 50, y: 66 },
+  { key: 'C',  label: 'Catcher',       x: 50, y: 93 },
+  { key: '1B', label: '1st Base',      x: 76, y: 64 },
+  { key: '2B', label: '2nd Base',      x: 64, y: 48 },
+  { key: 'SS', label: 'Shortstop',     x: 36, y: 48 },
+  { key: '3B', label: '3rd Base',      x: 24, y: 64 },
+  { key: 'LF', label: 'Left Field',    x: 14, y: 24 },
+  { key: 'LC', label: 'Left Center',   x: 34, y: 12 },
+  { key: 'RC', label: 'Right Center',  x: 66, y: 12 },
+  { key: 'RF', label: 'Right Field',   x: 86, y: 24 },
 ];
 
 export const BENCH_POSITIONS: PositionConfig[] = [
-  { key: 'BN1', label: 'Bench 1', x: 10, y: 83 },   // SVG y=78 → 82.9
-  { key: 'BN2', label: 'Bench 2', x: 10, y: 97 },   // SVG y=88 → 97.1
-  { key: 'BN3', label: 'Bench 3', x: 90, y: 83 },
-  { key: 'BN4', label: 'Bench 4', x: 90, y: 97 },
+  { key: 'BN1', label: 'Bench 1', x: 10, y: 78 },
+  { key: 'BN2', label: 'Bench 2', x: 10, y: 93 },
+  { key: 'BN3', label: 'Bench 3', x: 90, y: 78 },
+  { key: 'BN4', label: 'Bench 4', x: 90, y: 93 },
 ];
 
 // Keep POSITIONS for backwards compat (field only)

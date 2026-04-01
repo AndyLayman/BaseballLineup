@@ -65,6 +65,21 @@ export default function Home() {
         loading={gamesLoading}
       />
 
+      {/* Inning nav in header area */}
+      {currentGame && (
+        <div className="flex justify-center py-1.5 px-4" style={{ background: 'var(--bg-deep)', borderBottom: '1px solid var(--border)' }}>
+          <InningNav
+            currentInning={currentInning}
+            numInnings={currentGame.num_innings}
+            completedInnings={currentGame.completed_innings || []}
+            onInningChange={handleInningChange}
+            onToggleInningComplete={toggleInningComplete}
+            onShowRecommendations={() => setShowRecommendations(!showRecommendations)}
+            showRecommendations={showRecommendations}
+          />
+        </div>
+      )}
+
       {/* Main content */}
       <div className="flex-1 flex flex-col min-h-0">
         {!currentGame ? (
@@ -97,18 +112,6 @@ export default function Home() {
         ) : (
           <div className="flex-1 flex items-start md:items-stretch min-h-0">
             <div className="flex-1 flex flex-col items-center justify-center px-4 min-w-0">
-              {/* Inning nav centered over field only */}
-              <div className="flex justify-center pt-1 pb-0">
-                <InningNav
-                  currentInning={currentInning}
-                  numInnings={currentGame.num_innings}
-                  completedInnings={currentGame.completed_innings || []}
-                  onInningChange={handleInningChange}
-                  onToggleInningComplete={toggleInningComplete}
-                  onShowRecommendations={() => setShowRecommendations(!showRecommendations)}
-                  showRecommendations={showRecommendations}
-                />
-              </div>
               <div className="w-full max-w-4xl flex-1 flex items-start md:items-center">
                 <Diamond
                   assignments={inningAssignments}

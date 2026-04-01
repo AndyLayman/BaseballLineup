@@ -20,7 +20,7 @@ export default function InningNav({
   showRecommendations,
 }: InningNavProps) {
   return (
-    <div className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+    <div className="inline-flex items-center justify-center gap-1.5">
       {Array.from({ length: numInnings }, (_, i) => i + 1).map(inning => {
         const isActive = !showRecommendations && currentInning === inning;
         const isCompleted = completedInnings.includes(inning);
@@ -28,7 +28,7 @@ export default function InningNav({
           <button
             key={inning}
             onClick={() => onInningChange(inning)}
-            className="w-14 h-12 rounded-md font-bold text-lg flex flex-col items-center justify-center touch-manipulation transition-all relative"
+            className="w-12 h-10 rounded-md font-bold text-base flex flex-col items-center justify-center touch-manipulation transition-all relative"
             style={
               isActive
                 ? { background: 'var(--accent)', color: 'var(--accent-on)' }
@@ -46,11 +46,11 @@ export default function InningNav({
         );
       })}
 
-      <div className="w-px h-10 mx-1" style={{ background: 'var(--border)' }} />
+      <div className="w-px h-8 mx-1" style={{ background: 'var(--border)' }} />
 
       <button
         onClick={() => onToggleInningComplete(currentInning)}
-        className="h-12 w-12 rounded-md font-semibold text-lg flex items-center justify-center touch-manipulation transition-all"
+        className="h-10 w-10 rounded-md font-semibold text-base flex items-center justify-center touch-manipulation transition-all"
         style={
           completedInnings.includes(currentInning)
             ? { background: 'var(--accent)', color: 'var(--accent-on)' }
@@ -63,7 +63,7 @@ export default function InningNav({
 
       <button
         onClick={onShowRecommendations}
-        className="h-12 px-4 rounded-md font-semibold text-sm flex items-center justify-center touch-manipulation transition-all"
+        className="h-10 px-3 rounded-md font-semibold text-sm flex items-center justify-center touch-manipulation transition-all"
         style={
           showRecommendations
             ? { background: 'var(--accent)', color: 'var(--accent-on)' }
