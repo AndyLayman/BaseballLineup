@@ -1,11 +1,28 @@
 @import "tailwindcss";
 
+:root {
+  --bg: #2F241D;
+  --bg-deep: #1E1610;
+  --bg-card: #3A2C22;
+  --bg-input: #1E1610;
+  --border: #473729;
+  --border-light: #5C4A3A;
+  --text: #F5E6CC;
+  --text-muted: #8B7355;
+  --text-dim: #6B5744;
+  --text-sub: #A89279;
+  --accent: #FFC425;
+  --accent-hover: #E5B020;
+  --accent-on: #2F241D;
+}
+
 body {
-  background: #1a1410;
-  color: #fff;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
+  transition: background 0.3s, color 0.3s;
 }
 
 @keyframes slide-up {

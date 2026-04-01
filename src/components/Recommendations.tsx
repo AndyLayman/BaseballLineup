@@ -37,31 +37,32 @@ export default function Recommendations({ players, assignments, numInnings }: Re
 
   return (
     <div className="flex-1 overflow-y-auto p-4">
-      <h2 className="text-[#FFC425] text-xl font-bold mb-1">Position Recommendations</h2>
-      <p className="text-[#bfa77a] text-sm mb-4">
+      <h2 className="text-xl font-bold mb-1" style={{ color: 'var(--accent)' }}>Position Recommendations</h2>
+      <p className="text-sm mb-4" style={{ color: 'var(--text-sub)' }}>
         Positions each player hasn&apos;t played yet this game ({numInnings} innings)
       </p>
 
       <div className="space-y-3">
         {recs.map(({ player, playedPositions, unplayedPositions, innings }) => (
-          <div key={player.id} className="bg-[#2F241D] rounded-xl p-4">
+          <div key={player.id} className="rounded-[10px] p-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
             <div className="flex items-center gap-3 mb-3">
               {getPhotoUrl(player.id) ? (
                 <img
                   src={getPhotoUrl(player.id)!}
                   alt={player.name}
                   className="w-10 h-10 rounded-full object-cover"
+                  style={{ border: '2px solid var(--accent)' }}
                 />
               ) : (
-                <div className="w-10 h-10 rounded-full bg-[#3d2e22] flex items-center justify-center">
-                  <span className="text-[#FFC425] font-bold">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'var(--border-light)' }}>
+                  <span className="font-bold" style={{ color: 'var(--accent)' }}>
                     {player.name.charAt(0)}
                   </span>
                 </div>
               )}
               <div className="flex-1">
-                <div className="text-white font-semibold">{player.name} #{player.number}</div>
-                <div className="text-[#bfa77a] text-xs">
+                <div className="font-semibold" style={{ color: 'var(--text)' }}>{player.name} #{player.number}</div>
+                <div className="text-xs" style={{ color: 'var(--text-sub)' }}>
                   Played {innings} of {numInnings} innings &middot; {playedPositions.size} of {ALL_POSITIONS.length} positions
                 </div>
               </div>
@@ -77,11 +78,12 @@ export default function Recommendations({ players, assignments, numInnings }: Re
                 return (
                   <span
                     key={pos}
-                    className={`px-2 py-1 rounded text-xs font-medium ${
+                    className="px-2 py-1 rounded text-xs font-medium"
+                    style={
                       played
-                        ? 'bg-green-600/20 text-green-400'
-                        : 'bg-[#FFC425]/15 text-[#FFC425] ring-1 ring-[#FFC425]/30'
-                    }`}
+                        ? { background: 'rgba(34,197,94,0.15)', color: '#4ade80' }
+                        : { background: 'rgba(255,196,37,0.1)', color: 'var(--accent)', outline: '1px solid rgba(255,196,37,0.3)', outlineOffset: '-1px' }
+                    }
                     title={positionLabel(pos)}
                   >
                     {pos}
@@ -91,7 +93,7 @@ export default function Recommendations({ players, assignments, numInnings }: Re
             </div>
 
             {unplayedPositions.length > 0 && (
-              <p className="text-[#FFC425]/70 text-xs mt-2">
+              <p className="text-xs mt-2" style={{ color: 'var(--text-muted)' }}>
                 Try: {unplayedPositions.map(positionLabel).join(', ')}
               </p>
             )}
@@ -100,7 +102,7 @@ export default function Recommendations({ players, assignments, numInnings }: Re
       </div>
 
       {recs.length === 0 && (
-        <p className="text-[#8a7560] text-center py-12">No players on the roster yet.</p>
+        <p className="text-center py-12" style={{ color: 'var(--text-muted)' }}>No players on the roster yet.</p>
       )}
     </div>
   );
