@@ -11,6 +11,7 @@ import InningNav from '@/components/InningNav';
 import PlayerPicker from '@/components/PlayerPicker';
 import GameSelector from '@/components/GameSelector';
 import Recommendations from '@/components/Recommendations';
+import BattingOrder from '@/components/BattingOrder';
 
 export default function Home() {
   const [currentInning, setCurrentInning] = useState(1);
@@ -93,12 +94,17 @@ export default function Home() {
             numInnings={currentGame.num_innings}
           />
         ) : (
-          <div className="flex-1 flex items-center justify-center p-4">
-            <Diamond
-              assignments={inningAssignments}
-              players={players}
-              onPositionTap={handlePositionTap}
-            />
+          <div className="flex-1 flex items-center justify-center p-4 gap-4">
+            <div className="flex-1 max-w-3xl">
+              <Diamond
+                assignments={inningAssignments}
+                players={players}
+                onPositionTap={handlePositionTap}
+              />
+            </div>
+            <div className="hidden md:flex w-48 shrink-0 self-stretch">
+              <BattingOrder players={players} />
+            </div>
           </div>
         )}
       </div>
