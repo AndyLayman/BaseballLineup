@@ -19,9 +19,9 @@ export default function PositionSlot({ position, label, player, onTap }: Positio
       {player ? (
         <>
           <div className="relative">
-            {player.photo_url ? (
+            {player.photo_file ? (
               <img
-                src={player.photo_url}
+                src={player.photo_file}
                 alt={player.name}
                 className="w-14 h-14 rounded-full object-cover border-2 border-white shadow-lg"
               />

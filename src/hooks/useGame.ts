@@ -4,13 +4,13 @@ import { useEffect, useState, useCallback } from 'react';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { Game } from '@/lib/types';
 
-export function useGame(teamId: string | null) {
+export function useGame() {
   const [games, setGames] = useState<Game[]>([]);
   const [currentGame, setCurrentGame] = useState<Game | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!teamId || !isSupabaseConfigured) {
+    if (!isSupabaseConfigured) {
       setGames([]);
       setCurrentGame(null);
       setLoading(false);
@@ -22,7 +22,6 @@ export function useGame(teamId: string | null) {
       const { data, error } = await supabase
         .from('games')
         .select('*')
-        .eq('team_id', teamId)
         .order('date', { ascending: false });
 
       if (error) {
@@ -37,7 +36,7 @@ export function useGame(teamId: string | null) {
     };
 
     fetchGames();
-  }, [teamId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const selectGame = useCallback((gameId: string) => {
     const game = games.find(g => g.id === gameId);
@@ -45,11 +44,10 @@ export function useGame(teamId: string | null) {
   }, [games]);
 
   const createGame = useCallback(async (opponent: string) => {
-    if (!teamId || !isSupabaseConfigured) return;
+    if (!isSupabaseConfigured) return;
     const { data, error } = await supabase
       .from('games')
       .insert({
-        team_id: teamId,
         opponent,
         num_innings: 5,
       })
@@ -62,7 +60,7 @@ export function useGame(teamId: string | null) {
       setGames(prev => [data, ...prev]);
       setCurrentGame(data);
     }
-  }, [teamId]);
+  }, []);
 
   return { games, currentGame, loading, selectGame, createGame };
 }
