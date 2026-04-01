@@ -16,11 +16,12 @@ export default function InningNav({
   showRecommendations,
 }: InningNavProps) {
   return (
-    <div className="flex items-center justify-center gap-2 px-4 py-3 bg-[#2F241D]">
+    <div className="flex items-center justify-center gap-2 px-4 py-3" style={{ background: 'var(--bg-deep)', borderTop: '1px solid var(--border)' }}>
       <button
         onClick={() => onInningChange(Math.max(1, currentInning - 1))}
         disabled={currentInning <= 1}
-        className="w-12 h-12 rounded-lg bg-[#3d2e22] text-[#bfa77a] font-bold text-xl flex items-center justify-center active:bg-[#4a3728] disabled:opacity-30 touch-manipulation"
+        className="w-12 h-12 rounded-md font-bold text-xl flex items-center justify-center disabled:opacity-30 touch-manipulation transition-all"
+        style={{ background: 'var(--bg-card)', color: 'var(--text-muted)', border: '1px solid var(--border-light)' }}
       >
         &lsaquo;
       </button>
@@ -29,13 +30,16 @@ export default function InningNav({
         <button
           key={inning}
           onClick={() => onInningChange(inning)}
-          className={`w-14 h-12 rounded-lg font-bold text-lg flex flex-col items-center justify-center touch-manipulation transition-colors ${
-            !showRecommendations && currentInning === inning
-              ? 'bg-[#FFC425] text-[#2F241D] shadow-lg shadow-[#FFC425]/30'
-              : 'bg-[#3d2e22] text-[#bfa77a] active:bg-[#4a3728]'
+          className={`w-14 h-12 rounded-md font-bold text-lg flex flex-col items-center justify-center touch-manipulation transition-all ${
+            !showRecommendations && currentInning === inning ? '' : ''
           }`}
+          style={
+            !showRecommendations && currentInning === inning
+              ? { background: 'var(--accent)', color: 'var(--accent-on)' }
+              : { background: 'var(--bg-card)', color: 'var(--text-muted)', border: '1px solid var(--border-light)' }
+          }
         >
-          <span className="text-[10px] font-normal leading-none">INN</span>
+          <span className="text-[10px] font-normal leading-none opacity-70">INN</span>
           <span>{inning}</span>
         </button>
       ))}
@@ -43,20 +47,22 @@ export default function InningNav({
       <button
         onClick={() => onInningChange(Math.min(numInnings, currentInning + 1))}
         disabled={currentInning >= numInnings}
-        className="w-12 h-12 rounded-lg bg-[#3d2e22] text-[#bfa77a] font-bold text-xl flex items-center justify-center active:bg-[#4a3728] disabled:opacity-30 touch-manipulation"
+        className="w-12 h-12 rounded-md font-bold text-xl flex items-center justify-center disabled:opacity-30 touch-manipulation transition-all"
+        style={{ background: 'var(--bg-card)', color: 'var(--text-muted)', border: '1px solid var(--border-light)' }}
       >
         &rsaquo;
       </button>
 
-      <div className="w-px h-10 bg-[#4a3728] mx-2" />
+      <div className="w-px h-10 mx-2" style={{ background: 'var(--border)' }} />
 
       <button
         onClick={onShowRecommendations}
-        className={`h-12 px-4 rounded-lg font-semibold text-sm flex items-center justify-center touch-manipulation transition-colors ${
+        className="h-12 px-4 rounded-md font-semibold text-sm flex items-center justify-center touch-manipulation transition-all"
+        style={
           showRecommendations
-            ? 'bg-[#FFC425] text-[#2F241D] shadow-lg shadow-[#FFC425]/30'
-            : 'bg-[#3d2e22] text-[#bfa77a] active:bg-[#4a3728]'
-        }`}
+            ? { background: 'var(--accent)', color: 'var(--accent-on)' }
+            : { background: 'var(--bg-card)', color: 'var(--text-muted)', border: '1px solid var(--border-light)' }
+        }
       >
         Recs
       </button>

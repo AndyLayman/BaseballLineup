@@ -17,8 +17,8 @@ export default function BattingOrder({ players, leadoffId, onSelectLeadoff }: Ba
   if (sorted.length === 0) return null;
 
   return (
-    <div className="bg-[#2F241D] rounded-xl p-3 flex flex-col">
-      <p className="text-[#FFC425] text-xs font-semibold uppercase tracking-wide mb-2 text-center">
+    <div className="rounded-[10px] p-3 flex flex-col" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+      <p className="text-xs font-semibold uppercase tracking-wide mb-2 text-center" style={{ color: 'var(--accent)' }}>
         Batting Order
       </p>
       <div className="flex-1 space-y-1">
@@ -28,13 +28,13 @@ export default function BattingOrder({ players, leadoffId, onSelectLeadoff }: Ba
             <div key={player.id} className="relative">
               <button
                 onClick={() => onSelectLeadoff(player.id)}
-                className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg touch-manipulation transition-colors ${
-                  isLeadoff
-                    ? 'bg-[#1a1410]/50 ring-2 ring-[#FFC425]'
-                    : 'bg-[#1a1410]/50 active:bg-[#3d2e22]'
-                }`}
+                className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md touch-manipulation transition-all"
+                style={{
+                  background: 'var(--bg-deep)',
+                  ...(isLeadoff ? { outline: '2px solid var(--accent)', outlineOffset: '-2px' } : {}),
+                }}
               >
-                <span className="text-[#FFC425] font-bold text-sm w-5 text-center shrink-0">
+                <span className="font-bold text-sm w-5 text-center shrink-0" style={{ color: 'var(--accent)' }}>
                   {i + 1}
                 </span>
                 {getPhotoUrl(player.id) ? (
@@ -42,23 +42,24 @@ export default function BattingOrder({ players, leadoffId, onSelectLeadoff }: Ba
                     src={getPhotoUrl(player.id)!}
                     alt={player.name}
                     className="w-8 h-8 rounded-full object-cover shrink-0"
+                    style={{ border: '2px solid var(--accent)' }}
                   />
                 ) : (
-                  <div className="w-8 h-8 rounded-full bg-[#3d2e22] flex items-center justify-center shrink-0">
-                    <span className="text-[#FFC425] font-bold text-xs">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ background: 'var(--border-light)' }}>
+                    <span className="font-bold text-xs" style={{ color: 'var(--accent)' }}>
                       {player.name.charAt(0)}
                     </span>
                   </div>
                 )}
-                <span className="text-[#bfa77a] text-xs font-medium shrink-0">
+                <span className="text-xs font-medium shrink-0" style={{ color: 'var(--text-sub)' }}>
                   #{player.number}
                 </span>
-                <span className="text-white text-sm font-medium truncate">
+                <span className="text-sm font-medium truncate" style={{ color: 'var(--text)' }}>
                   {player.name}
                 </span>
               </button>
               {isLeadoff && (
-                <span className="absolute -right-2 top-1/2 -translate-y-1/2 bg-[#FFC425] text-[#2F241D] text-[10px] font-bold uppercase px-2 py-0.5 rounded-full shadow-lg whitespace-nowrap z-10">
+                <span className="absolute -right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold uppercase px-2 py-0.5 rounded-full whitespace-nowrap z-10" style={{ background: 'var(--accent)', color: 'var(--accent-on)' }}>
                   Lead Off
                 </span>
               )}
@@ -67,7 +68,7 @@ export default function BattingOrder({ players, leadoffId, onSelectLeadoff }: Ba
         })}
       </div>
       {!leadoffId && (
-        <p className="text-[#bfa77a] text-[10px] text-center mt-2">Tap to mark first up next inning</p>
+        <p className="text-[10px] text-center mt-2" style={{ color: 'var(--text-muted)' }}>Tap to mark first up next inning</p>
       )}
     </div>
   );

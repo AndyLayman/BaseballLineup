@@ -55,7 +55,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen md:h-screen md:overflow-hidden bg-[#1a1410] select-none overflow-y-auto">
+    <div className="flex flex-col min-h-screen md:h-screen md:overflow-hidden select-none overflow-y-auto" style={{ background: 'var(--bg)' }}>
       {/* Top bar */}
       <GameSelector
         games={games}
@@ -78,12 +78,12 @@ export default function Home() {
               ) : !isSupabaseConfigured ? (
                 <>
                   <p className="text-red-400 text-lg mb-2">Supabase not connected</p>
-                  <p className="text-gray-500 text-sm">Check that environment variables are set</p>
+                  <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Check that environment variables are set</p>
                 </>
               ) : (
                 <>
-                  <p className="text-gray-400 text-lg mb-2">No game selected</p>
-                  <p className="text-gray-500 text-sm">Create a new game to get started</p>
+                  <p className="text-lg mb-2" style={{ color: 'var(--text-muted)' }}>No game selected</p>
+                  <p className="text-sm" style={{ color: 'var(--text-dim)' }}>Create a new game to get started</p>
                 </>
               )}
             </div>

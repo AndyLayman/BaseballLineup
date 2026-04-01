@@ -30,15 +30,15 @@ export default function GameSelector({
   };
 
   return (
-    <div className="flex items-center gap-3 px-4 py-3 bg-[#2F241D] border-b border-[#4a3728]">
+    <div className="flex items-center gap-3 px-4 py-3" style={{ background: 'var(--bg-deep)', borderBottom: '1px solid var(--border)' }}>
       <div className="flex items-center gap-2">
         <span className="text-2xl">&#9918;</span>
-        <h1 className="text-[#FFC425] font-bold text-lg">Lineup</h1>
+        <h1 className="font-bold text-lg" style={{ color: 'var(--accent)' }}>Lineup</h1>
       </div>
 
       <div className="flex-1 flex items-center gap-2 justify-end">
         {loading ? (
-          <span className="text-[#bfa77a] text-sm">Loading...</span>
+          <span className="text-sm" style={{ color: 'var(--text-muted)' }}>Loading...</span>
         ) : showNew ? (
           <div className="flex items-center gap-2">
             <input
@@ -47,18 +47,21 @@ export default function GameSelector({
               value={opponent}
               onChange={e => setOpponent(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleCreate()}
-              className="h-10 px-3 rounded-lg bg-[#3d2e22] text-white placeholder-[#8a7560] outline-none focus:ring-2 focus:ring-[#FFC425] text-sm w-40"
+              className="h-10 px-3 rounded-md text-sm w-40 outline-none"
+              style={{ background: 'var(--bg-input)', color: 'var(--text)', border: '1px solid var(--border-light)' }}
               autoFocus
             />
             <button
               onClick={handleCreate}
-              className="h-10 px-4 rounded-lg bg-[#FFC425] text-[#2F241D] font-semibold text-sm active:bg-[#e6b020] touch-manipulation"
+              className="h-10 px-4 rounded-md font-semibold text-sm touch-manipulation transition-all"
+              style={{ background: 'var(--accent)', color: 'var(--accent-on)' }}
             >
               Start
             </button>
             <button
               onClick={() => setShowNew(false)}
-              className="h-10 px-3 rounded-lg bg-[#3d2e22] text-[#bfa77a] text-sm active:bg-[#4a3728] touch-manipulation"
+              className="h-10 px-3 rounded-md text-sm touch-manipulation transition-all"
+              style={{ background: 'var(--bg-card)', color: 'var(--text-muted)', border: '1px solid var(--border-light)' }}
             >
               Cancel
             </button>
@@ -69,7 +72,8 @@ export default function GameSelector({
               <select
                 value={currentGame?.id || ''}
                 onChange={e => onSelectGame(e.target.value)}
-                className="h-10 px-3 rounded-lg bg-[#3d2e22] text-white text-sm outline-none appearance-none cursor-pointer"
+                className="h-10 px-3 rounded-md text-sm outline-none appearance-none cursor-pointer"
+                style={{ background: 'var(--bg-input)', color: 'var(--text)', border: '1px solid var(--border-light)' }}
               >
                 <option value="" disabled>Select game...</option>
                 {games.map(g => (
@@ -81,7 +85,8 @@ export default function GameSelector({
             )}
             <button
               onClick={() => setShowNew(true)}
-              className="h-10 px-4 rounded-lg bg-[#FFC425] text-[#2F241D] font-bold text-sm active:bg-[#e6b020] touch-manipulation whitespace-nowrap"
+              className="h-10 px-4 rounded-md font-bold text-sm touch-manipulation whitespace-nowrap transition-all"
+              style={{ background: 'var(--accent)', color: 'var(--accent-on)' }}
             >
               + New Game
             </button>
