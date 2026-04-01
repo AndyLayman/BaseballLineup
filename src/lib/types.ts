@@ -13,6 +13,7 @@ export interface Game {
   opponent: string | null;
   date: string;
   num_innings: number;
+  completed_innings: number[];
 }
 
 export interface LineupAssignment {

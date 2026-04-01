@@ -20,7 +20,7 @@ export default function Home() {
   const [leadoffId, setLeadoffId] = useState<number | null>(null);
 
   const { players } = usePlayers();
-  const { games, currentGame, loading: gamesLoading, error: gameError, selectGame, createGame } = useGame();
+  const { games, currentGame, loading: gamesLoading, error: gameError, selectGame, createGame, toggleInningComplete } = useGame();
   const { assignments, getInningAssignments, assignPlayer, unassignPlayer } = useLineup(currentGame?.id || null);
 
   const inningAssignments = getInningAssignments(currentInning);
@@ -102,7 +102,9 @@ export default function Home() {
                 <InningNav
                   currentInning={currentInning}
                   numInnings={currentGame.num_innings}
+                  completedInnings={currentGame.completed_innings || []}
                   onInningChange={handleInningChange}
+                  onToggleInningComplete={toggleInningComplete}
                   onShowRecommendations={() => setShowRecommendations(!showRecommendations)}
                   showRecommendations={showRecommendations}
                 />
