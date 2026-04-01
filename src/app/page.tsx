@@ -32,7 +32,7 @@ export default function Home() {
     setSelectedPosition(position);
   };
 
-  const handleSelectPlayer = async (playerId: string) => {
+  const handleSelectPlayer = async (playerId: number) => {
     if (selectedPosition && currentGame) {
       await assignPlayer(currentInning, selectedPosition, playerId);
       setSelectedPosition(null);

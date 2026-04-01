@@ -37,7 +37,7 @@ export function useLineup(gameId: string | null) {
     [assignments]
   );
 
-  const assignPlayer = useCallback(async (inning: number, position: Position, playerId: string) => {
+  const assignPlayer = useCallback(async (inning: number, position: Position, playerId: number) => {
     if (!gameId || !isSupabaseConfigured) return;
 
     // Check if there's already an assignment for this position+inning
