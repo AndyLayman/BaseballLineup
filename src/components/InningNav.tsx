@@ -40,7 +40,7 @@ export default function InningNav({
             <span className="text-[10px] font-normal leading-none opacity-70">INN</span>
             <span>{inning}</span>
             {isCompleted && (
-              <span className="absolute -top-1 -right-1 text-[10px] leading-none" style={{ color: 'var(--accent)' }}>&#10003;</span>
+              <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full flex items-center justify-center text-[9px] leading-none" style={{ background: 'var(--bg-card)', color: 'var(--accent)', border: '1px solid var(--accent)' }}>&#10003;</span>
             )}
           </button>
         );
