@@ -1,6 +1,7 @@
 'use client';
 
 import { Player, Position } from '@/lib/types';
+import { getPhotoUrl } from '@/lib/supabase';
 
 interface PositionSlotProps {
   position: Position;
@@ -19,9 +20,9 @@ export default function PositionSlot({ position, label, player, onTap }: Positio
       {player ? (
         <>
           <div className="relative">
-            {player.photo_file ? (
+            {getPhotoUrl(player.photo_file) ? (
               <img
-                src={player.photo_file}
+                src={getPhotoUrl(player.photo_file)!}
                 alt={player.name}
                 className="w-14 h-14 rounded-full object-cover border-2 border-white shadow-lg"
               />
