@@ -54,7 +54,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-[#1a1410] select-none">
+    <div className="flex flex-col min-h-screen md:h-screen md:overflow-hidden bg-[#1a1410] select-none">
       {/* Top bar */}
       <GameSelector
         games={games}
@@ -118,6 +118,13 @@ export default function Home() {
           onShowRecommendations={() => setShowRecommendations(!showRecommendations)}
           showRecommendations={showRecommendations}
         />
+      )}
+
+      {/* Batting order on mobile */}
+      {currentGame && !showRecommendations && (
+        <div className="md:hidden px-4 pb-4">
+          <BattingOrder players={players} />
+        </div>
       )}
 
       {/* Player picker drawer */}
