@@ -43,7 +43,7 @@ export default function Diamond({ assignments, players, onPositionTap }: Diamond
           <path
             d={`M ${HOME.x},${HOME.y}
                 L ${FOUL_LEFT.x},${FOUL_LEFT.y}
-                Q 50,12 ${FOUL_RIGHT.x},${FOUL_RIGHT.y}
+                Q 50,2 ${FOUL_RIGHT.x},${FOUL_RIGHT.y}
                 Z`}
             fill="#2d7a3a"
           />
@@ -53,7 +53,7 @@ export default function Diamond({ assignments, players, onPositionTap }: Diamond
             <clipPath id="fieldClip">
               <path d={`M ${HOME.x},${HOME.y}
                         L ${FOUL_LEFT.x},${FOUL_LEFT.y}
-                        Q 50,12 ${FOUL_RIGHT.x},${FOUL_RIGHT.y}
+                        Q 50,2 ${FOUL_RIGHT.x},${FOUL_RIGHT.y}
                         Z`} />
             </clipPath>
           </defs>
@@ -87,7 +87,7 @@ export default function Diamond({ assignments, players, onPositionTap }: Diamond
 
           {/* Outfield arc */}
           <path
-            d={`M ${FOUL_LEFT.x},${FOUL_LEFT.y} Q 50,12 ${FOUL_RIGHT.x},${FOUL_RIGHT.y}`}
+            d={`M ${FOUL_LEFT.x},${FOUL_LEFT.y} Q 50,2 ${FOUL_RIGHT.x},${FOUL_RIGHT.y}`}
             fill="none"
             stroke="white" strokeWidth="0.4" opacity="0.3"
           />
