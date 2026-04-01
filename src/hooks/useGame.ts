@@ -44,13 +44,14 @@ export function useGame() {
     if (game) setCurrentGame(game);
   }, [games]);
 
-  const createGame = useCallback(async (opponent: string) => {
+  const createGame = useCallback(async (opponent: string, date: string) => {
     if (!isSupabaseConfigured) return;
     setError(null);
     const { data, error } = await supabase
       .from('games')
       .insert({
         opponent,
+        date,
         num_innings: 5,
       })
       .select()
