@@ -103,7 +103,7 @@ export default function Home() {
                 onPositionTap={handlePositionTap}
               />
             </div>
-            <div className="hidden md:flex w-48 shrink-0 self-stretch">
+            <div className="hidden md:flex w-56 lg:w-64 shrink-0 self-stretch">
               <BattingOrder players={players} leadoffId={leadoffId} onSelectLeadoff={(id) => setLeadoffId(id === leadoffId ? null : id)} />
             </div>
           </div>

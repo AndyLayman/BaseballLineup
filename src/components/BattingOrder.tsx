@@ -54,7 +54,7 @@ export default function BattingOrder({ players, leadoffId, onSelectLeadoff }: Ba
                   #{player.number}
                 </span>
                 <span className="text-white text-sm font-medium truncate">
-                  {player.name.split(' ')[0]}
+                  {player.name}
                 </span>
               </button>
               {isLeadoff && (
