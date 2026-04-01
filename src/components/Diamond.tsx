@@ -10,16 +10,15 @@ interface DiamondProps {
   onPositionTap: (position: Position) => void;
 }
 
-// All coordinates in SVG space. viewBox is "0 20 100 70" to crop empty top.
+// All coordinates in SVG space. viewBox is "0 0 100 90".
 const HOME = { x: 50, y: 80 };
 const FIRST = { x: 68, y: 62 };
 const SECOND = { x: 50, y: 44 };
 const THIRD = { x: 32, y: 62 };
 const MOUND = { x: 50, y: 64 };
 
-// Foul line endpoints — extend from home through 1st/3rd to outfield
-const FOUL_LEFT = { x: 5, y: 25 };
-const FOUL_RIGHT = { x: 95, y: 25 };
+const FOUL_LEFT = { x: 5, y: 35 };
+const FOUL_RIGHT = { x: 95, y: 35 };
 
 export default function Diamond({ assignments, players, onPositionTap }: DiamondProps) {
   const getPlayerForPosition = (position: Position): Player | null => {
@@ -32,11 +31,11 @@ export default function Diamond({ assignments, players, onPositionTap }: Diamond
   return (
     <div className="w-full max-w-3xl mx-auto flex flex-col gap-3">
       {/* Field */}
-      <div className="relative w-full" style={{ aspectRatio: '10/7' }}>
+      <div className="relative w-full" style={{ aspectRatio: '10/9' }}>
         {/* SVG field graphic */}
         <svg
           className="absolute inset-0 w-full h-full"
-          viewBox="0 18 100 72"
+          viewBox="0 0 100 90"
           preserveAspectRatio="xMidYMid meet"
         >
           {/* Outfield grass — from home, along foul lines, arc across top */}
