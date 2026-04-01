@@ -25,49 +25,49 @@ export default function BattingOrder({ players, leadoffId, onSelectLeadoff }: Ba
         {sorted.map((player, i) => {
           const isLeadoff = player.id === leadoffId;
           return (
-            <button
-              key={player.id}
-              onClick={() => onSelectLeadoff(player.id)}
-              className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg touch-manipulation transition-colors ${
-                isLeadoff
-                  ? 'bg-[#FFC425]/20 ring-1 ring-[#FFC425]'
-                  : 'bg-[#1a1410]/50 active:bg-[#3d2e22]'
-              }`}
-            >
-              <span className="text-[#FFC425] font-bold text-sm w-5 text-center shrink-0">
-                {i + 1}
-              </span>
-              {isLeadoff && (
-                <span className="text-[#FFC425] text-sm shrink-0">&#9654;</span>
-              )}
-              {getPhotoUrl(player.id) ? (
-                <img
-                  src={getPhotoUrl(player.id)!}
-                  alt={player.name}
-                  className="w-8 h-8 rounded-full object-cover shrink-0"
-                />
-              ) : (
-                <div className="w-8 h-8 rounded-full bg-[#3d2e22] flex items-center justify-center shrink-0">
-                  <span className="text-[#FFC425] font-bold text-xs">
-                    {player.name.charAt(0)}
+            <div key={player.id} className="relative">
+              <button
+                onClick={() => onSelectLeadoff(player.id)}
+                className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg touch-manipulation transition-colors ${
+                  isLeadoff
+                    ? 'bg-[#1a1410]/50 ring-2 ring-[#FFC425]'
+                    : 'bg-[#1a1410]/50 active:bg-[#3d2e22]'
+                }`}
+              >
+                <span className="text-[#FFC425] font-bold text-sm w-5 text-center shrink-0">
+                  {i + 1}
+                </span>
+                {getPhotoUrl(player.id) ? (
+                  <img
+                    src={getPhotoUrl(player.id)!}
+                    alt={player.name}
+                    className="w-8 h-8 rounded-full object-cover shrink-0"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-[#3d2e22] flex items-center justify-center shrink-0">
+                    <span className="text-[#FFC425] font-bold text-xs">
+                      {player.name.charAt(0)}
+                    </span>
+                  </div>
+                )}
+                <div className="min-w-0 flex-1">
+                  <span className="text-white text-sm font-medium truncate block">
+                    {player.name.split(' ')[0]}
                   </span>
                 </div>
-              )}
-              <div className="min-w-0 flex-1">
-                <span className="text-white text-sm font-medium truncate block">
-                  {player.name.split(' ')[0]}
+                <span className="text-[#bfa77a] text-xs font-medium shrink-0">
+                  #{player.number}
                 </span>
-              </div>
-              <span className="text-[#bfa77a] text-xs font-medium shrink-0">
-                #{player.number}
-              </span>
-            </button>
+              </button>
+              {isLeadoff && (
+                <span className="absolute -right-2 top-1/2 -translate-y-1/2 bg-[#FFC425] text-[#2F241D] text-[10px] font-bold uppercase px-2 py-0.5 rounded-full shadow-lg whitespace-nowrap z-10">
+                  Lead Off
+                </span>
+              )}
+            </div>
           );
         })}
       </div>
-      {leadoffId && (
-        <p className="text-[#bfa77a] text-[10px] text-center mt-2">Tap player to change first up</p>
-      )}
       {!leadoffId && (
         <p className="text-[#bfa77a] text-[10px] text-center mt-2">Tap to mark first up next inning</p>
       )}
