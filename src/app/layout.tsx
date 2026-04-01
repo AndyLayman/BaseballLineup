@@ -4,6 +4,14 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Baseball Lineup",
   description: "Baseball lineup management tool for coaches",
+  icons: {
+    apple: "/apple-touch-icon.png",
+  },
+  appleWebApp: {
+    capable: true,
+    title: "Lineup",
+    statusBarStyle: "black-translucent",
+  },
 };
 
 export const viewport: Viewport = {
