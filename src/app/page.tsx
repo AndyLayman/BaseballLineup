@@ -105,7 +105,7 @@ export default function Home() {
                 />
               </div>
             </div>
-            <div className="hidden md:flex w-72 lg:w-80 shrink-0 self-stretch overflow-y-auto py-2 pr-2" style={{ borderLeft: '1px solid var(--border)' }}>
+            <div className="hidden md:flex w-72 lg:w-80 shrink-0 self-stretch overflow-y-auto py-2 pl-2" style={{ borderLeft: '1px solid var(--border)' }}>
               <BattingOrder players={players} leadoffId={leadoffId} onSelectLeadoff={(id) => setLeadoffId(id === leadoffId ? null : id)} />
             </div>
           </div>
