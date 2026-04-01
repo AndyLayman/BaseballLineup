@@ -93,6 +93,8 @@ export default function Home() {
             players={players}
             assignments={assignments}
             numInnings={currentGame.num_innings}
+            completedInnings={currentGame.completed_innings || []}
+            onClose={() => setShowRecommendations(false)}
           />
         ) : (
           <div className="flex-1 flex items-start md:items-stretch min-h-0">
