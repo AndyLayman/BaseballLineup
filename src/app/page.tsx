@@ -95,32 +95,30 @@ export default function Home() {
             numInnings={currentGame.num_innings}
           />
         ) : (
-          <>
-            {/* Inning nav floating above field */}
-            <div className="flex justify-center px-4 pt-2 pb-1">
-              <InningNav
-                currentInning={currentInning}
-                numInnings={currentGame.num_innings}
-                onInningChange={handleInningChange}
-                onShowRecommendations={() => setShowRecommendations(!showRecommendations)}
-                showRecommendations={showRecommendations}
-              />
-            </div>
-            <div className="flex-1 flex items-start pt-1 pb-2 md:items-center md:pt-0 min-h-0">
-              <div className="flex-1 flex items-center justify-center px-4 min-w-0">
-                <div className="w-full max-w-4xl">
-                  <Diamond
-                    assignments={inningAssignments}
-                    players={players}
-                    onPositionTap={handlePositionTap}
-                  />
-                </div>
+          <div className="flex-1 flex items-start md:items-stretch min-h-0">
+            <div className="flex-1 flex flex-col items-center justify-center px-4 min-w-0">
+              {/* Inning nav centered over field only */}
+              <div className="flex justify-center pt-2 pb-1">
+                <InningNav
+                  currentInning={currentInning}
+                  numInnings={currentGame.num_innings}
+                  onInningChange={handleInningChange}
+                  onShowRecommendations={() => setShowRecommendations(!showRecommendations)}
+                  showRecommendations={showRecommendations}
+                />
               </div>
-              <div className="hidden md:flex w-72 lg:w-80 shrink-0 self-stretch overflow-y-auto py-2 pl-2" style={{ borderLeft: '1px solid var(--border)' }}>
-                <BattingOrder players={players} leadoffId={leadoffId} onSelectLeadoff={(id) => setLeadoffId(id === leadoffId ? null : id)} />
+              <div className="w-full max-w-4xl flex-1 flex items-start md:items-center">
+                <Diamond
+                  assignments={inningAssignments}
+                  players={players}
+                  onPositionTap={handlePositionTap}
+                />
               </div>
             </div>
-          </>
+            <div className="hidden md:flex w-72 lg:w-80 shrink-0 self-stretch overflow-y-auto py-2 pl-2" style={{ borderLeft: '1px solid var(--border)' }}>
+              <BattingOrder players={players} leadoffId={leadoffId} onSelectLeadoff={(id) => setLeadoffId(id === leadoffId ? null : id)} />
+            </div>
+          </div>
         )}
       </div>
 
