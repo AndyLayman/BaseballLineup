@@ -133,22 +133,28 @@ export default function Diamond({ assignments, players, onPositionTap }: Diamond
             />
           </div>
         ))}
-      </div>
 
-      {/* Bench */}
-      <div className="bg-[#2F241D] rounded-xl px-4 py-3">
-        <p className="text-[#FFC425] text-xs font-semibold uppercase tracking-wide mb-2 text-center">Bench</p>
-        <div className="flex justify-around">
-          {BENCH_POSITIONS.map(pos => (
+        {/* Bench slots — 2 stacked on each side of home plate */}
+        {BENCH_POSITIONS.map(pos => (
+          <div
+            key={pos.key}
+            className="absolute"
+            style={{
+              left: `${pos.x}%`,
+              top: `${pos.y}%`,
+              transform: 'translate(-50%, -50%)',
+              zIndex: 10,
+            }}
+          >
             <PositionSlot
-              key={pos.key}
               position={pos.key}
               label={pos.label}
               player={getPlayerForPosition(pos.key)}
               onTap={() => onPositionTap(pos.key)}
+              small
             />
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     </div>
   );

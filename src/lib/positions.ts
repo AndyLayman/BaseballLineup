@@ -22,11 +22,11 @@ export const FIELD_POSITIONS: PositionConfig[] = [
   { key: 'RF', label: 'Right Field',   x: 86, y: 24 },
 ];
 
-export const BENCH_POSITIONS: { key: Position; label: string }[] = [
-  { key: 'BN1', label: 'Bench 1' },
-  { key: 'BN2', label: 'Bench 2' },
-  { key: 'BN3', label: 'Bench 3' },
-  { key: 'BN4', label: 'Bench 4' },
+export const BENCH_POSITIONS: PositionConfig[] = [
+  { key: 'BN1', label: 'Bench 1', x: 10, y: 78 },
+  { key: 'BN2', label: 'Bench 2', x: 10, y: 93 },
+  { key: 'BN3', label: 'Bench 3', x: 90, y: 78 },
+  { key: 'BN4', label: 'Bench 4', x: 90, y: 93 },
 ];
 
 // Keep POSITIONS for backwards compat (field only)
