@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { Game } from '@/lib/types';
 
 export function useGame(teamId: string | null) {
@@ -10,7 +10,7 @@ export function useGame(teamId: string | null) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!teamId) {
+    if (!teamId || !isSupabaseConfigured) {
       setGames([]);
       setCurrentGame(null);
       setLoading(false);
@@ -45,7 +45,7 @@ export function useGame(teamId: string | null) {
   }, [games]);
 
   const createGame = useCallback(async (opponent: string) => {
-    if (!teamId) return;
+    if (!teamId || !isSupabaseConfigured) return;
     const { data, error } = await supabase
       .from('games')
       .insert({

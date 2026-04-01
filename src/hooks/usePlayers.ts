@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { Player } from '@/lib/types';
 
 export function usePlayers(teamId: string | null) {
@@ -9,7 +9,7 @@ export function usePlayers(teamId: string | null) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!teamId) {
+    if (!teamId || !isSupabaseConfigured) {
       setPlayers([]);
       setLoading(false);
       return;

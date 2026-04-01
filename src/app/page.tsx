@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Position } from '@/lib/types';
-import { supabase } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { usePlayers } from '@/hooks/usePlayers';
 import { useGame } from '@/hooks/useGame';
 import { useLineup } from '@/hooks/useLineup';
@@ -20,6 +20,7 @@ export default function Home() {
 
   // Bootstrap: get or create the first team
   useEffect(() => {
+    if (!isSupabaseConfigured) return;
     const initTeam = async () => {
       const { data: teams } = await supabase.from('teams').select('id').limit(1);
       if (teams && teams.length > 0) {
