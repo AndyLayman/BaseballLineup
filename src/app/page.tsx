@@ -95,15 +95,17 @@ export default function Home() {
             numInnings={currentGame.num_innings}
           />
         ) : (
-          <div className="flex-1 flex items-start justify-center px-4 pt-3 pb-2 md:items-center md:pt-4 gap-4">
-            <div className="flex-1 max-w-3xl">
-              <Diamond
-                assignments={inningAssignments}
-                players={players}
-                onPositionTap={handlePositionTap}
-              />
+          <div className="flex-1 flex items-start pt-3 pb-2 md:items-center md:pt-0 min-h-0">
+            <div className="flex-1 flex items-center justify-center px-4 min-w-0">
+              <div className="w-full max-w-4xl">
+                <Diamond
+                  assignments={inningAssignments}
+                  players={players}
+                  onPositionTap={handlePositionTap}
+                />
+              </div>
             </div>
-            <div className="hidden md:flex w-72 lg:w-80 shrink-0 self-stretch">
+            <div className="hidden md:flex w-72 lg:w-80 shrink-0 self-stretch overflow-y-auto py-2 pr-2" style={{ borderLeft: '1px solid var(--border)' }}>
               <BattingOrder players={players} leadoffId={leadoffId} onSelectLeadoff={(id) => setLeadoffId(id === leadoffId ? null : id)} />
             </div>
           </div>
