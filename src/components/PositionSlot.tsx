@@ -49,7 +49,7 @@ export default function PositionSlot({ position, label, player, onTap, small }: 
             <div className="w-9 h-9 rounded-full border-2 border-dashed flex items-center justify-center" style={{ borderColor: 'var(--border-light)', background: 'rgba(0,0,0,0.15)' }}>
               <span className="text-[10px] font-bold" style={{ color: 'var(--text)' }}>{position}</span>
             </div>
-            <span className="text-[8px] font-medium drop-shadow-md" style={{ color: 'var(--text-muted)' }}>
+            <span className="text-[8px] font-medium drop-shadow-md" style={{ color: 'var(--text)' }}>
               {label}
             </span>
           </>
@@ -88,7 +88,7 @@ export default function PositionSlot({ position, label, player, onTap, small }: 
           <span className="text-xs font-semibold drop-shadow-md leading-tight text-center max-w-[80px] truncate" style={{ color: 'var(--text)' }}>
             {player.name.split(' ')[0]}
           </span>
-          <span className="text-[10px] font-medium drop-shadow-md" style={{ color: 'var(--text-muted)' }}>
+          <span className="text-[10px] font-medium drop-shadow-md" style={{ color: 'var(--text)' }}>
             {label}
           </span>
         </>
@@ -97,7 +97,7 @@ export default function PositionSlot({ position, label, player, onTap, small }: 
           <div className="w-14 h-14 rounded-full border-2 border-dashed flex items-center justify-center" style={{ borderColor: 'var(--border-light)', background: 'rgba(0,0,0,0.15)' }}>
             <span className="text-lg font-bold" style={{ color: 'var(--text)' }}>{position}</span>
           </div>
-          <span className="text-[10px] font-medium drop-shadow-md" style={{ color: 'var(--text-muted)' }}>
+          <span className="text-[10px] font-medium drop-shadow-md" style={{ color: 'var(--text)' }}>
             {label}
           </span>
         </>
