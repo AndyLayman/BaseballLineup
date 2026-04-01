@@ -110,8 +110,9 @@ export default function Home() {
         )}
       </div>
 
-      {/* Bottom nav */}
+      {/* Bottom nav - sticky */}
       {currentGame && (
+        <div className="sticky bottom-0 z-20">
         <InningNav
           currentInning={currentInning}
           numInnings={currentGame.num_innings}
@@ -119,6 +120,7 @@ export default function Home() {
           onShowRecommendations={() => setShowRecommendations(!showRecommendations)}
           showRecommendations={showRecommendations}
         />
+        </div>
       )}
 
       {/* Batting order on mobile */}
