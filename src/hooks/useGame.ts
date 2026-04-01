@@ -65,5 +65,26 @@ export function useGame() {
     }
   }, []);
 
-  return { games, currentGame, loading, error, selectGame, createGame };
+  const toggleInningComplete = useCallback(async (inning: number) => {
+    if (!isSupabaseConfigured || !currentGame) return;
+    const current = currentGame.completed_innings || [];
+    const updated = current.includes(inning)
+      ? current.filter(i => i !== inning)
+      : [...current, inning].sort((a, b) => a - b);
+
+    const { error } = await supabase
+      .from('games')
+      .update({ completed_innings: updated })
+      .eq('id', currentGame.id);
+
+    if (error) {
+      setError(`Update innings: ${error.message}`);
+    } else {
+      const updatedGame = { ...currentGame, completed_innings: updated };
+      setCurrentGame(updatedGame);
+      setGames(prev => prev.map(g => g.id === currentGame.id ? updatedGame : g));
+    }
+  }, [currentGame]);
+
+  return { games, currentGame, loading, error, selectGame, createGame, toggleInningComplete };
 }
