@@ -17,8 +17,8 @@ export const FIELD_POSITIONS: PositionConfig[] = [
   { key: 'SS', label: 'Shortstop',     x: 36, y: 47.5 }, // SVG y=48
   { key: '3B', label: '3rd Base',      x: 24, y: 67.5 }, // SVG y=64
   { key: 'LF', label: 'Left Field',    x: 14, y: 25 },   // SVG y=30 → (30-10)/80*100=25
-  { key: 'LC', label: 'Left Center',   x: 34, y: 12.5 }, // SVG y=20 → (20-10)/80*100=12.5
-  { key: 'RC', label: 'Right Center',  x: 66, y: 12.5 }, // SVG y=20
+  { key: 'LC', label: 'Left Center',   x: 34, y: 16 },
+  { key: 'RC', label: 'Right Center',  x: 66, y: 16 },
   { key: 'RF', label: 'Right Field',   x: 86, y: 25 },   // SVG y=30
 ];
 

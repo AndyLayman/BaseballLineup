@@ -98,7 +98,7 @@ export default function Home() {
           <div className="flex-1 flex items-start md:items-stretch min-h-0">
             <div className="flex-1 flex flex-col items-center justify-center px-4 min-w-0">
               {/* Inning nav centered over field only */}
-              <div className="flex justify-center pt-2 pb-1">
+              <div className="flex justify-center pt-1 pb-0">
                 <InningNav
                   currentInning={currentInning}
                   numInnings={currentGame.num_innings}
