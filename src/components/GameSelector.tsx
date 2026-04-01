@@ -41,7 +41,7 @@ export default function GameSelector({
         {loading ? (
           <span className="text-sm" style={{ color: 'var(--text-muted)' }}>Loading...</span>
         ) : showNew ? (
-          <div className="flex-1 flex items-center gap-2">
+          <div className="flex-1 flex items-center gap-2 min-w-0 overflow-hidden">
             <input
               type="text"
               placeholder="Opponent..."
@@ -56,19 +56,19 @@ export default function GameSelector({
               type="date"
               value={gameDate}
               onChange={e => setGameDate(e.target.value)}
-              className="h-10 px-2 rounded-md text-sm outline-none"
+              className="h-10 px-2 rounded-md text-sm outline-none shrink-0"
               style={{ background: 'var(--bg-input)', color: 'var(--text)', border: '1px solid var(--border-light)', colorScheme: 'dark' }}
             />
             <button
               onClick={handleCreate}
-              className="h-10 px-4 rounded-md font-semibold text-sm touch-manipulation transition-all"
+              className="h-10 px-4 rounded-md font-semibold text-sm touch-manipulation transition-all shrink-0"
               style={{ background: 'var(--accent)', color: 'var(--accent-on)' }}
             >
               Add
             </button>
             <button
               onClick={() => setShowNew(false)}
-              className="h-10 w-10 rounded-md text-lg flex items-center justify-center touch-manipulation transition-all"
+              className="h-10 w-10 rounded-md text-lg flex items-center justify-center touch-manipulation transition-all shrink-0"
               style={{ background: 'var(--bg-card)', color: 'var(--text-muted)', border: '1px solid var(--border-light)' }}
             >
               &times;
