@@ -16,7 +16,7 @@ export default function InningNav({
   showRecommendations,
 }: InningNavProps) {
   return (
-    <div className="flex items-center justify-center gap-2 px-4 py-3" style={{ background: 'var(--bg-deep)', borderTop: '1px solid var(--border)' }}>
+    <div className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
       <button
         onClick={() => onInningChange(Math.max(1, currentInning - 1))}
         disabled={currentInning <= 1}
