@@ -95,7 +95,7 @@ export default function Home() {
             numInnings={currentGame.num_innings}
           />
         ) : (
-          <div className="flex-1 flex items-center justify-center p-4 gap-4">
+          <div className="flex-1 flex items-start justify-center px-4 pt-1 pb-2 md:items-center md:pt-4 gap-4">
             <div className="flex-1 max-w-3xl">
               <Diamond
                 assignments={inningAssignments}
