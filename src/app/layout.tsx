@@ -20,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full">
-      <body className="h-full overflow-hidden overscroll-none">{children}</body>
+      <body className="h-full md:overflow-hidden overscroll-none">{children}</body>
     </html>
   );
 }
