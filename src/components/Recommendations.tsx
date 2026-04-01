@@ -108,9 +108,12 @@ export default function Recommendations({ players, assignments, numInnings, comp
                   Played {innings} of {numInnings} innings &middot; {positionStatuses.size} of {ALL_POSITIONS.length} positions
                 </div>
               </div>
-              {unplayedPositions.length === 0 && (
-                <span className="text-green-400 text-sm font-medium">All covered!</span>
-              )}
+              {unplayedPositions.length === 0 && (() => {
+                const allCompleted = ALL_POSITIONS.every(p => positionStatuses.get(p) === 'completed');
+                return allCompleted
+                  ? <span className="text-green-400 text-sm font-medium">All covered!</span>
+                  : <span className="text-sm font-medium" style={{ color: '#60a5fa' }}>All scheduled</span>;
+              })()}
             </div>
 
             {/* Position grid */}
