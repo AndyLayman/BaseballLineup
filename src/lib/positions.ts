@@ -7,17 +7,19 @@ export interface PositionConfig {
   y: number;
 }
 
+// Coordinates are CSS percentages within the field container (aspect ratio 10:9).
+// SVG viewBox is 100x90, so: CSS x% = SVG x, CSS y% = (SVG y / 90) * 100
 export const FIELD_POSITIONS: PositionConfig[] = [
-  { key: 'P',  label: 'Pitcher',       x: 50, y: 55 },
-  { key: 'C',  label: 'Catcher',       x: 50, y: 78 },
-  { key: '1B', label: '1st Base',      x: 76, y: 52 },
-  { key: '2B', label: '2nd Base',      x: 65, y: 37 },
-  { key: 'SS', label: 'Shortstop',     x: 35, y: 37 },
-  { key: '3B', label: '3rd Base',      x: 24, y: 52 },
-  { key: 'LF', label: 'Left Field',    x: 13, y: 20 },
-  { key: 'LC', label: 'Left Center',   x: 34, y: 10 },
-  { key: 'RC', label: 'Right Center',  x: 66, y: 10 },
-  { key: 'RF', label: 'Right Field',   x: 87, y: 20 },
+  { key: 'P',  label: 'Pitcher',       x: 50, y: 66 },  // just in front of mound
+  { key: 'C',  label: 'Catcher',       x: 50, y: 93 },  // behind home plate
+  { key: '1B', label: '1st Base',      x: 76, y: 64 },  // outside 1st base
+  { key: '2B', label: '2nd Base',      x: 64, y: 48 },  // behind 2nd toward 1st
+  { key: 'SS', label: 'Shortstop',     x: 36, y: 48 },  // behind 2nd toward 3rd
+  { key: '3B', label: '3rd Base',      x: 24, y: 64 },  // outside 3rd base
+  { key: 'LF', label: 'Left Field',    x: 14, y: 24 },
+  { key: 'LC', label: 'Left Center',   x: 34, y: 12 },
+  { key: 'RC', label: 'Right Center',  x: 66, y: 12 },
+  { key: 'RF', label: 'Right Field',   x: 86, y: 24 },
 ];
 
 export const BENCH_POSITIONS: { key: Position; label: string }[] = [

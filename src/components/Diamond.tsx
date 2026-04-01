@@ -10,6 +10,14 @@ interface DiamondProps {
   onPositionTap: (position: Position) => void;
 }
 
+// All coordinates in a consistent 100x90 viewBox
+// Home plate at (50, 80), diamond rotated 45deg
+const HOME = { x: 50, y: 80 };
+const FIRST = { x: 68, y: 62 };
+const SECOND = { x: 50, y: 44 };
+const THIRD = { x: 32, y: 62 };
+const MOUND = { x: 50, y: 64 };
+
 export default function Diamond({ assignments, players, onPositionTap }: DiamondProps) {
   const getPlayerForPosition = (position: Position): Player | null => {
     const assignment = assignments.find(a => a.position === position);
@@ -21,70 +29,65 @@ export default function Diamond({ assignments, players, onPositionTap }: Diamond
   return (
     <div className="w-full max-w-3xl mx-auto flex flex-col gap-3">
       {/* Field */}
-      <div className="relative w-full" style={{ aspectRatio: '5/4' }}>
-        {/* Outfield grass */}
-        <div className="absolute inset-0 bg-green-700 rounded-t-[50%] overflow-hidden">
-          {/* Grass texture lines */}
-          <div className="absolute inset-0 opacity-10">
-            {[20, 35, 50, 65, 80].map(y => (
-              <div
-                key={y}
-                className="absolute w-full border-t border-green-400"
-                style={{ top: `${y}%` }}
-              />
-            ))}
-          </div>
+      <div className="relative w-full" style={{ aspectRatio: '10/9' }}>
+        {/* SVG field graphic */}
+        <svg
+          className="absolute inset-0 w-full h-full"
+          viewBox="0 0 100 90"
+          preserveAspectRatio="xMidYMid meet"
+        >
+          {/* Outfield grass - semicircle */}
+          <path
+            d="M 5 85 Q 5 5 50 2 Q 95 5 95 85 Z"
+            fill="#2d7a3a"
+          />
+          {/* Darker grass stripes */}
+          {[15, 30, 45, 60, 75].map(y => (
+            <line key={y} x1="5" y1={y} x2="95" y2={y} stroke="#267032" strokeWidth="3" opacity="0.3" />
+          ))}
 
-          {/* Infield dirt area */}
-          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-            {/* Dirt diamond */}
-            <polygon
-              points="50,70 62,50 50,38 38,50"
-              fill="rgba(139,90,43,0.35)"
-            />
-            {/* Base paths */}
-            <polygon
-              points="50,70 62,50 50,38 38,50"
-              fill="none"
-              stroke="rgba(255,255,255,0.4)"
-              strokeWidth="0.4"
-            />
-            {/* Foul lines */}
-            <line x1="50" y1="70" x2="5" y2="5" stroke="rgba(255,255,255,0.2)" strokeWidth="0.3" />
-            <line x1="50" y1="70" x2="95" y2="5" stroke="rgba(255,255,255,0.2)" strokeWidth="0.3" />
-          </svg>
-
-          {/* Pitcher's mound */}
-          <div
-            className="absolute bg-amber-600/40 rounded-full"
-            style={{
-              width: '4%',
-              height: '4%',
-              left: '48%',
-              top: '52%',
-            }}
+          {/* Infield dirt */}
+          <polygon
+            points={`${HOME.x},${HOME.y} ${FIRST.x},${FIRST.y} ${SECOND.x},${SECOND.y} ${THIRD.x},${THIRD.y}`}
+            fill="#8B6B3D"
+            opacity="0.4"
           />
 
-          {/* Base markers */}
-          {[
-            { x: 50, y: 70 },  // Home
-            { x: 62, y: 50 },  // 1st
-            { x: 50, y: 38 },  // 2nd
-            { x: 38, y: 50 },  // 3rd
-          ].map((base, i) => (
-            <div
-              key={i}
-              className="absolute w-2.5 h-2.5 bg-white shadow"
-              style={{
-                left: `${base.x}%`,
-                top: `${base.y}%`,
-                transform: 'translate(-50%, -50%) rotate(45deg)',
-              }}
-            />
-          ))}
-        </div>
+          {/* Dirt arc around infield */}
+          <ellipse cx="50" cy="62" rx="22" ry="20" fill="#8B6B3D" opacity="0.2" />
 
-        {/* Field position slots */}
+          {/* Foul lines from home plate to outfield edges */}
+          <line
+            x1={HOME.x} y1={HOME.y}
+            x2="5" y2="5"
+            stroke="white" strokeWidth="0.4" opacity="0.35"
+          />
+          <line
+            x1={HOME.x} y1={HOME.y}
+            x2="95" y2="5"
+            stroke="white" strokeWidth="0.4" opacity="0.35"
+          />
+
+          {/* Base paths */}
+          <polygon
+            points={`${HOME.x},${HOME.y} ${FIRST.x},${FIRST.y} ${SECOND.x},${SECOND.y} ${THIRD.x},${THIRD.y}`}
+            fill="none"
+            stroke="white"
+            strokeWidth="0.4"
+            opacity="0.5"
+          />
+
+          {/* Pitcher's mound */}
+          <circle cx={MOUND.x} cy={MOUND.y} r="2" fill="#8B6B3D" opacity="0.5" />
+
+          {/* Bases */}
+          <rect x={HOME.x - 1.5} y={HOME.y - 1.5} width="3" height="3" fill="white" transform={`rotate(45,${HOME.x},${HOME.y})`} />
+          <rect x={FIRST.x - 1.2} y={FIRST.y - 1.2} width="2.4" height="2.4" fill="white" transform={`rotate(45,${FIRST.x},${FIRST.y})`} />
+          <rect x={SECOND.x - 1.2} y={SECOND.y - 1.2} width="2.4" height="2.4" fill="white" transform={`rotate(45,${SECOND.x},${SECOND.y})`} />
+          <rect x={THIRD.x - 1.2} y={THIRD.y - 1.2} width="2.4" height="2.4" fill="white" transform={`rotate(45,${THIRD.x},${THIRD.y})`} />
+        </svg>
+
+        {/* Field position slots - positioned using same coordinate system */}
         {FIELD_POSITIONS.map(pos => (
           <div
             key={pos.key}
