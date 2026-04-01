@@ -8,6 +8,7 @@ export function useGame() {
   const [games, setGames] = useState<Game[]>([]);
   const [currentGame, setCurrentGame] = useState<Game | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
@@ -25,7 +26,7 @@ export function useGame() {
         .order('date', { ascending: false });
 
       if (error) {
-        console.error('Error fetching games:', error);
+        setError(`Load games: ${error.message}`);
       } else {
         setGames(data || []);
         if (data && data.length > 0 && !currentGame) {
@@ -45,6 +46,7 @@ export function useGame() {
 
   const createGame = useCallback(async (opponent: string) => {
     if (!isSupabaseConfigured) return;
+    setError(null);
     const { data, error } = await supabase
       .from('games')
       .insert({
@@ -55,12 +57,12 @@ export function useGame() {
       .single();
 
     if (error) {
-      console.error('Error creating game:', error);
+      setError(`Create game: ${error.message}`);
     } else if (data) {
       setGames(prev => [data, ...prev]);
       setCurrentGame(data);
     }
   }, []);
 
-  return { games, currentGame, loading, selectGame, createGame };
+  return { games, currentGame, loading, error, selectGame, createGame };
 }
