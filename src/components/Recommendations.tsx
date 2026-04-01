@@ -45,9 +45,9 @@ export default function Recommendations({ players, assignments, numInnings }: Re
         {recs.map(({ player, playedPositions, unplayedPositions, innings }) => (
           <div key={player.id} className="bg-gray-800 rounded-xl p-4">
             <div className="flex items-center gap-3 mb-3">
-              {player.photo_url ? (
+              {player.photo_file ? (
                 <img
-                  src={player.photo_url}
+                  src={player.photo_file}
                   alt={player.name}
                   className="w-10 h-10 rounded-full object-cover"
                 />

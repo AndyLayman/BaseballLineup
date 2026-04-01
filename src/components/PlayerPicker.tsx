@@ -91,9 +91,9 @@ export default function PlayerPicker({
                     : 'bg-gray-800 active:bg-gray-700'
                 }`}
               >
-                {player.photo_url ? (
+                {player.photo_file ? (
                   <img
-                    src={player.photo_url}
+                    src={player.photo_file}
                     alt={player.name}
                     className="w-12 h-12 rounded-full object-cover"
                   />

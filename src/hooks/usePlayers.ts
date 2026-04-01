@@ -4,12 +4,12 @@ import { useEffect, useState } from 'react';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { Player } from '@/lib/types';
 
-export function usePlayers(teamId: string | null) {
+export function usePlayers() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!teamId || !isSupabaseConfigured) {
+    if (!isSupabaseConfigured) {
       setPlayers([]);
       setLoading(false);
       return;
@@ -20,7 +20,6 @@ export function usePlayers(teamId: string | null) {
       const { data, error } = await supabase
         .from('players')
         .select('*')
-        .eq('team_id', teamId)
         .order('number');
 
       if (error) {
@@ -32,7 +31,7 @@ export function usePlayers(teamId: string | null) {
     };
 
     fetchPlayers();
-  }, [teamId]);
+  }, []);
 
   return { players, loading };
 }
