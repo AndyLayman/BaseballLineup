@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { LineupAssignment, Position } from '@/lib/types';
 
 export function useLineup(gameId: string | null) {
@@ -9,7 +9,7 @@ export function useLineup(gameId: string | null) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!gameId) {
+    if (!gameId || !isSupabaseConfigured) {
       setAssignments([]);
       return;
     }
@@ -38,7 +38,7 @@ export function useLineup(gameId: string | null) {
   );
 
   const assignPlayer = useCallback(async (inning: number, position: Position, playerId: string) => {
-    if (!gameId) return;
+    if (!gameId || !isSupabaseConfigured) return;
 
     // Check if there's already an assignment for this position+inning
     const existing = assignments.find(
@@ -81,7 +81,7 @@ export function useLineup(gameId: string | null) {
   }, [gameId, assignments]);
 
   const unassignPlayer = useCallback(async (inning: number, position: Position) => {
-    if (!gameId) return;
+    if (!gameId || !isSupabaseConfigured) return;
 
     const existing = assignments.find(
       a => a.game_id === gameId && a.inning === inning && a.position === position
