@@ -96,8 +96,8 @@ export default function Home() {
           />
         ) : (
           <div className="flex-1 flex items-start md:items-stretch min-h-0">
-            <div className="flex-1 flex flex-col items-center px-4 min-w-0">
-              <div className="flex justify-center pt-2 pb-1">
+            <div className="flex-1 flex flex-col items-center px-4 min-w-0 relative">
+              <div className="absolute top-2 left-0 right-0 flex justify-center z-20">
                 <InningNav
                   currentInning={currentInning}
                   numInnings={currentGame.num_innings}
