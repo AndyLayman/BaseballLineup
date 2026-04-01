@@ -28,7 +28,7 @@ export default function InningNav({
           <button
             key={inning}
             onClick={() => onInningChange(inning)}
-            className="w-12 h-10 rounded-md font-bold text-base flex flex-col items-center justify-center touch-manipulation transition-all relative"
+            className="w-10 h-10 rounded-md font-bold text-base flex flex-col items-center justify-center touch-manipulation transition-all relative"
             style={
               isActive
                 ? { background: 'var(--accent)', color: 'var(--accent-on)' }
