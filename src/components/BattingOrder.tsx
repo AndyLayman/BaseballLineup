@@ -21,7 +21,7 @@ export default function BattingOrder({ players, leadoffId, onSelectLeadoff }: Ba
       <p className="text-[#FFC425] text-xs font-semibold uppercase tracking-wide mb-2 text-center">
         Batting Order
       </p>
-      <div className="flex-1 overflow-y-auto space-y-1">
+      <div className="flex-1 space-y-1">
         {sorted.map((player, i) => {
           const isLeadoff = player.id === leadoffId;
           return (
@@ -50,13 +50,11 @@ export default function BattingOrder({ players, leadoffId, onSelectLeadoff }: Ba
                     </span>
                   </div>
                 )}
-                <div className="min-w-0 flex-1">
-                  <span className="text-white text-sm font-medium truncate block">
-                    {player.name.split(' ')[0]}
-                  </span>
-                </div>
                 <span className="text-[#bfa77a] text-xs font-medium shrink-0">
                   #{player.number}
+                </span>
+                <span className="text-white text-sm font-medium truncate">
+                  {player.name.split(' ')[0]}
                 </span>
               </button>
               {isLeadoff && (
