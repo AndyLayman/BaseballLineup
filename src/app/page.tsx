@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Position } from '@/lib/types';
+import { isSupabaseConfigured } from '@/lib/supabase';
 import { usePlayers } from '@/hooks/usePlayers';
 import { useGame } from '@/hooks/useGame';
 import { useLineup } from '@/hooks/useLineup';
@@ -17,7 +18,7 @@ export default function Home() {
   const [showRecommendations, setShowRecommendations] = useState(false);
 
   const { players } = usePlayers();
-  const { games, currentGame, loading: gamesLoading, selectGame, createGame } = useGame();
+  const { games, currentGame, loading: gamesLoading, error: gameError, selectGame, createGame } = useGame();
   const { assignments, getInningAssignments, assignPlayer, unassignPlayer } = useLineup(currentGame?.id || null);
 
   const inningAssignments = getInningAssignments(currentInning);
@@ -67,8 +68,22 @@ export default function Home() {
         {!currentGame ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
-              <p className="text-gray-400 text-lg mb-2">No game selected</p>
-              <p className="text-gray-500 text-sm">Create a new game to get started</p>
+              {gameError ? (
+                <>
+                  <p className="text-red-400 text-lg mb-2">Error</p>
+                  <p className="text-red-300 text-sm">{gameError}</p>
+                </>
+              ) : !isSupabaseConfigured ? (
+                <>
+                  <p className="text-red-400 text-lg mb-2">Supabase not connected</p>
+                  <p className="text-gray-500 text-sm">Check that environment variables are set</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-gray-400 text-lg mb-2">No game selected</p>
+                  <p className="text-gray-500 text-sm">Create a new game to get started</p>
+                </>
+              )}
             </div>
           </div>
         ) : showRecommendations ? (
