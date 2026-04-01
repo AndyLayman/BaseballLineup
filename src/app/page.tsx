@@ -53,7 +53,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-900 select-none">
+    <div className="flex flex-col h-screen bg-[#1a1410] select-none">
       {/* Top bar */}
       <GameSelector
         games={games}

@@ -30,15 +30,15 @@ export default function GameSelector({
   };
 
   return (
-    <div className="flex items-center gap-3 px-4 py-3 bg-gray-800 border-b border-gray-700">
+    <div className="flex items-center gap-3 px-4 py-3 bg-[#2F241D] border-b border-[#4a3728]">
       <div className="flex items-center gap-2">
         <span className="text-2xl">&#9918;</span>
-        <h1 className="text-white font-bold text-lg">Lineup</h1>
+        <h1 className="text-[#FFC425] font-bold text-lg">Lineup</h1>
       </div>
 
       <div className="flex-1 flex items-center gap-2 justify-end">
         {loading ? (
-          <span className="text-gray-400 text-sm">Loading...</span>
+          <span className="text-[#bfa77a] text-sm">Loading...</span>
         ) : showNew ? (
           <div className="flex items-center gap-2">
             <input
@@ -47,18 +47,18 @@ export default function GameSelector({
               value={opponent}
               onChange={e => setOpponent(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleCreate()}
-              className="h-10 px-3 rounded-lg bg-gray-700 text-white placeholder-gray-500 outline-none focus:ring-2 focus:ring-blue-500 text-sm w-40"
+              className="h-10 px-3 rounded-lg bg-[#3d2e22] text-white placeholder-[#8a7560] outline-none focus:ring-2 focus:ring-[#FFC425] text-sm w-40"
               autoFocus
             />
             <button
               onClick={handleCreate}
-              className="h-10 px-4 rounded-lg bg-blue-500 text-white font-semibold text-sm active:bg-blue-600 touch-manipulation"
+              className="h-10 px-4 rounded-lg bg-[#FFC425] text-[#2F241D] font-semibold text-sm active:bg-[#e6b020] touch-manipulation"
             >
               Start
             </button>
             <button
               onClick={() => setShowNew(false)}
-              className="h-10 px-3 rounded-lg bg-gray-700 text-gray-300 text-sm active:bg-gray-600 touch-manipulation"
+              className="h-10 px-3 rounded-lg bg-[#3d2e22] text-[#bfa77a] text-sm active:bg-[#4a3728] touch-manipulation"
             >
               Cancel
             </button>
@@ -69,7 +69,7 @@ export default function GameSelector({
               <select
                 value={currentGame?.id || ''}
                 onChange={e => onSelectGame(e.target.value)}
-                className="h-10 px-3 rounded-lg bg-gray-700 text-white text-sm outline-none appearance-none cursor-pointer"
+                className="h-10 px-3 rounded-lg bg-[#3d2e22] text-white text-sm outline-none appearance-none cursor-pointer"
               >
                 <option value="" disabled>Select game...</option>
                 {games.map(g => (
@@ -81,7 +81,7 @@ export default function GameSelector({
             )}
             <button
               onClick={() => setShowNew(true)}
-              className="h-10 px-4 rounded-lg bg-green-600 text-white font-semibold text-sm active:bg-green-700 touch-manipulation whitespace-nowrap"
+              className="h-10 px-4 rounded-lg bg-[#FFC425] text-[#2F241D] font-bold text-sm active:bg-[#e6b020] touch-manipulation whitespace-nowrap"
             >
               + New Game
             </button>
