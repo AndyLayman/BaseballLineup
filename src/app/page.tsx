@@ -111,8 +111,8 @@ export default function Home() {
           />
         ) : (
           <div className="flex-1 flex items-start md:items-stretch min-h-0">
-            <div className="flex-1 flex flex-col items-center justify-center px-4 min-w-0">
-              <div className="w-full max-w-4xl flex-1 flex items-start md:items-center">
+            <div className="flex-1 flex flex-col items-center px-4 min-w-0">
+              <div className="w-full max-w-4xl flex items-start md:items-center md:flex-1">
                 <Diamond
                   assignments={inningAssignments}
                   players={players}
