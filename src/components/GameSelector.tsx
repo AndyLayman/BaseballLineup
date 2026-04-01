@@ -7,7 +7,7 @@ interface GameSelectorProps {
   games: Game[];
   currentGame: Game | null;
   onSelectGame: (gameId: string) => void;
-  onCreateGame: (opponent: string) => void;
+  onCreateGame: (opponent: string, date: string) => void;
   loading: boolean;
 }
 
@@ -20,11 +20,13 @@ export default function GameSelector({
 }: GameSelectorProps) {
   const [showNew, setShowNew] = useState(false);
   const [opponent, setOpponent] = useState('');
+  const [gameDate, setGameDate] = useState(() => new Date().toISOString().split('T')[0]);
 
   const handleCreate = () => {
-    if (opponent.trim()) {
-      onCreateGame(opponent.trim());
+    if (opponent.trim() && gameDate) {
+      onCreateGame(opponent.trim(), gameDate);
       setOpponent('');
+      setGameDate(new Date().toISOString().split('T')[0]);
       setShowNew(false);
     }
   };
@@ -45,13 +47,20 @@ export default function GameSelector({
           <div className="flex items-center gap-2">
             <input
               type="text"
-              placeholder="Opponent name..."
+              placeholder="Opponent..."
               value={opponent}
               onChange={e => setOpponent(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleCreate()}
-              className="h-10 px-3 rounded-md text-sm w-40 outline-none"
+              className="h-10 px-3 rounded-md text-sm w-32 outline-none"
               style={{ background: 'var(--bg-input)', color: 'var(--text)', border: '1px solid var(--border-light)' }}
               autoFocus
+            />
+            <input
+              type="date"
+              value={gameDate}
+              onChange={e => setGameDate(e.target.value)}
+              className="h-10 px-2 rounded-md text-sm outline-none"
+              style={{ background: 'var(--bg-input)', color: 'var(--text)', border: '1px solid var(--border-light)', colorScheme: 'dark' }}
             />
             <button
               onClick={handleCreate}
