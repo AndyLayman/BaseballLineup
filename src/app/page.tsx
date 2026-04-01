@@ -17,6 +17,7 @@ export default function Home() {
   const [currentInning, setCurrentInning] = useState(1);
   const [selectedPosition, setSelectedPosition] = useState<Position | null>(null);
   const [showRecommendations, setShowRecommendations] = useState(false);
+  const [leadoffId, setLeadoffId] = useState<number | null>(null);
 
   const { players } = usePlayers();
   const { games, currentGame, loading: gamesLoading, error: gameError, selectGame, createGame } = useGame();
@@ -103,7 +104,7 @@ export default function Home() {
               />
             </div>
             <div className="hidden md:flex w-48 shrink-0 self-stretch">
-              <BattingOrder players={players} />
+              <BattingOrder players={players} leadoffId={leadoffId} onSelectLeadoff={(id) => setLeadoffId(id === leadoffId ? null : id)} />
             </div>
           </div>
         )}
@@ -123,7 +124,7 @@ export default function Home() {
       {/* Batting order on mobile */}
       {currentGame && !showRecommendations && (
         <div className="md:hidden px-4 pb-4">
-          <BattingOrder players={players} />
+          <BattingOrder players={players} leadoffId={leadoffId} onSelectLeadoff={(id) => setLeadoffId(id === leadoffId ? null : id)} />
         </div>
       )}
 
