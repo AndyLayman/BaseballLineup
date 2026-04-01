@@ -10,7 +10,7 @@ interface DiamondProps {
   onPositionTap: (position: Position) => void;
 }
 
-// All coordinates in a consistent 100x80 viewBox (offset by 10 to crop top)
+// All coordinates in SVG space. viewBox is "0 20 100 70" to crop empty top.
 const HOME = { x: 50, y: 80 };
 const FIRST = { x: 68, y: 62 };
 const SECOND = { x: 50, y: 44 };
@@ -32,11 +32,11 @@ export default function Diamond({ assignments, players, onPositionTap }: Diamond
   return (
     <div className="w-full max-w-3xl mx-auto flex flex-col gap-3">
       {/* Field */}
-      <div className="relative w-full" style={{ aspectRatio: '10/8' }}>
+      <div className="relative w-full" style={{ aspectRatio: '10/7' }}>
         {/* SVG field graphic */}
         <svg
           className="absolute inset-0 w-full h-full"
-          viewBox="0 10 100 80"
+          viewBox="0 20 100 70"
           preserveAspectRatio="xMidYMid meet"
         >
           {/* Outfield grass — from home, along foul lines, arc across top */}
