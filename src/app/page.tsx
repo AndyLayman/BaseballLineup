@@ -26,6 +26,20 @@ export default function Home() {
   const inningAssignments = getInningAssignments(currentInning);
   const assignedPlayerIds = new Set(inningAssignments.map(a => a.player_id));
 
+  // Default to first incomplete inning when game changes
+  useEffect(() => {
+    if (!currentGame) return;
+    const completed = currentGame.completed_innings || [];
+    for (let i = 1; i <= currentGame.num_innings; i++) {
+      if (!completed.includes(i)) {
+        setCurrentInning(i);
+        return;
+      }
+    }
+    // All complete — stay on last inning
+    setCurrentInning(currentGame.num_innings);
+  }, [currentGame?.id, currentGame?.completed_innings]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const currentAssignment = selectedPosition
     ? inningAssignments.find(a => a.position === selectedPosition)
     : null;
