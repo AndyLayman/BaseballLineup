@@ -186,7 +186,7 @@ export default function BattingOrder({ players, leadoffId, onSelectLeadoff, onUp
             >
               <button
                 onClick={reordering ? undefined : () => onSelectLeadoff(player.id)}
-                className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md touch-manipulation transition-all ${reordering ? 'cursor-grab active:cursor-grabbing' : ''}`}
+                className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md touch-manipulation transition-all text-left ${reordering ? 'cursor-grab active:cursor-grabbing' : ''}`}
                 style={{
                   background: isDragging ? 'var(--bg-card)' : 'var(--bg-deep)',
                   ...(isDragging ? { border: '1px solid var(--accent)', boxShadow: '0 4px 12px rgba(0,0,0,0.4)' } : {}),
