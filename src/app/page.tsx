@@ -124,7 +124,7 @@ export default function Home() {
                   showRecommendations={showRecommendations}
                 />
               </div>
-              <div className="w-full max-w-4xl md:max-w-none flex items-start md:items-center md:justify-center md:flex-1 md:overflow-hidden">
+              <div className="w-full max-w-4xl md:max-w-none flex items-start md:items-center md:justify-center md:flex-1 diamond-container">
                 <Diamond
                   assignments={inningAssignments}
                   players={players}
