@@ -8,12 +8,13 @@ interface BattingOrderProps {
   players: Player[];
   leadoffId: number | null;
   onSelectLeadoff: (playerId: number) => void;
-  onUpdateBattingOrder: (orderedIds: number[]) => void;
+  onUpdateBattingOrder: (orderedIds: number[], removedIds: number[]) => void;
 }
 
 export default function BattingOrder({ players, leadoffId, onSelectLeadoff, onUpdateBattingOrder }: BattingOrderProps) {
   const [reordering, setReordering] = useState(false);
   const [dragOrder, setDragOrder] = useState<Player[]>([]);
+  const [removed, setRemoved] = useState<Player[]>([]);
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
   const [dragOffset, setDragOffset] = useState(0);
   const itemRects = useRef<DOMRect[]>([]);
@@ -26,19 +27,33 @@ export default function BattingOrder({ players, leadoffId, onSelectLeadoff, onUp
     .filter(p => p.sort_order != null)
     .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
 
+  const inactive = players.filter(p => p.sort_order == null).sort((a, b) => a.number - b.number);
+
   const startReordering = () => {
     setDragOrder([...sorted]);
+    setRemoved([...inactive]);
     setReordering(true);
   };
 
   const saveOrder = () => {
-    onUpdateBattingOrder(dragOrder.map(p => p.id));
+    onUpdateBattingOrder(dragOrder.map(p => p.id), removed.map(p => p.id));
     setReordering(false);
   };
 
   const cancelReorder = () => {
     setReordering(false);
     setDraggingIndex(null);
+    setRemoved([]);
+  };
+
+  const removePlayer = (player: Player) => {
+    setDragOrder(prev => prev.filter(p => p.id !== player.id));
+    setRemoved(prev => [...prev, player].sort((a, b) => a.number - b.number));
+  };
+
+  const restorePlayer = (player: Player) => {
+    setRemoved(prev => prev.filter(p => p.id !== player.id));
+    setDragOrder(prev => [...prev, player]);
   };
 
   // Capture item positions when drag starts
@@ -201,9 +216,18 @@ export default function BattingOrder({ players, leadoffId, onSelectLeadoff, onUp
                 <span className="text-xs font-medium shrink-0" style={{ color: 'var(--text-sub)' }}>
                   #{player.number}
                 </span>
-                <span className="text-sm font-medium truncate" style={{ color: 'var(--text)' }}>
+                <span className="text-sm font-medium truncate flex-1" style={{ color: 'var(--text)' }}>
                   {player.name}
                 </span>
+                {reordering && (
+                  <span
+                    onClick={(e) => { e.stopPropagation(); removePlayer(player); }}
+                    className="w-6 h-6 rounded flex items-center justify-center shrink-0 text-xs touch-manipulation"
+                    style={{ background: 'rgba(239,68,68,0.2)', color: '#f87171' }}
+                  >
+                    &times;
+                  </span>
+                )}
               </button>
               {isLeadoff && !reordering && (
                 <span className="absolute -right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold uppercase px-2 py-0.5 rounded-full whitespace-nowrap z-10" style={{ background: 'var(--accent)', color: 'var(--accent-on)' }}>
@@ -214,6 +238,46 @@ export default function BattingOrder({ players, leadoffId, onSelectLeadoff, onUp
           );
         })}
       </div>
+      {reordering && removed.length > 0 && (
+        <div className="mt-3">
+          <p className="text-[10px] font-semibold uppercase tracking-wide mb-1" style={{ color: 'var(--text-muted)' }}>
+            Not in Lineup
+          </p>
+          <div className="space-y-1">
+            {removed.map(player => (
+              <div key={player.id} className="flex items-center gap-2 px-2 py-1.5 rounded-md" style={{ background: 'var(--bg-deep)', opacity: 0.6 }}>
+                {getPhotoUrl(player.id) ? (
+                  <img
+                    src={getPhotoUrl(player.id)!}
+                    alt={player.name}
+                    className="w-7 h-7 rounded-full object-cover shrink-0"
+                    style={{ border: '1px solid var(--border-light)' }}
+                  />
+                ) : (
+                  <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: 'var(--border-light)' }}>
+                    <span className="font-bold text-xs" style={{ color: 'var(--text-muted)' }}>
+                      {player.name.charAt(0)}
+                    </span>
+                  </div>
+                )}
+                <span className="text-xs font-medium shrink-0" style={{ color: 'var(--text-muted)' }}>
+                  #{player.number}
+                </span>
+                <span className="text-sm truncate flex-1" style={{ color: 'var(--text-muted)' }}>
+                  {player.name}
+                </span>
+                <button
+                  onClick={() => restorePlayer(player)}
+                  className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded touch-manipulation"
+                  style={{ background: 'rgba(34,197,94,0.15)', color: '#4ade80' }}
+                >
+                  Add
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       {!leadoffId && !reordering && (
         <p className="text-[10px] text-center mt-2" style={{ color: 'var(--text-muted)' }}>Tap to mark first up next inning</p>
       )}

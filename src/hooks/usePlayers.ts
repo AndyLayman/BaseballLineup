@@ -51,17 +51,22 @@ export function usePlayers() {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
-  const updateBattingOrder = useCallback(async (orderedIds: number[]) => {
+  const updateBattingOrder = useCallback(async (orderedIds: number[], removedIds: number[]) => {
     if (!isSupabaseConfigured) return;
-    // Update sort_order for each player based on their position in the array
-    const updates = orderedIds.map((id, index) =>
-      supabase.from('players').update({ sort_order: index + 1 }).eq('id', id)
-    );
+    const updates = [
+      ...orderedIds.map((id, index) =>
+        supabase.from('players').update({ sort_order: index + 1 }).eq('id', id)
+      ),
+      ...removedIds.map(id =>
+        supabase.from('players').update({ sort_order: null }).eq('id', id)
+      ),
+    ];
     await Promise.all(updates);
-    // Optimistically update local state
     setPlayers(prev => prev.map(p => {
       const idx = orderedIds.indexOf(p.id);
-      return idx >= 0 ? { ...p, sort_order: idx + 1 } : p;
+      if (idx >= 0) return { ...p, sort_order: idx + 1 };
+      if (removedIds.includes(p.id)) return { ...p, sort_order: null };
+      return p;
     }));
   }, []);
 
