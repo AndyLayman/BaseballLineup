@@ -19,7 +19,7 @@ export default function Home() {
   const [showRecommendations, setShowRecommendations] = useState(false);
   const [leadoffId, setLeadoffId] = useState<number | null>(null);
 
-  const { players } = usePlayers();
+  const { players, updateBattingOrder } = usePlayers();
   const { games, currentGame, loading: gamesLoading, error: gameError, selectGame, createGame, toggleInningComplete } = useGame();
   const { assignments, getInningAssignments, assignPlayer, unassignPlayer } = useLineup(currentGame?.id || null);
 
@@ -119,7 +119,7 @@ export default function Home() {
               </div>
             </div>
             <div className="hidden md:flex w-72 lg:w-80 shrink-0 self-stretch overflow-y-auto py-2 pl-2" style={{ borderLeft: '1px solid var(--border)' }}>
-              <BattingOrder players={players} leadoffId={leadoffId} onSelectLeadoff={(id) => setLeadoffId(id === leadoffId ? null : id)} />
+              <BattingOrder players={players} leadoffId={leadoffId} onSelectLeadoff={(id) => setLeadoffId(id === leadoffId ? null : id)} onUpdateBattingOrder={updateBattingOrder} />
             </div>
           </div>
         )}
@@ -128,7 +128,7 @@ export default function Home() {
       {/* Batting order on mobile */}
       {currentGame && !showRecommendations && (
         <div className="md:hidden px-4 pb-4">
-          <BattingOrder players={players} leadoffId={leadoffId} onSelectLeadoff={(id) => setLeadoffId(id === leadoffId ? null : id)} />
+          <BattingOrder players={players} leadoffId={leadoffId} onSelectLeadoff={(id) => setLeadoffId(id === leadoffId ? null : id)} onUpdateBattingOrder={updateBattingOrder} />
         </div>
       )}
 

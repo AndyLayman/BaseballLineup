@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { Player } from '@/lib/types';
 
@@ -51,5 +51,19 @@ export function usePlayers() {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
-  return { players, loading };
+  const updateBattingOrder = useCallback(async (orderedIds: number[]) => {
+    if (!isSupabaseConfigured) return;
+    // Update sort_order for each player based on their position in the array
+    const updates = orderedIds.map((id, index) =>
+      supabase.from('players').update({ sort_order: index + 1 }).eq('id', id)
+    );
+    await Promise.all(updates);
+    // Optimistically update local state
+    setPlayers(prev => prev.map(p => {
+      const idx = orderedIds.indexOf(p.id);
+      return idx >= 0 ? { ...p, sort_order: idx + 1 } : p;
+    }));
+  }, []);
+
+  return { players, loading, updateBattingOrder };
 }
