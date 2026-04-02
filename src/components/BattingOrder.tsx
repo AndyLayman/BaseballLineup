@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { Player } from '@/lib/types';
 import { getPhotoUrl } from '@/lib/supabase';
 
@@ -14,8 +14,13 @@ interface BattingOrderProps {
 export default function BattingOrder({ players, leadoffId, onSelectLeadoff, onUpdateBattingOrder }: BattingOrderProps) {
   const [reordering, setReordering] = useState(false);
   const [dragOrder, setDragOrder] = useState<Player[]>([]);
-  const dragItem = useRef<number | null>(null);
-  const dragOverItem = useRef<number | null>(null);
+  const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
+  const [dragOffset, setDragOffset] = useState(0);
+  const itemRects = useRef<DOMRect[]>([]);
+  const listRef = useRef<HTMLDivElement>(null);
+  const startY = useRef(0);
+  const currentY = useRef(0);
+  const originalIndex = useRef(0);
 
   const sorted = [...players]
     .filter(p => p.sort_order != null)
@@ -33,71 +38,80 @@ export default function BattingOrder({ players, leadoffId, onSelectLeadoff, onUp
 
   const cancelReorder = () => {
     setReordering(false);
+    setDraggingIndex(null);
   };
 
-  const handleDragStart = useCallback((index: number) => {
-    dragItem.current = index;
+  // Capture item positions when drag starts
+  const captureRects = useCallback(() => {
+    if (!listRef.current) return;
+    const items = listRef.current.querySelectorAll('[data-drag-item]');
+    itemRects.current = Array.from(items).map(el => el.getBoundingClientRect());
   }, []);
-
-  const handleDragOver = useCallback((e: React.DragEvent, index: number) => {
-    e.preventDefault();
-    dragOverItem.current = index;
-  }, []);
-
-  const handleDrop = useCallback(() => {
-    if (dragItem.current === null || dragOverItem.current === null) return;
-    const from = dragItem.current;
-    const to = dragOverItem.current;
-    if (from === to) return;
-    setDragOrder(prev => {
-      const updated = [...prev];
-      const [moved] = updated.splice(from, 1);
-      updated.splice(to, 0, moved);
-      return updated;
-    });
-    dragItem.current = null;
-    dragOverItem.current = null;
-  }, []);
-
-  // Touch drag support
-  const touchItem = useRef<number | null>(null);
-  const touchY = useRef<number>(0);
-  const listRef = useRef<HTMLDivElement>(null);
 
   const handleTouchStart = useCallback((index: number, e: React.TouchEvent) => {
-    touchItem.current = index;
-    touchY.current = e.touches[0].clientY;
-  }, []);
+    captureRects();
+    startY.current = e.touches[0].clientY;
+    currentY.current = e.touches[0].clientY;
+    originalIndex.current = index;
+    setDraggingIndex(index);
+    setDragOffset(0);
+  }, [captureRects]);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (touchItem.current === null || !listRef.current) return;
+    if (draggingIndex === null) return;
     e.preventDefault();
-    const currentY = e.touches[0].clientY;
-    const items = listRef.current.querySelectorAll('[data-drag-item]');
-    for (let i = 0; i < items.length; i++) {
-      const rect = items[i].getBoundingClientRect();
-      if (currentY >= rect.top && currentY <= rect.bottom) {
-        dragOverItem.current = i;
+    const touch = e.touches[0];
+    currentY.current = touch.clientY;
+    const offset = currentY.current - startY.current;
+    setDragOffset(offset);
+
+    // Determine if we should swap
+    const rects = itemRects.current;
+    if (!rects.length) return;
+    const draggedCenter = rects[originalIndex.current].top + rects[originalIndex.current].height / 2 + offset;
+
+    let targetIndex = originalIndex.current;
+    for (let i = 0; i < rects.length; i++) {
+      const itemCenter = rects[i].top + rects[i].height / 2;
+      if (draggedCenter < itemCenter) {
+        targetIndex = i;
         break;
       }
+      targetIndex = i;
     }
-  }, []);
 
-  const handleTouchEnd = useCallback(() => {
-    if (touchItem.current === null || dragOverItem.current === null) return;
-    const from = touchItem.current;
-    const to = dragOverItem.current;
-    if (from !== to) {
+    if (targetIndex !== draggingIndex) {
       setDragOrder(prev => {
         const updated = [...prev];
-        const [moved] = updated.splice(from, 1);
-        updated.splice(to, 0, moved);
+        const [moved] = updated.splice(draggingIndex, 1);
+        updated.splice(targetIndex, 0, moved);
         return updated;
       });
+      // Adjust refs so future moves are relative to new position
+      const diff = targetIndex - draggingIndex;
+      const itemHeight = rects[0]?.height ?? 40;
+      startY.current += diff * (itemHeight + 4); // 4px = space-y-1 gap
+      setDraggingIndex(targetIndex);
+      originalIndex.current = targetIndex;
+      // Re-capture after reorder
+      requestAnimationFrame(captureRects);
     }
-    touchItem.current = null;
-    dragOverItem.current = null;
+  }, [draggingIndex, captureRects]);
+
+  const handleTouchEnd = useCallback(() => {
+    setDraggingIndex(null);
+    setDragOffset(0);
   }, []);
+
+  // Prevent body scroll when dragging
+  useEffect(() => {
+    if (draggingIndex === null) return;
+    const prevent = (e: TouchEvent) => {
+      if (draggingIndex !== null) e.preventDefault();
+    };
+    document.addEventListener('touchmove', prevent, { passive: false });
+    return () => document.removeEventListener('touchmove', prevent);
+  }, [draggingIndex]);
 
   if (sorted.length === 0) return null;
 
@@ -136,26 +150,31 @@ export default function BattingOrder({ players, leadoffId, onSelectLeadoff, onUp
           </div>
         )}
       </div>
-      <div className="flex-1 space-y-1" ref={listRef} onTouchMove={reordering ? handleTouchMove : undefined}>
+      <div className="flex-1 space-y-1" ref={listRef}>
         {displayList.map((player, i) => {
           const isLeadoff = player.id === leadoffId;
+          const isDragging = reordering && draggingIndex === i;
           return (
             <div
               key={player.id}
               data-drag-item
               className="relative"
-              draggable={reordering}
-              onDragStart={() => handleDragStart(i)}
-              onDragOver={(e) => handleDragOver(e, i)}
-              onDrop={handleDrop}
               onTouchStart={reordering ? (e) => handleTouchStart(i, e) : undefined}
+              onTouchMove={reordering ? handleTouchMove : undefined}
               onTouchEnd={reordering ? handleTouchEnd : undefined}
+              style={{
+                transform: isDragging ? `translateY(${dragOffset}px)` : undefined,
+                zIndex: isDragging ? 50 : undefined,
+                transition: isDragging ? 'none' : 'transform 150ms ease',
+                opacity: isDragging ? 0.9 : 1,
+              }}
             >
               <button
                 onClick={reordering ? undefined : () => onSelectLeadoff(player.id)}
                 className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md touch-manipulation transition-all ${reordering ? 'cursor-grab active:cursor-grabbing' : ''}`}
                 style={{
-                  background: 'var(--bg-deep)',
+                  background: isDragging ? 'var(--bg-card)' : 'var(--bg-deep)',
+                  ...(isDragging ? { border: '1px solid var(--accent)', boxShadow: '0 4px 12px rgba(0,0,0,0.4)' } : {}),
                   ...(isLeadoff && !reordering ? { outline: '2px solid var(--accent)', outlineOffset: '-2px' } : {}),
                 }}
               >
