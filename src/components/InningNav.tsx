@@ -5,7 +5,6 @@ interface InningNavProps {
   numInnings: number;
   completedInnings: number[];
   onInningChange: (inning: number) => void;
-  onToggleInningComplete: (inning: number) => void;
   onShowRecommendations: () => void;
   showRecommendations: boolean;
 }
@@ -15,7 +14,6 @@ export default function InningNav({
   numInnings,
   completedInnings,
   onInningChange,
-  onToggleInningComplete,
   onShowRecommendations,
   showRecommendations,
 }: InningNavProps) {
@@ -47,19 +45,6 @@ export default function InningNav({
       })}
 
       <div className="w-px h-8 mx-1" style={{ background: 'var(--border)' }} />
-
-      <button
-        onClick={() => onToggleInningComplete(currentInning)}
-        className="h-10 w-10 rounded-md font-semibold text-base flex items-center justify-center touch-manipulation transition-all"
-        style={
-          completedInnings.includes(currentInning)
-            ? { background: 'var(--accent)', color: 'var(--accent-on)' }
-            : { background: 'var(--bg-card)', color: 'var(--text-muted)', border: '1px solid var(--border-light)' }
-        }
-        title={completedInnings.includes(currentInning) ? 'Uncheck inning' : 'Check off inning'}
-      >
-        &#10003;
-      </button>
 
       <button
         onClick={onShowRecommendations}

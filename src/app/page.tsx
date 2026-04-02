@@ -105,7 +105,7 @@ export default function Home() {
                   numInnings={currentGame.num_innings}
                   completedInnings={currentGame.completed_innings || []}
                   onInningChange={handleInningChange}
-                  onToggleInningComplete={toggleInningComplete}
+
                   onShowRecommendations={() => setShowRecommendations(!showRecommendations)}
                   showRecommendations={showRecommendations}
                 />
