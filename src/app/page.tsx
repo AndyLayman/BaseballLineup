@@ -98,7 +98,7 @@ export default function Home() {
           />
         ) : (
           <div className="flex-1 flex items-start md:items-stretch min-h-0">
-            <div className="flex-1 flex flex-col items-center px-4 min-w-0 relative">
+            <div className="flex-1 flex flex-col items-center px-4 min-w-0 relative md:justify-center">
               <div className="flex justify-center z-20 py-2 md:absolute md:top-2 md:left-0 md:right-0 md:py-0">
                 <InningNav
                   currentInning={currentInning}
@@ -110,7 +110,7 @@ export default function Home() {
                   showRecommendations={showRecommendations}
                 />
               </div>
-              <div className="w-full max-w-4xl flex items-start md:items-center md:flex-1">
+              <div className="w-full max-w-4xl md:max-w-none flex items-start md:items-center md:flex-1">
                 <Diamond
                   assignments={inningAssignments}
                   players={players}
