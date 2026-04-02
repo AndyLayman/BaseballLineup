@@ -29,7 +29,7 @@ export default function Diamond({ assignments, players, onPositionTap }: Diamond
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto flex flex-col gap-3">
+    <div className="w-full max-w-3xl md:max-w-none mx-auto flex flex-col gap-3">
       {/* Field */}
       <div className="relative w-full" style={{ aspectRatio: '10/9' }}>
         {/* SVG field graphic */}
