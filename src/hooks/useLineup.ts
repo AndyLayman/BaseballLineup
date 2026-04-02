@@ -30,6 +30,39 @@ export function useLineup(gameId: string | null) {
     };
 
     fetchAssignments();
+
+    // Subscribe to realtime changes on lineup_assignments for this game
+    const channel = supabase
+      .channel(`lineup-${gameId}`)
+      .on('postgres_changes', {
+        event: '*', schema: 'public', table: 'lineup_assignments',
+        filter: `game_id=eq.${gameId}`,
+      }, async (payload) => {
+        if (payload.eventType === 'DELETE') {
+          const old = payload.old as { id: string };
+          setAssignments(prev => prev.filter(a => a.id !== old.id));
+        } else {
+          // For INSERT/UPDATE, refetch the row with joined player data
+          const { data } = await supabase
+            .from('lineup_assignments')
+            .select('*, player:players(*)')
+            .eq('id', (payload.new as { id: string }).id)
+            .single();
+          if (data) {
+            if (payload.eventType === 'INSERT') {
+              setAssignments(prev => {
+                if (prev.some(a => a.id === data.id)) return prev;
+                return [...prev, data];
+              });
+            } else {
+              setAssignments(prev => prev.map(a => a.id === data.id ? data : a));
+            }
+          }
+        }
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, [gameId]);
 
   const getInningAssignments = useCallback(

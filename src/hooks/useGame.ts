@@ -37,6 +37,26 @@ export function useGame() {
     };
 
     fetchGames();
+
+    // Subscribe to realtime changes on the games table
+    const channel = supabase
+      .channel('games-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'games' }, (payload) => {
+        if (payload.eventType === 'INSERT') {
+          setGames(prev => [payload.new as Game, ...prev]);
+        } else if (payload.eventType === 'UPDATE') {
+          const updated = payload.new as Game;
+          setGames(prev => prev.map(g => g.id === updated.id ? updated : g));
+          setCurrentGame(prev => prev?.id === updated.id ? updated : prev);
+        } else if (payload.eventType === 'DELETE') {
+          const old = payload.old as { id: string };
+          setGames(prev => prev.filter(g => g.id !== old.id));
+          setCurrentGame(prev => prev?.id === old.id ? null : prev);
+        }
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const selectGame = useCallback((gameId: string) => {
