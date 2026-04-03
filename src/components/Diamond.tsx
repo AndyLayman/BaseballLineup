@@ -38,76 +38,67 @@ export default function Diamond({ assignments, players, onPositionTap }: Diamond
           viewBox="0 0 100 90"
           preserveAspectRatio="xMidYMid meet"
         >
-          {/* Outfield grass — from home, along foul lines, arc across top */}
-          <path
-            d={`M ${HOME.x},${HOME.y}
-                L ${FOUL_LEFT.x},${FOUL_LEFT.y}
-                Q 50,2 ${FOUL_RIGHT.x},${FOUL_RIGHT.y}
-                Z`}
-            fill="#2d7a3a"
-          />
-
-          {/* Darker grass stripes */}
           <defs>
-            <clipPath id="fieldClip">
-              <path d={`M ${HOME.x},${HOME.y}
-                        L ${FOUL_LEFT.x},${FOUL_LEFT.y}
-                        Q 50,2 ${FOUL_RIGHT.x},${FOUL_RIGHT.y}
-                        Z`} />
-            </clipPath>
+            {/* Gradient for outfield arc: teal to purple */}
+            <linearGradient id="arcGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="var(--teal)" />
+              <stop offset="50%" stopColor="var(--teal)" />
+              <stop offset="100%" stopColor="var(--purple)" />
+            </linearGradient>
+            {/* Gradient for foul lines */}
+            <linearGradient id="foulLeftGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="var(--teal)" stopOpacity="0.6" />
+              <stop offset="100%" stopColor="var(--teal)" stopOpacity="0.2" />
+            </linearGradient>
+            <linearGradient id="foulRightGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="var(--purple)" stopOpacity="0.6" />
+              <stop offset="100%" stopColor="var(--purple)" stopOpacity="0.2" />
+            </linearGradient>
           </defs>
-          <g clipPath="url(#fieldClip)">
-            {[20, 30, 40, 50, 60, 70].map(y => (
-              <line key={y} x1="0" y1={y} x2="100" y2={y} stroke="#267032" strokeWidth="2.5" opacity="0.3" />
-            ))}
-          </g>
 
-          {/* Dirt arc around infield */}
-          <ellipse cx="50" cy="62" rx="22" ry="20" fill="#8B6B3D" opacity="0.2" />
-
-          {/* Infield dirt diamond */}
+          {/* Infield fill — semi-transparent teal */}
           <polygon
             points={`${HOME.x},${HOME.y} ${FIRST.x},${FIRST.y} ${SECOND.x},${SECOND.y} ${THIRD.x},${THIRD.y}`}
-            fill="#8B6B3D"
-            opacity="0.35"
+            fill="var(--teal)"
+            opacity="0.08"
           />
 
           {/* Foul lines */}
           <line
             x1={HOME.x} y1={HOME.y}
             x2={FOUL_LEFT.x} y2={FOUL_LEFT.y}
-            stroke="white" strokeWidth="0.4" opacity="0.4"
+            stroke="url(#foulLeftGradient)" strokeWidth="0.5"
           />
           <line
             x1={HOME.x} y1={HOME.y}
             x2={FOUL_RIGHT.x} y2={FOUL_RIGHT.y}
-            stroke="white" strokeWidth="0.4" opacity="0.4"
+            stroke="url(#foulRightGradient)" strokeWidth="0.5"
           />
 
-          {/* Outfield arc */}
+          {/* Outfield arc — teal to purple gradient */}
           <path
             d={`M ${FOUL_LEFT.x},${FOUL_LEFT.y} Q 50,2 ${FOUL_RIGHT.x},${FOUL_RIGHT.y}`}
             fill="none"
-            stroke="white" strokeWidth="0.4" opacity="0.3"
+            stroke="url(#arcGradient)" strokeWidth="0.5" opacity="0.7"
           />
 
-          {/* Base paths */}
+          {/* Base paths — teal lines */}
           <polygon
             points={`${HOME.x},${HOME.y} ${FIRST.x},${FIRST.y} ${SECOND.x},${SECOND.y} ${THIRD.x},${THIRD.y}`}
             fill="none"
-            stroke="white"
-            strokeWidth="0.4"
+            stroke="var(--teal)"
+            strokeWidth="0.5"
             opacity="0.5"
           />
 
-          {/* Pitcher's mound */}
-          <circle cx={MOUND.x} cy={MOUND.y} r="2" fill="#8B6B3D" opacity="0.5" />
+          {/* Pitcher's mound — circle outline */}
+          <circle cx={MOUND.x} cy={MOUND.y} r="2.5" fill="none" stroke="var(--teal)" strokeWidth="0.4" opacity="0.3" />
 
-          {/* Bases */}
-          <rect x={HOME.x - 1.5} y={HOME.y - 1.5} width="3" height="3" fill="white" transform={`rotate(45,${HOME.x},${HOME.y})`} />
-          <rect x={FIRST.x - 1.2} y={FIRST.y - 1.2} width="2.4" height="2.4" fill="white" transform={`rotate(45,${FIRST.x},${FIRST.y})`} />
-          <rect x={SECOND.x - 1.2} y={SECOND.y - 1.2} width="2.4" height="2.4" fill="white" transform={`rotate(45,${SECOND.x},${SECOND.y})`} />
-          <rect x={THIRD.x - 1.2} y={THIRD.y - 1.2} width="2.4" height="2.4" fill="white" transform={`rotate(45,${THIRD.x},${THIRD.y})`} />
+          {/* Bases — teal squares */}
+          <rect x={HOME.x - 1.8} y={HOME.y - 1.8} width="3.6" height="3.6" fill="var(--teal)" transform={`rotate(45,${HOME.x},${HOME.y})`} opacity="0.8" />
+          <rect x={FIRST.x - 1.4} y={FIRST.y - 1.4} width="2.8" height="2.8" fill="var(--teal)" transform={`rotate(45,${FIRST.x},${FIRST.y})`} opacity="0.8" />
+          <rect x={SECOND.x - 1.4} y={SECOND.y - 1.4} width="2.8" height="2.8" fill="var(--teal)" transform={`rotate(45,${SECOND.x},${SECOND.y})`} opacity="0.8" />
+          <rect x={THIRD.x - 1.4} y={THIRD.y - 1.4} width="2.8" height="2.8" fill="var(--teal)" transform={`rotate(45,${THIRD.x},${THIRD.y})`} opacity="0.8" />
         </svg>
 
         {/* Field position slots */}
