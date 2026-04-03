@@ -21,7 +21,7 @@ export default function Home() {
 
   const { players, updateBattingOrder } = usePlayers();
   const { games, currentGame, loading: gamesLoading, error: gameError, selectGame, createGame, toggleInningComplete } = useGame();
-  const { assignments, getInningAssignments, assignPlayer, unassignPlayer } = useLineup(currentGame?.id || null);
+  const { assignments, getInningAssignments, assignPlayer, unassignPlayer, swapPositions } = useLineup(currentGame?.id || null);
 
   const inningAssignments = getInningAssignments(currentInning);
   const assignedPlayerIds = new Set(inningAssignments.map(a => a.player_id));
@@ -60,6 +60,12 @@ export default function Home() {
     if (selectedPosition && currentGame) {
       await unassignPlayer(currentInning, selectedPosition);
       setSelectedPosition(null);
+    }
+  };
+
+  const handleSwapPositions = async (fromPosition: Position, toPosition: Position) => {
+    if (currentGame) {
+      await swapPositions(currentInning, fromPosition, toPosition);
     }
   };
 
@@ -129,6 +135,7 @@ export default function Home() {
                   assignments={inningAssignments}
                   players={players}
                   onPositionTap={handlePositionTap}
+                  onSwapPositions={handleSwapPositions}
                 />
               </div>
             </div>

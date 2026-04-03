@@ -101,5 +101,60 @@ export function useLineup(gameId: string | null) {
     }
   }, [gameId, assignments]);
 
-  return { assignments, loading, getInningAssignments, assignPlayer, unassignPlayer };
+  const swapPositions = useCallback(async (inning: number, fromPosition: Position, toPosition: Position) => {
+    if (!gameId || !isSupabaseConfigured) return;
+
+    const fromAssignment = assignments.find(
+      a => a.game_id === gameId && a.inning === inning && a.position === fromPosition
+    );
+    const toAssignment = assignments.find(
+      a => a.game_id === gameId && a.inning === inning && a.position === toPosition
+    );
+
+    if (!fromAssignment) return;
+
+    if (toAssignment) {
+      // Swap: update both assignments' player_ids
+      const [fromResult, toResult] = await Promise.all([
+        supabase
+          .from('lineup_assignments')
+          .update({ player_id: toAssignment.player_id })
+          .eq('id', fromAssignment.id)
+          .select('*, player:players(*)')
+          .single(),
+        supabase
+          .from('lineup_assignments')
+          .update({ player_id: fromAssignment.player_id })
+          .eq('id', toAssignment.id)
+          .select('*, player:players(*)')
+          .single(),
+      ]);
+
+      if (fromResult.error || toResult.error) {
+        console.error('Error swapping positions:', fromResult.error || toResult.error);
+      } else {
+        setAssignments(prev => prev.map(a => {
+          if (a.id === fromAssignment.id) return fromResult.data!;
+          if (a.id === toAssignment.id) return toResult.data!;
+          return a;
+        }));
+      }
+    } else {
+      // Move to empty position
+      const { data, error } = await supabase
+        .from('lineup_assignments')
+        .update({ position: toPosition })
+        .eq('id', fromAssignment.id)
+        .select('*, player:players(*)')
+        .single();
+
+      if (error) {
+        console.error('Error moving position:', error);
+      } else if (data) {
+        setAssignments(prev => prev.map(a => a.id === fromAssignment.id ? data : a));
+      }
+    }
+  }, [gameId, assignments]);
+
+  return { assignments, loading, getInningAssignments, assignPlayer, unassignPlayer, swapPositions };
 }
