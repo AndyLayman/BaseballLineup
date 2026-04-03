@@ -25,7 +25,14 @@ export default function PlayerPicker({
 }: PlayerPickerProps) {
   const [search, setSearch] = useState('');
 
-  const filtered = players.filter(p =>
+  const sorted = [...players].sort((a, b) => {
+    const aOrder = a.sort_order ?? Infinity;
+    const bOrder = b.sort_order ?? Infinity;
+    if (aOrder !== bOrder) return aOrder - bOrder;
+    return a.number - b.number;
+  });
+
+  const filtered = sorted.filter(p =>
     p.name.toLowerCase().includes(search.toLowerCase()) ||
     p.number.toString().includes(search)
   );
