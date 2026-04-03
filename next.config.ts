@@ -1,8 +1,10 @@
 import type { NextConfig } from "next";
 
+const isNetlify = process.env.NETLIFY === 'true';
+
 const nextConfig: NextConfig = {
   output: 'export',
-  basePath: '/BaseballLineup',
+  basePath: isNetlify ? '' : '/BaseballLineup',
   images: {
     unoptimized: true,
   },
