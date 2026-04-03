@@ -25,7 +25,19 @@ export default function PlayerPicker({
 }: PlayerPickerProps) {
   const [search, setSearch] = useState('');
 
-  const filtered = players.filter(p =>
+  const sorted = [...players].sort((a, b) => {
+    const aAssigned = assignedPlayerIds.has(a.id) && a.id !== currentPlayerId;
+    const bAssigned = assignedPlayerIds.has(b.id) && b.id !== currentPlayerId;
+    // Unassigned players first
+    if (aAssigned !== bAssigned) return aAssigned ? 1 : -1;
+    // Then by batting order
+    const aOrder = a.sort_order ?? Infinity;
+    const bOrder = b.sort_order ?? Infinity;
+    if (aOrder !== bOrder) return aOrder - bOrder;
+    return a.number - b.number;
+  });
+
+  const filtered = sorted.filter(p =>
     p.name.toLowerCase().includes(search.toLowerCase()) ||
     p.number.toString().includes(search)
   );
