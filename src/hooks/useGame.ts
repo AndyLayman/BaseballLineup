@@ -37,24 +37,6 @@ export function useGame() {
     };
 
     fetchGames();
-
-    // Poll for changes every 15 seconds
-    const interval = setInterval(async () => {
-      const { data } = await supabase
-        .from('games')
-        .select('*')
-        .order('date', { ascending: false });
-      if (data) {
-        setGames(data);
-        setCurrentGame(prev => {
-          if (!prev) return data[0] || null;
-          const updated = data.find(g => g.id === prev.id);
-          return updated || prev;
-        });
-      }
-    }, 15000);
-
-    return () => clearInterval(interval);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const selectGame = useCallback((gameId: string) => {

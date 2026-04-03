@@ -31,17 +31,6 @@ export function usePlayers() {
     };
 
     fetchPlayers();
-
-    // Poll for changes every 15 seconds
-    const interval = setInterval(async () => {
-      const { data } = await supabase
-        .from('players')
-        .select('*')
-        .order('number');
-      if (data) setPlayers(data);
-    }, 15000);
-
-    return () => clearInterval(interval);
   }, []);
 
   const updateBattingOrder = useCallback(async (orderedIds: number[], removedIds: number[]) => {

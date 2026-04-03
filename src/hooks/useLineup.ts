@@ -30,17 +30,6 @@ export function useLineup(gameId: string | null) {
     };
 
     fetchAssignments();
-
-    // Poll for changes every 15 seconds
-    const interval = setInterval(async () => {
-      const { data } = await supabase
-        .from('lineup_assignments')
-        .select('*, player:players(*)')
-        .eq('game_id', gameId);
-      if (data) setAssignments(data);
-    }, 15000);
-
-    return () => clearInterval(interval);
   }, [gameId]);
 
   const getInningAssignments = useCallback(
