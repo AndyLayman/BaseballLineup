@@ -26,19 +26,19 @@ export default function InningNav({
           <button
             key={inning}
             onClick={() => onInningChange(inning)}
-            className="w-10 h-10 rounded-md font-bold text-base flex flex-col items-center justify-center touch-manipulation transition-all relative"
+            className={`w-10 h-10 rounded-lg font-semibold text-base flex flex-col items-center justify-center touch-manipulation relative ${isActive ? 'btn-primary' : ''}`}
             style={
               isActive
-                ? { background: 'var(--accent)', color: 'var(--accent-on)' }
+                ? { boxShadow: 'var(--glow-accent)' }
                 : isCompleted
-                ? { background: 'var(--bg-deep)', color: 'var(--accent)', border: '1px solid var(--accent)' }
-                : { background: 'var(--bg-card)', color: 'var(--text-muted)', border: '1px solid var(--border-light)' }
+                ? { background: 'var(--bg-deep)', color: 'var(--teal)', border: '1px solid var(--teal)' }
+                : { background: 'var(--gray-800)', color: 'var(--text-muted)', border: '1px solid var(--border)' }
             }
           >
-            <span className="text-[10px] font-normal leading-none opacity-70">INN</span>
+            <span className="text-[10px] font-light leading-none opacity-70">INN</span>
             <span>{inning}</span>
             {isCompleted && (
-              <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full flex items-center justify-center text-[9px] leading-none" style={{ background: 'var(--bg-card)', color: 'var(--accent)', border: '1px solid var(--accent)' }}>&#10003;</span>
+              <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full flex items-center justify-center text-[9px] leading-none" style={{ background: 'var(--bg-card)', color: 'var(--teal)', border: '1px solid var(--teal)' }}>&#10003;</span>
             )}
           </button>
         );
@@ -48,12 +48,8 @@ export default function InningNav({
 
       <button
         onClick={onShowRecommendations}
-        className="h-10 px-3 rounded-md font-semibold text-sm flex items-center justify-center touch-manipulation transition-all"
-        style={
-          showRecommendations
-            ? { background: 'var(--accent)', color: 'var(--accent-on)' }
-            : { background: 'var(--bg-card)', color: 'var(--text-muted)', border: '1px solid var(--border-light)' }
-        }
+        className={`h-10 px-3 rounded-lg font-semibold text-sm flex items-center justify-center touch-manipulation ${showRecommendations ? 'btn-primary' : 'btn-secondary'}`}
+        style={showRecommendations ? { boxShadow: 'var(--glow-accent)' } : undefined}
       >
         Recs
       </button>

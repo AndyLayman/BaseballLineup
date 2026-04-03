@@ -135,14 +135,13 @@ export default function BattingOrder({ players, leadoffId, onSelectLeadoff, onUp
   return (
     <div className="p-3 flex flex-col w-full">
       <div className="flex items-center justify-between mb-2">
-        <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--accent)' }}>
+        <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--teal)' }}>
           Batting Order
         </p>
         {!reordering ? (
           <button
             onClick={startReordering}
-            className="text-[10px] font-semibold uppercase px-2 py-1 rounded-md touch-manipulation transition-all"
-            style={{ background: 'var(--bg-card)', color: 'var(--text-muted)', border: '1px solid var(--border-light)' }}
+            className="text-[10px] font-semibold uppercase px-2 py-1 rounded-lg touch-manipulation btn-secondary"
           >
             Set Order
           </button>
@@ -150,15 +149,13 @@ export default function BattingOrder({ players, leadoffId, onSelectLeadoff, onUp
           <div className="flex gap-1.5">
             <button
               onClick={saveOrder}
-              className="text-[10px] font-semibold uppercase px-2 py-1 rounded-md touch-manipulation transition-all"
-              style={{ background: 'var(--accent)', color: 'var(--accent-on)' }}
+              className="text-[10px] font-semibold uppercase px-2 py-1 rounded-lg touch-manipulation btn-primary"
             >
               Save
             </button>
             <button
               onClick={cancelReorder}
-              className="text-[10px] font-semibold uppercase px-2 py-1 rounded-md touch-manipulation transition-all"
-              style={{ background: 'var(--bg-card)', color: 'var(--text-muted)', border: '1px solid var(--border-light)' }}
+              className="text-[10px] font-semibold uppercase px-2 py-1 rounded-lg touch-manipulation btn-secondary"
             >
               Cancel
             </button>
@@ -189,14 +186,14 @@ export default function BattingOrder({ players, leadoffId, onSelectLeadoff, onUp
                 className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md touch-manipulation transition-all text-left ${reordering ? 'cursor-grab active:cursor-grabbing' : ''}`}
                 style={{
                   background: isDragging ? 'var(--bg-card)' : 'var(--bg-deep)',
-                  ...(isDragging ? { border: '1px solid var(--accent)', boxShadow: '0 4px 12px rgba(0,0,0,0.4)' } : {}),
-                  ...(isLeadoff && !reordering ? { outline: '2px solid var(--accent)', outlineOffset: '-2px' } : {}),
+                  ...(isDragging ? { border: '1px solid var(--teal)', boxShadow: 'var(--glow-teal)' } : {}),
+                  ...(isLeadoff && !reordering ? { outline: '2px solid var(--teal)', outlineOffset: '-2px' } : {}),
                 }}
               >
                 {reordering && (
                   <span className="text-sm shrink-0" style={{ color: 'var(--text-muted)' }}>&#9776;</span>
                 )}
-                <span className="font-bold text-sm w-5 text-center shrink-0" style={{ color: 'var(--accent)' }}>
+                <span className="font-bold text-sm w-5 text-center shrink-0" style={{ color: 'var(--teal)' }}>
                   {i + 1}
                 </span>
                 {getPhotoUrl(player.id) ? (
@@ -204,11 +201,11 @@ export default function BattingOrder({ players, leadoffId, onSelectLeadoff, onUp
                     src={getPhotoUrl(player.id)!}
                     alt={player.name}
                     className="w-8 h-8 rounded-full object-cover shrink-0"
-                    style={{ border: '2px solid var(--accent)' }}
+                    style={{ border: '2px solid var(--teal)' }}
                   />
                 ) : (
                   <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ background: 'var(--border-light)' }}>
-                    <span className="font-bold text-xs" style={{ color: 'var(--accent)' }}>
+                    <span className="font-bold text-xs" style={{ color: 'var(--teal)' }}>
                       {player.name.charAt(0)}
                     </span>
                   </div>
@@ -223,14 +220,14 @@ export default function BattingOrder({ players, leadoffId, onSelectLeadoff, onUp
                   <span
                     onClick={(e) => { e.stopPropagation(); removePlayer(player); }}
                     className="w-6 h-6 rounded flex items-center justify-center shrink-0 text-xs touch-manipulation"
-                    style={{ background: 'rgba(239,68,68,0.2)', color: '#f87171' }}
+                    style={{ background: 'rgba(255,97,97,0.15)', color: 'var(--danger)' }}
                   >
                     &times;
                   </span>
                 )}
               </button>
               {isLeadoff && !reordering && (
-                <span className="absolute -right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold uppercase px-2 py-0.5 rounded-full whitespace-nowrap z-10" style={{ background: 'var(--accent)', color: 'var(--accent-on)' }}>
+                <span className="absolute -right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold uppercase px-2 py-0.5 rounded-full whitespace-nowrap z-10" style={{ background: 'var(--teal)', color: 'var(--black)' }}>
                   Lead Off
                 </span>
               )}

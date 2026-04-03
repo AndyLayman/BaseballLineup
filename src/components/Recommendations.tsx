@@ -32,7 +32,6 @@ export default function Recommendations({ players, assignments, numInnings, comp
       const pos = a.position;
       const existing = positionStatuses.get(pos);
       const isCompleted = completedSet.has(a.inning);
-      // If already marked completed, keep it; otherwise set based on this assignment
       if (existing !== 'completed') {
         positionStatuses.set(pos, isCompleted ? 'completed' : 'scheduled');
       }
@@ -47,7 +46,6 @@ export default function Recommendations({ players, assignments, numInnings, comp
     };
   });
 
-  // Sort by most unplayed positions first
   recs.sort((a, b) => b.unplayedPositions.length - a.unplayedPositions.length);
 
   const positionLabel = (p: Position) => POSITIONS.find(pos => pos.key === p)?.label || p;
@@ -55,64 +53,63 @@ export default function Recommendations({ players, assignments, numInnings, comp
   return (
     <div className="flex-1 overflow-y-auto p-4">
       <div className="flex items-center justify-between mb-1">
-        <h2 className="text-xl font-bold" style={{ color: 'var(--accent)' }}>Position Recommendations</h2>
+        <h2 className="text-xl font-semibold" style={{ color: 'var(--teal)' }}>Position Recommendations</h2>
         <button
           onClick={onClose}
-          className="w-10 h-10 rounded-md text-lg flex items-center justify-center touch-manipulation transition-all"
-          style={{ background: 'var(--bg-card)', color: 'var(--text-muted)', border: '1px solid var(--border-light)' }}
+          className="w-10 h-10 rounded-lg text-lg flex items-center justify-center touch-manipulation btn-secondary"
         >
           &times;
         </button>
       </div>
-      <p className="text-sm mb-3" style={{ color: 'var(--text-sub)' }}>
+      <p className="text-sm font-light mb-3" style={{ color: 'var(--gray-200)' }}>
         Positions each player hasn&apos;t played yet this game ({numInnings} innings)
       </p>
 
       {/* Key */}
       <div className="flex flex-wrap gap-3 mb-4 text-xs font-medium">
         <div className="flex items-center gap-1.5">
-          <span className="w-5 h-5 rounded flex items-center justify-center" style={{ background: 'rgba(34,197,94,0.15)', color: '#4ade80' }}>P</span>
-          <span style={{ color: 'var(--text-sub)' }}>Played</span>
+          <span className="w-5 h-5 rounded flex items-center justify-center" style={{ background: 'rgba(131,221,104,0.15)', color: 'var(--green)' }}>P</span>
+          <span style={{ color: 'var(--gray-200)' }}>Played</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="w-5 h-5 rounded flex items-center justify-center" style={{ background: 'rgba(96,165,250,0.15)', color: '#60a5fa' }}>P</span>
-          <span style={{ color: 'var(--text-sub)' }}>Scheduled</span>
+          <span className="w-5 h-5 rounded flex items-center justify-center" style={{ background: 'rgba(8,221,200,0.15)', color: 'var(--teal)' }}>P</span>
+          <span style={{ color: 'var(--gray-200)' }}>Scheduled</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="w-5 h-5 rounded flex items-center justify-center" style={{ background: 'rgba(255,196,37,0.1)', color: 'var(--accent)', outline: '1px solid rgba(255,196,37,0.3)', outlineOffset: '-1px' }}>P</span>
-          <span style={{ color: 'var(--text-sub)' }}>Unplayed</span>
+          <span className="w-5 h-5 rounded flex items-center justify-center" style={{ background: 'rgba(207,89,243,0.1)', color: 'var(--purple)', outline: '1px solid rgba(207,89,243,0.3)', outlineOffset: '-1px' }}>P</span>
+          <span style={{ color: 'var(--gray-200)' }}>Unplayed</span>
         </div>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-3 stagger-enter">
         {recs.map(({ player, positionStatuses, unplayedPositions, innings }) => (
-          <div key={player.id} className="rounded-[10px] p-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+          <div key={player.id} className="rounded-lg p-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
             <div className="flex items-center gap-3 mb-3">
               {getPhotoUrl(player.id) ? (
                 <img
                   src={getPhotoUrl(player.id)!}
                   alt={player.name}
                   className="w-10 h-10 rounded-full object-cover"
-                  style={{ border: '2px solid var(--accent)' }}
+                  style={{ border: '2px solid var(--teal)' }}
                 />
               ) : (
-                <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'var(--border-light)' }}>
-                  <span className="font-bold" style={{ color: 'var(--accent)' }}>
+                <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'var(--gray-800)' }}>
+                  <span className="font-semibold" style={{ color: 'var(--teal)' }}>
                     {player.name.charAt(0)}
                   </span>
                 </div>
               )}
               <div className="flex-1">
-                <div className="font-semibold" style={{ color: 'var(--text)' }}>{player.name} #{player.number}</div>
-                <div className="text-xs" style={{ color: 'var(--text-sub)' }}>
+                <div className="font-medium" style={{ color: 'var(--text)' }}>{player.name} #{player.number}</div>
+                <div className="text-xs font-light" style={{ color: 'var(--gray-200)' }}>
                   Played {innings} of {numInnings} innings &middot; {positionStatuses.size} of {ALL_POSITIONS.length} positions
                 </div>
               </div>
               {unplayedPositions.length === 0 && (() => {
                 const allCompleted = ALL_POSITIONS.every(p => positionStatuses.get(p) === 'completed');
                 return allCompleted
-                  ? <span className="text-green-400 text-sm font-medium">All covered!</span>
-                  : <span className="text-sm font-medium" style={{ color: '#60a5fa' }}>All scheduled</span>;
+                  ? <span className="text-sm font-medium" style={{ color: 'var(--green)' }}>All covered!</span>
+                  : <span className="text-sm font-medium" style={{ color: 'var(--teal)' }}>All scheduled</span>;
               })()}
             </div>
 
@@ -121,10 +118,10 @@ export default function Recommendations({ players, assignments, numInnings, comp
               {ALL_POSITIONS.map(pos => {
                 const status = positionStatuses.get(pos);
                 const styleMap: Record<string, React.CSSProperties> = {
-                  completed: { background: 'rgba(34,197,94,0.15)', color: '#4ade80' },
-                  scheduled: { background: 'rgba(96,165,250,0.15)', color: '#60a5fa' },
+                  completed: { background: 'rgba(131,221,104,0.15)', color: 'var(--green)' },
+                  scheduled: { background: 'rgba(8,221,200,0.15)', color: 'var(--teal)' },
                 };
-                const defaultStyle: React.CSSProperties = { background: 'rgba(255,196,37,0.1)', color: 'var(--accent)', outline: '1px solid rgba(255,196,37,0.3)', outlineOffset: '-1px' };
+                const defaultStyle: React.CSSProperties = { background: 'rgba(207,89,243,0.1)', color: 'var(--purple)', outline: '1px solid rgba(207,89,243,0.3)', outlineOffset: '-1px' };
                 return (
                   <span
                     key={pos}
@@ -139,7 +136,7 @@ export default function Recommendations({ players, assignments, numInnings, comp
             </div>
 
             {unplayedPositions.length > 0 && (
-              <p className="text-xs mt-2" style={{ color: 'var(--text-muted)' }}>
+              <p className="text-xs font-light mt-2" style={{ color: 'var(--text-muted)' }}>
                 Try: {unplayedPositions.map(positionLabel).join(', ')}
               </p>
             )}
@@ -148,7 +145,7 @@ export default function Recommendations({ players, assignments, numInnings, comp
       </div>
 
       {recs.length === 0 && (
-        <p className="text-center py-12" style={{ color: 'var(--text-muted)' }}>No players on the roster yet.</p>
+        <p className="text-center py-12 font-light" style={{ color: 'var(--text-muted)' }}>No players on the roster yet.</p>
       )}
     </div>
   );

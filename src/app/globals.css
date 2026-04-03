@@ -1,41 +1,126 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
 
 :root {
-  --bg: #2F241D;
-  --bg-deep: #1E1610;
-  --bg-card: #3A2C22;
-  --bg-input: #1E1610;
-  --border: #473729;
-  --border-light: #5C4A3A;
-  --text: #F5E6CC;
-  --text-muted: #8B7355;
-  --text-dim: #6B5744;
-  --text-sub: #A89279;
-  --accent: #FFC425;
-  --accent-hover: #E5B020;
-  --accent-on: #2F241D;
+  /* Neutrals */
+  --black: #0A0A0A;
+  --gray-950: #141414;
+  --gray-900: #1A1A1A;
+  --gray-800: #2A2A2A;
+  --gray-700: #3A3A3A;
+  --gray-600: #5A5A5A;
+  --gray-400: #8A8A8A;
+  --gray-200: #B0B0B0;
+  --white: #F7F7F7;
+
+  /* Accents */
+  --teal: #08DDC8;
+  --green: #83DD68;
+  --purple: #CF59F3;
+  --accent-gradient: conic-gradient(
+    from 180deg at 50% -18.18%,
+    #08DDC8 0deg, #83DD68 128.08deg,
+    #CF59F3 264.81deg, #08DDC8 360deg
+  );
+
+  /* Semantic */
+  --bg: var(--black);
+  --bg-deep: var(--gray-950);
+  --bg-card: var(--gray-900);
+  --bg-input: var(--gray-800);
+  --text: var(--white);
+  --text-muted: var(--gray-400);
+  --text-dim: var(--gray-600);
+  --text-sub: var(--gray-200);
+  --border: var(--gray-700);
+  --border-light: var(--gray-600);
+  --hover: var(--gray-800);
+  --accent: var(--teal);
+  --accent-hover: #06C4B2;
+  --accent-on: var(--black);
+
+  /* Status */
+  --danger: #FF6161;
+
+  /* Glows */
+  --glow-teal: 0 0 12px rgba(8, 221, 200, 0.4);
+  --glow-green: 0 0 12px rgba(131, 221, 104, 0.4);
+  --glow-purple: 0 0 12px rgba(207, 89, 243, 0.4);
+  --glow-accent: 0 0 20px rgba(8, 221, 200, 0.3), 0 0 40px rgba(207, 89, 243, 0.15);
+
+  /* Motion */
+  --duration-fast: 120ms;
+  --duration-base: 250ms;
+  --duration-slow: 500ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-weight: 300;
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
-  transition: background 0.3s, color 0.3s;
 }
 
 @keyframes slide-up {
-  from {
-    transform: translateY(100%);
-  }
-  to {
-    transform: translateY(0);
-  }
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
 }
 
 .animate-slide-up {
-  animation: slide-up 0.3s ease-out;
+  animation: slide-up var(--duration-base) var(--ease-out);
+}
+
+@keyframes fadeUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.stagger-enter > * {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: fadeUp var(--duration-base) var(--ease-out) forwards;
+}
+.stagger-enter > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-enter > *:nth-child(2) { animation-delay: 50ms; }
+.stagger-enter > *:nth-child(3) { animation-delay: 100ms; }
+.stagger-enter > *:nth-child(4) { animation-delay: 150ms; }
+.stagger-enter > *:nth-child(5) { animation-delay: 200ms; }
+.stagger-enter > *:nth-child(6) { animation-delay: 250ms; }
+.stagger-enter > *:nth-child(7) { animation-delay: 300ms; }
+.stagger-enter > *:nth-child(8) { animation-delay: 350ms; }
+.stagger-enter > *:nth-child(9) { animation-delay: 400ms; }
+.stagger-enter > *:nth-child(10) { animation-delay: 450ms; }
+.stagger-enter > *:nth-child(11) { animation-delay: 500ms; }
+.stagger-enter > *:nth-child(12) { animation-delay: 550ms; }
+.stagger-enter > *:nth-child(13) { animation-delay: 600ms; }
+.stagger-enter > *:nth-child(14) { animation-delay: 650ms; }
+
+.btn-primary {
+  background: var(--accent-gradient);
+  color: var(--black);
+  font-weight: 600;
+  transition: box-shadow var(--duration-fast) var(--ease-in-out),
+              transform var(--duration-fast) var(--ease-in-out);
+}
+.btn-primary:hover {
+  box-shadow: var(--glow-accent);
+}
+.btn-primary:active {
+  transform: scale(0.97);
+}
+
+.btn-secondary {
+  background: var(--gray-800);
+  color: var(--white);
+  border: 1px solid var(--gray-700);
+  transition: border-color var(--duration-fast) var(--ease-in-out);
+}
+.btn-secondary:hover {
+  border-color: var(--gray-600);
 }
 
 @media (min-width: 768px) {
