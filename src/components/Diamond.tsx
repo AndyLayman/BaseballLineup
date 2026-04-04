@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { Player, Position, LineupAssignment } from '@/lib/types';
 import { FIELD_POSITIONS, BENCH_POSITIONS } from '@/lib/positions';
+import { getPhotoUrl } from '@/lib/supabase';
 import PositionSlot from './PositionSlot';
 
 interface DiamondProps {
@@ -27,6 +28,7 @@ const DRAG_THRESHOLD = 8;
 export default function Diamond({ assignments, players, onPositionTap, onSwapPositions }: DiamondProps) {
   const [dragFrom, setDragFrom] = useState<Position | null>(null);
   const [dropTarget, setDropTarget] = useState<Position | null>(null);
+  const [ghostPos, setGhostPos] = useState<{ x: number; y: number } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
   const touchStartPos = useRef<{ x: number; y: number } | null>(null);
@@ -37,8 +39,18 @@ export default function Diamond({ assignments, players, onPositionTap, onSwapPos
   useEffect(() => {
     if (!dragFrom) return;
     const prevent = (e: TouchEvent) => e.preventDefault();
+    document.body.style.overflow = 'hidden';
+    document.body.style.touchAction = 'none';
+    document.documentElement.style.overflow = 'hidden';
+    document.documentElement.style.touchAction = 'none';
     document.addEventListener('touchmove', prevent, { passive: false });
-    return () => document.removeEventListener('touchmove', prevent);
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.touchAction = '';
+      document.documentElement.style.overflow = '';
+      document.documentElement.style.touchAction = '';
+      document.removeEventListener('touchmove', prevent);
+    };
   }, [dragFrom]);
 
   const getPlayerForPosition = (position: Position): Player | null => {
@@ -93,12 +105,14 @@ export default function Diamond({ assignments, players, onPositionTap, onSwapPos
       if (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD) {
         isDragging.current = true;
         setDragFrom(touchStartPosition.current);
+        setGhostPos({ x: touch.clientX, y: touch.clientY });
         if (navigator.vibrate) navigator.vibrate(30);
       }
       return;
     }
 
     e.preventDefault();
+    setGhostPos({ x: touch.clientX, y: touch.clientY });
     const target = findPositionAtPoint(touch.clientX, touch.clientY);
     setDropTarget(target && target !== dragFrom ? target : null);
   };
@@ -115,12 +129,16 @@ export default function Diamond({ assignments, players, onPositionTap, onSwapPos
     touchStartPosition.current = null;
     setDragFrom(null);
     setDropTarget(null);
+    setGhostPos(null);
   };
+
+  const dragPlayer = dragFrom ? getPlayerForPosition(dragFrom) : null;
 
   const renderPositionSlot = (pos: { key: Position; label: string }, small?: boolean) => (
     <div
       key={pos.key}
       ref={setPositionRef(pos.key)}
+      style={{ touchAction: getPlayerForPosition(pos.key) ? 'none' : undefined }}
       onTouchStart={handleTouchStart(pos.key)}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd(pos.key)}
@@ -140,7 +158,39 @@ export default function Diamond({ assignments, players, onPositionTap, onSwapPos
   );
 
   return (
-    <div ref={containerRef} className="w-full max-w-3xl md:max-w-none mx-auto flex flex-col gap-3">
+    <div ref={containerRef} className="w-full max-w-3xl md:max-w-none mx-auto flex flex-col gap-3 relative">
+      {/* Floating ghost that follows finger */}
+      {dragFrom && ghostPos && dragPlayer && (
+        <div
+          className="fixed z-50 pointer-events-none"
+          style={{
+            left: ghostPos.x,
+            top: ghostPos.y,
+            transform: 'translate(-50%, -50%)',
+          }}
+        >
+          <div className="relative" style={{ filter: 'drop-shadow(0 0 12px var(--teal))' }}>
+            {getPhotoUrl(dragPlayer.id) ? (
+              <img
+                src={getPhotoUrl(dragPlayer.id)!}
+                alt={dragPlayer.name}
+                className="w-16 h-16 rounded-full object-cover"
+                style={{ border: '3px solid var(--teal)', opacity: 0.9 }}
+              />
+            ) : (
+              <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: 'var(--gray-800)', border: '3px solid var(--teal)', opacity: 0.9 }}>
+                <span className="text-xl font-semibold" style={{ color: 'var(--text)' }}>
+                  {dragPlayer.name.charAt(0)}
+                </span>
+              </div>
+            )}
+            <span className="absolute -top-1 -right-1 text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center" style={{ background: 'var(--teal)', color: 'var(--black)' }}>
+              {dragPlayer.number}
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Drag hint */}
       {dragFrom && (
         <div className="absolute top-2 left-0 right-0 z-30 flex justify-center pointer-events-none">
