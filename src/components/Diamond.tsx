@@ -38,20 +38,18 @@ export default function Diamond({ assignments, players, onPositionTap, onSwapPos
   // Lock body scroll when dragging
   useEffect(() => {
     if (!dragFrom) return;
-
-    const preventScroll = (e: TouchEvent) => {
-      e.preventDefault();
-    };
-
-    // Prevent all scroll while dragging
+    const prevent = (e: TouchEvent) => e.preventDefault();
     document.body.style.overflow = 'hidden';
     document.body.style.touchAction = 'none';
-    document.addEventListener('touchmove', preventScroll, { passive: false });
-
+    document.documentElement.style.overflow = 'hidden';
+    document.documentElement.style.touchAction = 'none';
+    document.addEventListener('touchmove', prevent, { passive: false });
     return () => {
       document.body.style.overflow = '';
       document.body.style.touchAction = '';
-      document.removeEventListener('touchmove', preventScroll);
+      document.documentElement.style.overflow = '';
+      document.documentElement.style.touchAction = '';
+      document.removeEventListener('touchmove', prevent);
     };
   }, [dragFrom]);
 
