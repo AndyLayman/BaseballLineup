@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { Player, Position, LineupAssignment } from '@/lib/types';
 import { FIELD_POSITIONS, BENCH_POSITIONS } from '@/lib/positions';
 import PositionSlot from './PositionSlot';
@@ -22,15 +22,24 @@ const MOUND = { x: 50, y: 64 };
 const FOUL_LEFT = { x: 5, y: 35 };
 const FOUL_RIGHT = { x: 95, y: 35 };
 
-const LONG_PRESS_MS = 400;
+const DRAG_THRESHOLD = 8;
 
 export default function Diamond({ assignments, players, onPositionTap, onSwapPositions }: DiamondProps) {
   const [dragFrom, setDragFrom] = useState<Position | null>(null);
   const [dropTarget, setDropTarget] = useState<Position | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isDragging = useRef(false);
+  const touchStartPos = useRef<{ x: number; y: number } | null>(null);
+  const touchStartPosition = useRef<Position | null>(null);
   const positionRefs = useRef<Map<Position, HTMLDivElement>>(new Map());
+
+  // Lock body scroll when dragging
+  useEffect(() => {
+    if (!dragFrom) return;
+    const prevent = (e: TouchEvent) => e.preventDefault();
+    document.addEventListener('touchmove', prevent, { passive: false });
+    return () => document.removeEventListener('touchmove', prevent);
+  }, [dragFrom]);
 
   const getPlayerForPosition = (position: Position): Player | null => {
     const assignment = assignments.find(a => a.position === position);
@@ -68,36 +77,26 @@ export default function Diamond({ assignments, players, onPositionTap, onSwapPos
     if (!hasPlayer) return;
 
     const touch = e.touches[0];
-    const startX = touch.clientX;
-    const startY = touch.clientY;
-
-    longPressTimer.current = setTimeout(() => {
-      isDragging.current = true;
-      setDragFrom(position);
-      if (navigator.vibrate) navigator.vibrate(30);
-    }, LONG_PRESS_MS);
-
-    (e.currentTarget as HTMLElement).dataset.startX = String(startX);
-    (e.currentTarget as HTMLElement).dataset.startY = String(startY);
+    touchStartPos.current = { x: touch.clientX, y: touch.clientY };
+    touchStartPosition.current = position;
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    const touch = e.touches[0];
+    if (!touchStartPos.current || !touchStartPosition.current) return;
 
-    if (!isDragging.current && longPressTimer.current) {
-      const el = e.currentTarget as HTMLElement;
-      const startX = parseFloat(el.dataset.startX || '0');
-      const startY = parseFloat(el.dataset.startY || '0');
-      const dx = touch.clientX - startX;
-      const dy = touch.clientY - startY;
-      if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
-        clearTimeout(longPressTimer.current);
-        longPressTimer.current = null;
+    const touch = e.touches[0];
+    const dx = touch.clientX - touchStartPos.current.x;
+    const dy = touch.clientY - touchStartPos.current.y;
+
+    // Start drag once past threshold
+    if (!isDragging.current) {
+      if (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD) {
+        isDragging.current = true;
+        setDragFrom(touchStartPosition.current);
+        if (navigator.vibrate) navigator.vibrate(30);
       }
       return;
     }
-
-    if (!isDragging.current) return;
 
     e.preventDefault();
     const target = findPositionAtPoint(touch.clientX, touch.clientY);
@@ -105,11 +104,6 @@ export default function Diamond({ assignments, players, onPositionTap, onSwapPos
   };
 
   const handleTouchEnd = (position: Position) => () => {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current);
-      longPressTimer.current = null;
-    }
-
     if (isDragging.current && dragFrom && dropTarget && onSwapPositions) {
       onSwapPositions(dragFrom, dropTarget);
     } else if (!isDragging.current) {
@@ -117,6 +111,8 @@ export default function Diamond({ assignments, players, onPositionTap, onSwapPos
     }
 
     isDragging.current = false;
+    touchStartPos.current = null;
+    touchStartPosition.current = null;
     setDragFrom(null);
     setDropTarget(null);
   };
