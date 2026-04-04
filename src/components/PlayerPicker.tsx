@@ -72,7 +72,7 @@ export default function PlayerPicker({
             onChange={e => setSearch(e.target.value)}
             className="w-full h-11 px-4 rounded-lg outline-none font-light"
             style={{ background: 'var(--bg-input)', color: 'var(--text)', border: '1px solid var(--border)' }}
-            autoFocus
+            autoFocus={false}
           />
         </div>
 
