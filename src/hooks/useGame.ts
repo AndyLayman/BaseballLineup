@@ -30,7 +30,14 @@ export function useGame() {
       } else {
         setGames(data || []);
         if (data && data.length > 0 && !currentGame) {
-          setCurrentGame(data[0]);
+          // Default to the game closest to today
+          const today = new Date().toISOString().split('T')[0];
+          const closest = data.reduce((best, game) => {
+            const bestDiff = Math.abs(new Date(best.date).getTime() - new Date(today).getTime());
+            const gameDiff = Math.abs(new Date(game.date).getTime() - new Date(today).getTime());
+            return gameDiff < bestDiff ? game : best;
+          });
+          setCurrentGame(closest);
         }
       }
       setLoading(false);
