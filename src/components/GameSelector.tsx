@@ -198,7 +198,7 @@ export default function GameSelector({
               onClick={() => setShowNew(true)}
               className="h-10 px-4 rounded-lg text-sm touch-manipulation whitespace-nowrap btn-primary"
             >
-              + New Game
+              + Game
             </button>
           </>
         )}
