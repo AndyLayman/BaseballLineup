@@ -138,7 +138,7 @@ export default function GameSelector({
 
                 {showDropdown && (
                   <div
-                    className="absolute right-0 top-full mt-1 z-50 min-w-[280px] rounded-lg overflow-hidden py-1"
+                    className="fixed left-2 right-2 md:absolute md:left-auto md:right-0 md:w-auto top-auto mt-1 z-50 min-w-[280px] rounded-lg overflow-hidden py-1 max-h-[60vh] overflow-y-auto"
                     style={{
                       background: 'var(--gray-900)',
                       border: '1px solid var(--border)',
