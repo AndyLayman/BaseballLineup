@@ -21,7 +21,7 @@ export default function Home() {
 
   const { players, updateBattingOrder } = usePlayers();
   const { games, currentGame, loading: gamesLoading, error: gameError, selectGame, createGame, toggleInningComplete } = useGame();
-  const { assignments, getInningAssignments, assignPlayer, unassignPlayer, swapPositions } = useLineup(currentGame?.id || null);
+  const { assignments, getInningAssignments, assignPlayer, unassignPlayer, swapPositions, copyFromInning, undo, canUndo } = useLineup(currentGame?.id || null);
 
   const inningAssignments = getInningAssignments(currentInning);
   const assignedPlayerIds = new Set(inningAssignments.map(a => a.player_id));
@@ -66,6 +66,12 @@ export default function Home() {
   const handleSwapPositions = async (fromPosition: Position, toPosition: Position) => {
     if (currentGame) {
       await swapPositions(currentInning, fromPosition, toPosition);
+    }
+  };
+
+  const handleCopyPrevious = async () => {
+    if (currentGame && currentInning > 1) {
+      await copyFromInning(currentInning - 1, currentInning);
     }
   };
 
@@ -119,7 +125,7 @@ export default function Home() {
         ) : (
           <div className="flex-1 flex items-start md:items-stretch min-h-0">
             <div className="flex-1 flex flex-col items-center px-4 min-w-0 relative md:justify-center">
-              <div className="flex justify-center z-20 py-2 md:absolute md:top-2 md:left-0 md:right-0 md:py-0">
+              <div className="flex flex-col items-center z-20 py-2 md:absolute md:top-2 md:left-0 md:right-0 md:py-0">
                 <InningNav
                   currentInning={currentInning}
                   numInnings={currentGame.num_innings}
@@ -129,6 +135,24 @@ export default function Home() {
                   onShowRecommendations={() => setShowRecommendations(!showRecommendations)}
                   showRecommendations={showRecommendations}
                 />
+                <div className="flex items-center gap-2 mt-1.5">
+                  {currentInning > 1 && (
+                    <button
+                      onClick={handleCopyPrevious}
+                      className="h-7 px-3 rounded-md text-xs font-medium touch-manipulation btn-secondary"
+                    >
+                      Copy Inning {currentInning - 1}
+                    </button>
+                  )}
+                  {canUndo && (
+                    <button
+                      onClick={undo}
+                      className="h-7 px-3 rounded-md text-xs font-medium touch-manipulation btn-secondary"
+                    >
+                      Undo
+                    </button>
+                  )}
+                </div>
               </div>
               <div className="w-full max-w-4xl md:max-w-none flex items-start md:items-center md:justify-center md:flex-1 diamond-container">
                 <Diamond
