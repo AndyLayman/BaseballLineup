@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Game } from '@/lib/types';
 
 interface GameSelectorProps {
@@ -11,6 +11,11 @@ interface GameSelectorProps {
   loading: boolean;
 }
 
+function formatDate(dateStr: string): string {
+  const d = new Date(dateStr + 'T12:00:00');
+  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
 export default function GameSelector({
   games,
   currentGame,
@@ -19,8 +24,26 @@ export default function GameSelector({
   loading,
 }: GameSelectorProps) {
   const [showNew, setShowNew] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
   const [opponent, setOpponent] = useState('');
   const [gameDate, setGameDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    if (!showDropdown) return;
+    const handleClick = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    document.addEventListener('touchstart', handleClick as EventListener);
+    return () => {
+      document.removeEventListener('mousedown', handleClick);
+      document.removeEventListener('touchstart', handleClick as EventListener);
+    };
+  }, [showDropdown]);
 
   const handleCreate = () => {
     if (opponent.trim() && gameDate) {
@@ -29,6 +52,11 @@ export default function GameSelector({
       setGameDate(new Date().toISOString().split('T')[0]);
       setShowNew(false);
     }
+  };
+
+  const handleSelect = (gameId: string) => {
+    onSelectGame(gameId);
+    setShowDropdown(false);
   };
 
   return (
@@ -85,19 +113,86 @@ export default function GameSelector({
         ) : (
           <>
             {games.length > 0 && (
-              <select
-                value={currentGame?.id || ''}
-                onChange={e => onSelectGame(e.target.value)}
-                className="h-10 px-3 rounded-lg text-sm outline-none appearance-none cursor-pointer"
-                style={{ background: 'var(--bg-input)', color: 'var(--text)', border: '1px solid var(--border)' }}
-              >
-                <option value="" disabled>Select game...</option>
-                {games.map(g => (
-                  <option key={g.id} value={g.id}>
-                    {g.date} vs {g.opponent || 'TBD'}
-                  </option>
-                ))}
-              </select>
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setShowDropdown(!showDropdown)}
+                  className="h-10 px-3 pr-8 rounded-lg text-sm cursor-pointer flex items-center gap-2 touch-manipulation"
+                  style={{ background: 'var(--bg-input)', color: 'var(--text)', border: '1px solid var(--border)' }}
+                >
+                  {currentGame ? (
+                    <>
+                      <span className="font-medium">{formatDate(currentGame.date)}</span>
+                      <span style={{ color: 'var(--text-muted)' }}>vs</span>
+                      <span>{currentGame.opponent || 'TBD'}</span>
+                    </>
+                  ) : (
+                    <span style={{ color: 'var(--text-muted)' }}>Select game...</span>
+                  )}
+                  <svg
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
+                    width="12" height="12" viewBox="0 0 12 12" fill="none"
+                  >
+                    <path d="M3 4.5L6 7.5L9 4.5" stroke="var(--text-muted)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+
+                {showDropdown && (
+                  <div
+                    className="absolute right-0 top-full mt-1 z-50 min-w-[280px] rounded-lg overflow-hidden py-1"
+                    style={{
+                      background: 'var(--gray-900)',
+                      border: '1px solid var(--border)',
+                      boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+                    }}
+                  >
+                    {games.map(g => {
+                      const isActive = g.id === currentGame?.id;
+                      const today = new Date().toISOString().split('T')[0];
+                      const isPast = g.date < today;
+
+                      return (
+                        <button
+                          key={g.id}
+                          onClick={() => handleSelect(g.id)}
+                          className="w-full flex items-center gap-3 px-3 py-2.5 text-left touch-manipulation"
+                          style={{
+                            background: isActive ? 'rgba(8,221,200,0.1)' : 'transparent',
+                            borderLeft: isActive ? '3px solid var(--teal)' : '3px solid transparent',
+                            transition: 'background 0.15s',
+                          }}
+                          onMouseEnter={e => {
+                            if (!isActive) (e.currentTarget as HTMLElement).style.background = 'var(--gray-800)';
+                          }}
+                          onMouseLeave={e => {
+                            if (!isActive) (e.currentTarget as HTMLElement).style.background = 'transparent';
+                          }}
+                        >
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-medium" style={{ color: isActive ? 'var(--teal)' : 'var(--text)' }}>
+                                {formatDate(g.date)}
+                              </span>
+                              {g.date === today && (
+                                <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium" style={{ background: 'rgba(8,221,200,0.15)', color: 'var(--teal)' }}>
+                                  TODAY
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-xs" style={{ color: isPast ? 'var(--text-dim)' : 'var(--text-muted)' }}>
+                              vs {g.opponent || 'TBD'}
+                            </span>
+                          </div>
+                          {isActive && (
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                              <path d="M3 7L6 10L11 4" stroke="var(--teal)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             )}
             <button
               onClick={() => setShowNew(true)}
