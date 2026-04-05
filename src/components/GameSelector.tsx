@@ -145,7 +145,12 @@ export default function GameSelector({
                       boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
                     }}
                   >
-                    {games.map(g => {
+                    {[...games].sort((a, b) => {
+                      const today = new Date().toISOString().split('T')[0];
+                      const aDiff = Math.abs(new Date(a.date).getTime() - new Date(today).getTime());
+                      const bDiff = Math.abs(new Date(b.date).getTime() - new Date(today).getTime());
+                      return aDiff - bDiff;
+                    }).map(g => {
                       const isActive = g.id === currentGame?.id;
                       const today = new Date().toISOString().split('T')[0];
                       const isPast = g.date < today;
