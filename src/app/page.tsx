@@ -12,12 +12,17 @@ import PlayerPicker from '@/components/PlayerPicker';
 import GameSelector from '@/components/GameSelector';
 import Recommendations from '@/components/Recommendations';
 import BattingOrder from '@/components/BattingOrder';
+import DiamondLock from '@/components/DiamondLock';
 
 export default function Home() {
   const [currentInning, setCurrentInning] = useState(1);
   const [selectedPosition, setSelectedPosition] = useState<Position | null>(null);
   const [showRecommendations, setShowRecommendations] = useState(false);
   const [leadoffId, setLeadoffId] = useState<number | null>(null);
+  const [isLocked, setIsLocked] = useState(false);
+  const [lockPattern, setLockPattern] = useState<string[] | null>(null);
+  const [showLock, setShowLock] = useState<'set' | 'unlock' | null>(null);
+  const [lockError, setLockError] = useState(false);
 
   const { players, updateBattingOrder } = usePlayers();
   const { games, currentGame, loading: gamesLoading, error: gameError, selectGame, createGame, toggleInningComplete } = useGame();
@@ -45,7 +50,7 @@ export default function Home() {
     : null;
 
   const handlePositionTap = (position: Position) => {
-    if (!currentGame) return;
+    if (!currentGame || isLocked) return;
     setSelectedPosition(position);
   };
 
@@ -64,14 +69,42 @@ export default function Home() {
   };
 
   const handleSwapPositions = async (fromPosition: Position, toPosition: Position) => {
-    if (currentGame) {
+    if (currentGame && !isLocked) {
       await swapPositions(currentInning, fromPosition, toPosition);
     }
   };
 
   const handleCopyPrevious = async () => {
-    if (currentGame && currentInning > 1) {
+    if (currentGame && currentInning > 1 && !isLocked) {
       await copyFromInning(currentInning - 1, currentInning);
+    }
+  };
+
+  const handleToggleLock = () => {
+    if (isLocked) {
+      // Show unlock dialog
+      setLockError(false);
+      setShowLock('unlock');
+    } else {
+      // Show set pattern dialog
+      setShowLock('set');
+    }
+  };
+
+  const handleLockComplete = (pattern: string[]) => {
+    if (showLock === 'set') {
+      setLockPattern(pattern);
+      setIsLocked(true);
+      setShowLock(null);
+    } else if (showLock === 'unlock') {
+      if (pattern.join(',') === lockPattern?.join(',')) {
+        setIsLocked(false);
+        setLockPattern(null);
+        setShowLock(null);
+        setLockError(false);
+      } else {
+        setLockError(true);
+      }
     }
   };
 
@@ -89,6 +122,8 @@ export default function Home() {
         onSelectGame={selectGame}
         onCreateGame={createGame}
         loading={gamesLoading}
+        isLocked={isLocked}
+        onToggleLock={handleToggleLock}
       />
 
       {/* Main content */}
@@ -135,24 +170,26 @@ export default function Home() {
                   onShowRecommendations={() => setShowRecommendations(!showRecommendations)}
                   showRecommendations={showRecommendations}
                 />
-                <div className="flex items-center gap-2 mt-1.5">
-                  {currentInning > 1 && (
-                    <button
-                      onClick={handleCopyPrevious}
-                      className="h-7 px-3 rounded-md text-xs font-medium touch-manipulation btn-secondary"
-                    >
-                      Copy Inning {currentInning - 1}
-                    </button>
-                  )}
-                  {canUndo && (
-                    <button
-                      onClick={undo}
-                      className="h-7 px-3 rounded-md text-xs font-medium touch-manipulation btn-secondary"
-                    >
-                      Undo
-                    </button>
-                  )}
-                </div>
+                {!isLocked && (
+                  <div className="flex items-center gap-2 mt-1.5">
+                    {currentInning > 1 && (
+                      <button
+                        onClick={handleCopyPrevious}
+                        className="h-7 px-3 rounded-md text-xs font-medium touch-manipulation btn-secondary"
+                      >
+                        Copy Inning {currentInning - 1}
+                      </button>
+                    )}
+                    {canUndo && (
+                      <button
+                        onClick={undo}
+                        className="h-7 px-3 rounded-md text-xs font-medium touch-manipulation btn-secondary"
+                      >
+                        Undo
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
               <div className="w-full max-w-4xl md:max-w-none flex items-start md:items-center md:justify-center md:flex-1 diamond-container">
                 <Diamond
@@ -177,8 +214,18 @@ export default function Home() {
         </div>
       )}
 
+      {/* Diamond lock */}
+      {showLock && (
+        <DiamondLock
+          mode={showLock}
+          onComplete={handleLockComplete}
+          onCancel={() => { setShowLock(null); setLockError(false); }}
+          error={lockError}
+        />
+      )}
+
       {/* Player picker drawer */}
-      {selectedPosition && currentGame && (
+      {selectedPosition && currentGame && !isLocked && (
         <PlayerPicker
           players={players}
           assignedPlayerIds={assignedPlayerIds}

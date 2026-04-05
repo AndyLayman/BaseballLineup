@@ -9,6 +9,8 @@ interface GameSelectorProps {
   onSelectGame: (gameId: string) => void;
   onCreateGame: (opponent: string, date: string) => void;
   loading: boolean;
+  isLocked: boolean;
+  onToggleLock: () => void;
 }
 
 function formatDate(dateStr: string): string {
@@ -22,6 +24,8 @@ export default function GameSelector({
   onSelectGame,
   onCreateGame,
   loading,
+  isLocked,
+  onToggleLock,
 }: GameSelectorProps) {
   const [showNew, setShowNew] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -112,7 +116,7 @@ export default function GameSelector({
           </div>
         ) : (
           <>
-            {games.length > 0 && (
+            {games.length > 0 && !isLocked && (
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setShowDropdown(!showDropdown)}
@@ -199,12 +203,33 @@ export default function GameSelector({
                 )}
               </div>
             )}
-            <button
-              onClick={() => setShowNew(true)}
-              className="h-10 px-4 rounded-lg text-sm touch-manipulation whitespace-nowrap btn-primary"
-            >
-              + Game
-            </button>
+            {!isLocked && (
+              <button
+                onClick={() => setShowNew(true)}
+                className="h-10 px-4 rounded-lg text-sm touch-manipulation whitespace-nowrap btn-primary"
+              >
+                + Game
+              </button>
+            )}
+            {currentGame && (
+              <button
+                onClick={onToggleLock}
+                className="h-10 w-10 rounded-lg flex items-center justify-center touch-manipulation btn-secondary"
+                title={isLocked ? 'Unlock' : 'Lock'}
+              >
+                {isLocked ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                  </svg>
+                ) : (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
+                  </svg>
+                )}
+              </button>
+            )}
           </>
         )}
       </div>
