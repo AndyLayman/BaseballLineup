@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: "Baseball Lineup",
   description: "Baseball lineup management tool for coaches",
   icons: {
+    icon: `${basePath}/favicon.png`,
     apple: `${basePath}/apple-touch-icon.png`,
   },
   appleWebApp: {
