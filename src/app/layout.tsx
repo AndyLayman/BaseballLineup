@@ -6,7 +6,7 @@ const basePath = isVercel ? '' : '/BaseballLineup';
 const isStaging = process.env.NEXT_PUBLIC_IS_STAGING === 'true';
 
 export const metadata: Metadata = {
-  title: isStaging ? "[Stage] Baseball Lineup" : "Baseball Lineup",
+  title: isStaging ? "[STAGE] Baseball Lineup" : "Baseball Lineup",
   description: "Baseball lineup management tool for coaches",
   icons: {
     icon: isStaging ? '/favicon-stage.png' : `${basePath}/favicon.png`,
