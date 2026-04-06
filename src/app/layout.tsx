@@ -1,16 +1,14 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
-const isVercel = process.env.VERCEL === '1';
-const basePath = isVercel ? '' : '/BaseballLineup';
 const isStaging = process.env.NEXT_PUBLIC_IS_STAGING === 'true';
 
 export const metadata: Metadata = {
   title: isStaging ? "[STAGE] Baseball Lineup" : "Baseball Lineup",
   description: "Baseball lineup management tool for coaches",
   icons: {
-    icon: isStaging ? '/favicon-stage.png' : `${basePath}/favicon.png`,
-    apple: `${basePath}/apple-touch-icon.png`,
+    icon: isStaging ? '/favicon-stage.png' : '/favicon.png',
+    apple: '/apple-touch-icon.png',
   },
   appleWebApp: {
     capable: true,
