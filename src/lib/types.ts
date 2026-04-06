@@ -3,6 +3,8 @@ export type Position = 'P' | 'C' | '1B' | '2B' | '3B' | 'SS' | 'LF' | 'LC' | 'RC
 export interface Player {
   id: number;
   name: string;
+  first_name: string;
+  last_name: string;
   number: number;
   photo_file: string | null;
   sort_order: number | null;

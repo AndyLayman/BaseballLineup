@@ -38,7 +38,7 @@ export default function PlayerPicker({
   });
 
   const filtered = sorted.filter(p =>
-    p.name.toLowerCase().includes(search.toLowerCase()) ||
+    `${p.first_name} ${p.last_name}`.toLowerCase().includes(search.toLowerCase()) ||
     p.number.toString().includes(search)
   );
 
@@ -110,19 +110,19 @@ export default function PlayerPicker({
                 {getPhotoUrl(player.id) ? (
                   <img
                     src={getPhotoUrl(player.id)!}
-                    alt={player.name}
+                    alt={player.first_name}
                     className="w-10 h-10 rounded-full object-cover"
                     style={{ border: '2px solid var(--teal)' }}
                   />
                 ) : (
                   <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'var(--gray-800)' }}>
                     <span className="font-semibold text-lg" style={{ color: 'var(--teal)' }}>
-                      {player.name.charAt(0)}
+                      {player.first_name.charAt(0)}
                     </span>
                   </div>
                 )}
                 <div className="flex-1 text-left">
-                  <div className="font-medium" style={{ color: 'var(--text)' }}>{player.name}</div>
+                  <div className="font-medium" style={{ color: 'var(--text)' }}>{player.first_name} {player.last_name}</div>
                   <div className="text-sm font-light" style={{ color: 'var(--gray-200)' }}>#{player.number}</div>
                 </div>
                 {isCurrent && (

@@ -88,19 +88,19 @@ export default function Recommendations({ players, assignments, numInnings, comp
               {getPhotoUrl(player.id) ? (
                 <img
                   src={getPhotoUrl(player.id)!}
-                  alt={player.name}
+                  alt={player.first_name}
                   className="w-10 h-10 rounded-full object-cover"
                   style={{ border: '2px solid var(--teal)' }}
                 />
               ) : (
                 <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'var(--gray-800)' }}>
                   <span className="font-semibold" style={{ color: 'var(--teal)' }}>
-                    {player.name.charAt(0)}
+                    {player.first_name.charAt(0)}
                   </span>
                 </div>
               )}
               <div className="flex-1">
-                <div className="font-medium" style={{ color: 'var(--text)' }}>{player.name} #{player.number}</div>
+                <div className="font-medium" style={{ color: 'var(--text)' }}>{player.first_name} {player.last_name} #{player.number}</div>
                 <div className="text-xs font-light" style={{ color: 'var(--gray-200)' }}>
                   Played {innings} of {numInnings} innings &middot; {positionStatuses.size} of {ALL_POSITIONS.length} positions
                 </div>

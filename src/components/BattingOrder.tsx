@@ -199,14 +199,14 @@ export default function BattingOrder({ players, leadoffId, onSelectLeadoff, onUp
                 {getPhotoUrl(player.id) ? (
                   <img
                     src={getPhotoUrl(player.id)!}
-                    alt={player.name}
+                    alt={player.first_name}
                     className="w-8 h-8 rounded-full object-cover shrink-0"
                     style={{ border: '2px solid var(--teal)' }}
                   />
                 ) : (
                   <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ background: 'var(--border-light)' }}>
                     <span className="font-bold text-xs" style={{ color: 'var(--teal)' }}>
-                      {player.name.charAt(0)}
+                      {player.first_name.charAt(0)}
                     </span>
                   </div>
                 )}
@@ -214,7 +214,7 @@ export default function BattingOrder({ players, leadoffId, onSelectLeadoff, onUp
                   #{player.number}
                 </span>
                 <span className="text-sm font-medium truncate flex-1" style={{ color: 'var(--text)' }}>
-                  {player.name}
+                  {player.first_name} {player.last_name}
                 </span>
                 {reordering && (
                   <span
@@ -246,14 +246,14 @@ export default function BattingOrder({ players, leadoffId, onSelectLeadoff, onUp
                 {getPhotoUrl(player.id) ? (
                   <img
                     src={getPhotoUrl(player.id)!}
-                    alt={player.name}
+                    alt={player.first_name}
                     className="w-7 h-7 rounded-full object-cover shrink-0"
                     style={{ border: '1px solid var(--border-light)' }}
                   />
                 ) : (
                   <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: 'var(--border-light)' }}>
                     <span className="font-bold text-xs" style={{ color: 'var(--text-muted)' }}>
-                      {player.name.charAt(0)}
+                      {player.first_name.charAt(0)}
                     </span>
                   </div>
                 )}
@@ -261,7 +261,7 @@ export default function BattingOrder({ players, leadoffId, onSelectLeadoff, onUp
                   #{player.number}
                 </span>
                 <span className="text-sm truncate flex-1" style={{ color: 'var(--text-muted)' }}>
-                  {player.name}
+                  {player.first_name} {player.last_name}
                 </span>
                 <button
                   onClick={() => restorePlayer(player)}

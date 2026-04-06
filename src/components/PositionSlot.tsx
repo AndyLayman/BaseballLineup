@@ -32,7 +32,7 @@ export default function PositionSlot({ position, label, player, onTap, small, is
               {getPhotoUrl(player.id) ? (
                 <img
                   src={getPhotoUrl(player.id)!}
-                  alt={player.name}
+                  alt={player.first_name}
                   className="w-9 h-9 rounded-full object-cover"
                   style={{
                     border: isDropTarget ? '3px solid var(--purple)' : '2px solid var(--teal)',
@@ -46,7 +46,7 @@ export default function PositionSlot({ position, label, player, onTap, small, is
                   boxShadow: isDropTarget ? '0 0 10px var(--purple)' : undefined,
                 }}>
                   <span className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
-                    {player.name.charAt(0)}
+                    {player.first_name.charAt(0)}
                   </span>
                 </div>
               )}
@@ -55,7 +55,7 @@ export default function PositionSlot({ position, label, player, onTap, small, is
               </span>
             </div>
             <span className="text-[10px] font-medium drop-shadow-md leading-tight text-center max-w-[48px] truncate" style={{ color: 'var(--text)' }}>
-              {player.name.split(' ')[0]}
+              {player.first_name}
             </span>
           </>
         ) : (
@@ -108,7 +108,7 @@ export default function PositionSlot({ position, label, player, onTap, small, is
                 boxShadow: isDropTarget ? '0 0 12px var(--purple)' : undefined,
               }}>
                 <span className="text-xl font-semibold" style={{ color: 'var(--text)' }}>
-                  {player.name.charAt(0)}
+                  {player.first_name.charAt(0)}
                 </span>
               </div>
             )}
@@ -117,7 +117,7 @@ export default function PositionSlot({ position, label, player, onTap, small, is
             </span>
           </div>
           <span className="text-xs font-medium drop-shadow-md leading-tight text-center max-w-[80px] truncate" style={{ color: 'var(--text)' }}>
-            {player.name.split(' ')[0]}
+            {player.first_name}
           </span>
           <span className="text-[10px] font-light drop-shadow-md" style={{ color: 'var(--gray-200)' }}>
             {label}

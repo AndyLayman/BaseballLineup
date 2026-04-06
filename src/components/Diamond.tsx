@@ -205,14 +205,14 @@ export default function Diamond({ assignments, players, onPositionTap, onSwapPos
             {getPhotoUrl(dragPlayer.id) ? (
               <img
                 src={getPhotoUrl(dragPlayer.id)!}
-                alt={dragPlayer.name}
+                alt={dragPlayer.first_name}
                 className="w-16 h-16 rounded-full object-cover"
                 style={{ border: '3px solid var(--teal)', opacity: 0.9 }}
               />
             ) : (
               <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: 'var(--gray-800)', border: '3px solid var(--teal)', opacity: 0.9 }}>
                 <span className="text-xl font-semibold" style={{ color: 'var(--text)' }}>
-                  {dragPlayer.name.charAt(0)}
+                  {dragPlayer.first_name.charAt(0)}
                 </span>
               </div>
             )}
