@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
-const basePath = process.env.NETLIFY === 'true' ? '' : '/BaseballLineup';
-const isStaging = process.env.NETLIFY === 'true';
+const isVercel = process.env.VERCEL === '1';
+const basePath = isVercel ? '' : '/BaseballLineup';
+const isStaging = isVercel;
 
 export const metadata: Metadata = {
   title: isStaging ? "[Stage] Baseball Lineup" : "Baseball Lineup",
