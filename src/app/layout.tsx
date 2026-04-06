@@ -3,7 +3,7 @@ import "./globals.css";
 
 const isVercel = process.env.VERCEL === '1';
 const basePath = isVercel ? '' : '/BaseballLineup';
-const isStaging = isVercel;
+const isStaging = process.env.NEXT_PUBLIC_IS_STAGING === 'true';
 
 export const metadata: Metadata = {
   title: isStaging ? "[Stage] Baseball Lineup" : "Baseball Lineup",
