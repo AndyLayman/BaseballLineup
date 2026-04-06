@@ -2,12 +2,13 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 const basePath = process.env.NETLIFY === 'true' ? '' : '/BaseballLineup';
+const isStaging = process.env.NETLIFY === 'true';
 
 export const metadata: Metadata = {
-  title: "Baseball Lineup",
+  title: isStaging ? "[Stage] Baseball Lineup" : "Baseball Lineup",
   description: "Baseball lineup management tool for coaches",
   icons: {
-    icon: `${basePath}/favicon.png`,
+    icon: isStaging ? '/favicon-stage.png' : `${basePath}/favicon.png`,
     apple: `${basePath}/apple-touch-icon.png`,
   },
   appleWebApp: {
