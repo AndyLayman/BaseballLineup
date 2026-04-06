@@ -1,10 +1,10 @@
 import type { NextConfig } from "next";
 
-const isNetlify = process.env.NETLIFY === 'true';
+const isVercel = process.env.VERCEL === '1';
 
 const nextConfig: NextConfig = {
   output: 'export',
-  basePath: isNetlify ? '' : '/BaseballLineup',
+  basePath: isVercel ? '' : '/BaseballLineup',
   images: {
     unoptimized: true,
   },
