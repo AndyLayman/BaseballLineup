@@ -79,7 +79,7 @@ export default function GameSelector({
             border: '1px solid oklab(0.769006 0.0640422 0.176756 / 0.3)',
           }}
         >
-          Stage
+          STG
         </span>
       )}
 
