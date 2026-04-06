@@ -13,13 +13,11 @@ interface DiamondProps {
   onSwapPositions?: (fromPosition: Position, toPosition: Position) => void;
 }
 
-// All coordinates in SVG space. viewBox is "0 0 100 90".
 const HOME = { x: 50, y: 80 };
 const FIRST = { x: 68, y: 62 };
 const SECOND = { x: 50, y: 44 };
 const THIRD = { x: 32, y: 62 };
 const MOUND = { x: 50, y: 64 };
-
 const FOUL_LEFT = { x: 5, y: 35 };
 const FOUL_RIGHT = { x: 95, y: 35 };
 
@@ -31,11 +29,15 @@ export default function Diamond({ assignments, players, onPositionTap, onSwapPos
   const [ghostPos, setGhostPos] = useState<{ x: number; y: number } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
-  const touchStartPos = useRef<{ x: number; y: number } | null>(null);
-  const touchStartPosition = useRef<Position | null>(null);
+  const startPos = useRef<{ x: number; y: number } | null>(null);
+  const startPosition = useRef<Position | null>(null);
+  const dropTargetRef = useRef<Position | null>(null);
   const positionRefs = useRef<Map<Position, HTMLDivElement>>(new Map());
 
-  // Lock body scroll when dragging
+  // Keep ref in sync with state
+  useEffect(() => { dropTargetRef.current = dropTarget; }, [dropTarget]);
+
+  // Lock body scroll when dragging (touch)
   useEffect(() => {
     if (!dragFrom) return;
     const prevent = (e: TouchEvent) => e.preventDefault();
@@ -61,75 +63,101 @@ export default function Diamond({ assignments, players, onPositionTap, onSwapPos
   };
 
   const setPositionRef = useCallback((position: Position) => (el: HTMLDivElement | null) => {
-    if (el) {
-      positionRefs.current.set(position, el);
-    } else {
-      positionRefs.current.delete(position);
-    }
+    if (el) positionRefs.current.set(position, el);
+    else positionRefs.current.delete(position);
   }, []);
 
   const findPositionAtPoint = (clientX: number, clientY: number): Position | null => {
     for (const [pos, el] of positionRefs.current) {
       const rect = el.getBoundingClientRect();
       const pad = 10;
-      if (
-        clientX >= rect.left - pad &&
-        clientX <= rect.right + pad &&
-        clientY >= rect.top - pad &&
-        clientY <= rect.bottom + pad
-      ) {
+      if (clientX >= rect.left - pad && clientX <= rect.right + pad &&
+          clientY >= rect.top - pad && clientY <= rect.bottom + pad) {
         return pos;
       }
     }
     return null;
   };
 
-  const handleTouchStart = (position: Position) => (e: React.TouchEvent) => {
-    const hasPlayer = getPlayerForPosition(position) !== null;
-    if (!hasPlayer) return;
-
-    const touch = e.touches[0];
-    touchStartPos.current = { x: touch.clientX, y: touch.clientY };
-    touchStartPosition.current = position;
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!touchStartPos.current || !touchStartPosition.current) return;
-
-    const touch = e.touches[0];
-    const dx = touch.clientX - touchStartPos.current.x;
-    const dy = touch.clientY - touchStartPos.current.y;
-
-    // Start drag once past threshold
-    if (!isDragging.current) {
-      if (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD) {
-        isDragging.current = true;
-        setDragFrom(touchStartPosition.current);
-        setGhostPos({ x: touch.clientX, y: touch.clientY });
-        if (navigator.vibrate) navigator.vibrate(30);
-      }
-      return;
+  const endDrag = (didTap: boolean, tapPosition?: Position) => {
+    if (isDragging.current && startPosition.current && dropTargetRef.current && onSwapPositions) {
+      onSwapPositions(startPosition.current, dropTargetRef.current);
+    } else if (didTap && tapPosition) {
+      onPositionTap(tapPosition);
     }
-
-    e.preventDefault();
-    setGhostPos({ x: touch.clientX, y: touch.clientY });
-    const target = findPositionAtPoint(touch.clientX, touch.clientY);
-    setDropTarget(target && target !== dragFrom ? target : null);
-  };
-
-  const handleTouchEnd = (position: Position) => () => {
-    if (isDragging.current && dragFrom && dropTarget && onSwapPositions) {
-      onSwapPositions(dragFrom, dropTarget);
-    } else if (!isDragging.current) {
-      onPositionTap(position);
-    }
-
     isDragging.current = false;
-    touchStartPos.current = null;
-    touchStartPosition.current = null;
+    startPos.current = null;
+    startPosition.current = null;
     setDragFrom(null);
     setDropTarget(null);
     setGhostPos(null);
+  };
+
+  const checkDragStart = (cx: number, cy: number) => {
+    if (!startPos.current || !startPosition.current) return false;
+    const dx = cx - startPos.current.x;
+    const dy = cy - startPos.current.y;
+    if (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD) {
+      isDragging.current = true;
+      setDragFrom(startPosition.current);
+      setGhostPos({ x: cx, y: cy });
+      if (navigator.vibrate) navigator.vibrate(30);
+      return true;
+    }
+    return false;
+  };
+
+  const updateDrag = (cx: number, cy: number) => {
+    setGhostPos({ x: cx, y: cy });
+    const target = findPositionAtPoint(cx, cy);
+    setDropTarget(target && target !== startPosition.current ? target : null);
+  };
+
+  // --- Touch handlers ---
+  const handleTouchStart = (position: Position) => (e: React.TouchEvent) => {
+    if (!getPlayerForPosition(position)) return;
+    const t = e.touches[0];
+    startPos.current = { x: t.clientX, y: t.clientY };
+    startPosition.current = position;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!startPos.current || !startPosition.current) return;
+    const t = e.touches[0];
+    if (!isDragging.current) {
+      if (!checkDragStart(t.clientX, t.clientY)) return;
+    }
+    e.preventDefault();
+    updateDrag(t.clientX, t.clientY);
+  };
+
+  const handleTouchEnd = (position: Position) => () => {
+    endDrag(!isDragging.current, position);
+  };
+
+  // --- Mouse handlers ---
+  const handleMouseDown = (position: Position) => (e: React.MouseEvent) => {
+    if (!getPlayerForPosition(position)) return;
+    e.preventDefault();
+    startPos.current = { x: e.clientX, y: e.clientY };
+    startPosition.current = position;
+
+    const onMove = (me: MouseEvent) => {
+      if (!startPos.current || !startPosition.current) return;
+      if (!isDragging.current) {
+        if (!checkDragStart(me.clientX, me.clientY)) return;
+      }
+      updateDrag(me.clientX, me.clientY);
+    };
+
+    const onUp = () => {
+      endDrag(!isDragging.current, position);
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+    };
+
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
   };
 
   const dragPlayer = dragFrom ? getPlayerForPosition(dragFrom) : null;
@@ -138,10 +166,14 @@ export default function Diamond({ assignments, players, onPositionTap, onSwapPos
     <div
       key={pos.key}
       ref={setPositionRef(pos.key)}
-      style={{ touchAction: getPlayerForPosition(pos.key) ? 'none' : undefined }}
+      style={{
+        touchAction: getPlayerForPosition(pos.key) ? 'none' : undefined,
+        cursor: getPlayerForPosition(pos.key) ? 'grab' : undefined,
+      }}
       onTouchStart={handleTouchStart(pos.key)}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd(pos.key)}
+      onMouseDown={handleMouseDown(pos.key)}
     >
       <PositionSlot
         position={pos.key}
@@ -159,7 +191,7 @@ export default function Diamond({ assignments, players, onPositionTap, onSwapPos
 
   return (
     <div ref={containerRef} className="w-full max-w-3xl md:max-w-none mx-auto flex flex-col gap-3 relative">
-      {/* Floating ghost that follows finger */}
+      {/* Floating ghost that follows cursor/finger */}
       {dragFrom && ghostPos && dragPlayer && (
         <div
           className="fixed z-50 pointer-events-none"
@@ -202,12 +234,7 @@ export default function Diamond({ assignments, players, onPositionTap, onSwapPos
 
       {/* Field */}
       <div className="relative w-full" style={{ aspectRatio: '10/9' }}>
-        {/* SVG field graphic */}
-        <svg
-          className="absolute inset-0 w-full h-full"
-          viewBox="0 0 100 90"
-          preserveAspectRatio="xMidYMid meet"
-        >
+        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 90" preserveAspectRatio="xMidYMid meet">
           <defs>
             <linearGradient id="arcGradient" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="var(--teal)" />
@@ -223,80 +250,26 @@ export default function Diamond({ assignments, players, onPositionTap, onSwapPos
               <stop offset="100%" stopColor="var(--purple)" stopOpacity="0.2" />
             </linearGradient>
           </defs>
-
-          {/* Infield fill */}
-          <polygon
-            points={`${HOME.x},${HOME.y} ${FIRST.x},${FIRST.y} ${SECOND.x},${SECOND.y} ${THIRD.x},${THIRD.y}`}
-            fill="var(--teal)"
-            opacity="0.08"
-          />
-
-          {/* Foul lines */}
-          <line
-            x1={HOME.x} y1={HOME.y}
-            x2={FOUL_LEFT.x} y2={FOUL_LEFT.y}
-            stroke="url(#foulLeftGradient)" strokeWidth="0.5"
-          />
-          <line
-            x1={HOME.x} y1={HOME.y}
-            x2={FOUL_RIGHT.x} y2={FOUL_RIGHT.y}
-            stroke="url(#foulRightGradient)" strokeWidth="0.5"
-          />
-
-          {/* Outfield arc */}
-          <path
-            d={`M ${FOUL_LEFT.x},${FOUL_LEFT.y} Q 50,2 ${FOUL_RIGHT.x},${FOUL_RIGHT.y}`}
-            fill="none"
-            stroke="url(#arcGradient)" strokeWidth="0.5" opacity="0.7"
-          />
-
-          {/* Base paths */}
-          <polygon
-            points={`${HOME.x},${HOME.y} ${FIRST.x},${FIRST.y} ${SECOND.x},${SECOND.y} ${THIRD.x},${THIRD.y}`}
-            fill="none"
-            stroke="var(--teal)"
-            strokeWidth="0.5"
-            opacity="0.5"
-          />
-
-          {/* Pitcher's mound */}
+          <polygon points={`${HOME.x},${HOME.y} ${FIRST.x},${FIRST.y} ${SECOND.x},${SECOND.y} ${THIRD.x},${THIRD.y}`} fill="var(--teal)" opacity="0.08" />
+          <line x1={HOME.x} y1={HOME.y} x2={FOUL_LEFT.x} y2={FOUL_LEFT.y} stroke="url(#foulLeftGradient)" strokeWidth="0.5" />
+          <line x1={HOME.x} y1={HOME.y} x2={FOUL_RIGHT.x} y2={FOUL_RIGHT.y} stroke="url(#foulRightGradient)" strokeWidth="0.5" />
+          <path d={`M ${FOUL_LEFT.x},${FOUL_LEFT.y} Q 50,2 ${FOUL_RIGHT.x},${FOUL_RIGHT.y}`} fill="none" stroke="url(#arcGradient)" strokeWidth="0.5" opacity="0.7" />
+          <polygon points={`${HOME.x},${HOME.y} ${FIRST.x},${FIRST.y} ${SECOND.x},${SECOND.y} ${THIRD.x},${THIRD.y}`} fill="none" stroke="var(--teal)" strokeWidth="0.5" opacity="0.5" />
           <circle cx={MOUND.x} cy={MOUND.y} r="2.5" fill="none" stroke="var(--teal)" strokeWidth="0.4" opacity="0.3" />
-
-          {/* Bases */}
           <rect x={HOME.x - 1.8} y={HOME.y - 1.8} width="3.6" height="3.6" fill="var(--teal)" transform={`rotate(45,${HOME.x},${HOME.y})`} opacity="0.8" />
           <rect x={FIRST.x - 1.4} y={FIRST.y - 1.4} width="2.8" height="2.8" fill="var(--teal)" transform={`rotate(45,${FIRST.x},${FIRST.y})`} opacity="0.8" />
           <rect x={SECOND.x - 1.4} y={SECOND.y - 1.4} width="2.8" height="2.8" fill="var(--teal)" transform={`rotate(45,${SECOND.x},${SECOND.y})`} opacity="0.8" />
           <rect x={THIRD.x - 1.4} y={THIRD.y - 1.4} width="2.8" height="2.8" fill="var(--teal)" transform={`rotate(45,${THIRD.x},${THIRD.y})`} opacity="0.8" />
         </svg>
 
-        {/* Field position slots */}
         {FIELD_POSITIONS.map(pos => (
-          <div
-            key={pos.key}
-            className="absolute"
-            style={{
-              left: `${pos.x}%`,
-              top: `${pos.y}%`,
-              transform: 'translate(-50%, -50%)',
-              zIndex: dragFrom === pos.key ? 20 : 10,
-            }}
-          >
+          <div key={pos.key} className="absolute" style={{ left: `${pos.x}%`, top: `${pos.y}%`, transform: 'translate(-50%, -50%)', zIndex: dragFrom === pos.key ? 20 : 10 }}>
             {renderPositionSlot(pos)}
           </div>
         ))}
 
-        {/* Bench slots */}
         {BENCH_POSITIONS.map(pos => (
-          <div
-            key={pos.key}
-            className="absolute"
-            style={{
-              left: `${pos.x}%`,
-              top: `${pos.y}%`,
-              transform: 'translate(-50%, -50%)',
-              zIndex: dragFrom === pos.key ? 20 : 10,
-            }}
-          >
+          <div key={pos.key} className="absolute" style={{ left: `${pos.x}%`, top: `${pos.y}%`, transform: 'translate(-50%, -50%)', zIndex: dragFrom === pos.key ? 20 : 10 }}>
             {renderPositionSlot(pos, true)}
           </div>
         ))}
