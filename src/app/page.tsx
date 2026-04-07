@@ -6,6 +6,7 @@ import { isSupabaseConfigured } from '@/lib/supabase';
 import { usePlayers } from '@/hooks/usePlayers';
 import { useGame } from '@/hooks/useGame';
 import { useLineup } from '@/hooks/useLineup';
+import { useGameSync } from '@/hooks/useGameSync';
 import Diamond from '@/components/Diamond';
 import InningNav from '@/components/InningNav';
 import PlayerPicker from '@/components/PlayerPicker';
@@ -27,6 +28,22 @@ export default function Home() {
   const { players, updateBattingOrder } = usePlayers();
   const { games, currentGame, loading: gamesLoading, error: gameError, selectGame, createGame, toggleInningComplete } = useGame();
   const { assignments, getInningAssignments, assignPlayer, unassignPlayer, swapPositions, copyFromInning, undo, canUndo } = useLineup(currentGame?.id || null);
+
+  // Subscribe to live scoring updates from the Stats app
+  useGameSync(
+    currentGame?.id || null,
+    // When the Stats app advances the inning, switch to it
+    (inning, half) => {
+      if (half === 'bottom') {
+        setCurrentInning(inning);
+        setShowRecommendations(false);
+      }
+    },
+    // When the Stats app identifies the leadoff batter, select them
+    (playerId) => {
+      setLeadoffId(playerId);
+    }
+  );
 
   const inningAssignments = getInningAssignments(currentInning);
   const assignedPlayerIds = new Set(inningAssignments.map(a => a.player_id));
