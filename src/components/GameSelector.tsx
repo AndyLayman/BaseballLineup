@@ -134,7 +134,7 @@ export default function GameSelector({
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setShowDropdown(!showDropdown)}
-                  className="h-10 px-3 pr-8 rounded-lg text-sm cursor-pointer flex items-center gap-2 touch-manipulation"
+                  className="h-10 px-2 pr-7 rounded-lg text-xs md:text-sm cursor-pointer flex items-center gap-1.5 touch-manipulation"
                   style={{ background: 'var(--bg-input)', color: 'var(--text)', border: '1px solid var(--border)' }}
                 >
                   {currentGame ? (
@@ -220,7 +220,7 @@ export default function GameSelector({
             {!isLocked && (
               <button
                 onClick={() => setShowNew(true)}
-                className="h-10 px-4 rounded-lg text-sm touch-manipulation whitespace-nowrap btn-primary"
+                className="h-10 px-3 rounded-lg text-xs md:text-sm touch-manipulation whitespace-nowrap btn-primary"
               >
                 + Game
               </button>
