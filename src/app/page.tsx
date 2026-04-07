@@ -13,6 +13,7 @@ import GameSelector from '@/components/GameSelector';
 import Recommendations from '@/components/Recommendations';
 import BattingOrder from '@/components/BattingOrder';
 import DiamondLock from '@/components/DiamondLock';
+import LastBatterPicker from '@/components/LastBatterPicker';
 
 export default function Home() {
   const [currentInning, setCurrentInning] = useState(1);
@@ -23,6 +24,7 @@ export default function Home() {
   const [lockPattern, setLockPattern] = useState<string[] | null>(null);
   const [showLock, setShowLock] = useState<'set' | 'unlock' | null>(null);
   const [lockError, setLockError] = useState(false);
+  const [completedInningPick, setCompletedInningPick] = useState<number | null>(null);
 
   const { players, updateBattingOrder } = usePlayers();
   const { games, currentGame, loading: gamesLoading, error: gameError, selectGame, createGame, toggleInningComplete } = useGame();
@@ -113,6 +115,31 @@ export default function Home() {
     setCurrentInning(inning);
   };
 
+  const handleMarkComplete = async (inning: number) => {
+    if (!currentGame || isLocked) return;
+    await toggleInningComplete(inning);
+    // Show last batter picker so user can set who's up next
+    const sorted = [...players].filter(p => p.sort_order != null).sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+    if (sorted.length > 0) {
+      setCompletedInningPick(inning);
+    }
+    // Auto-advance happens via the useEffect on completed_innings
+  };
+
+  const handleLastBatterSelect = (playerId: number) => {
+    const sorted = [...players].filter(p => p.sort_order != null).sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+    const idx = sorted.findIndex(p => p.id === playerId);
+    if (idx >= 0 && sorted.length > 0) {
+      const nextIdx = (idx + 1) % sorted.length;
+      setLeadoffId(sorted[nextIdx].id);
+    }
+    setCompletedInningPick(null);
+  };
+
+  const handleSkipLastBatter = () => {
+    setCompletedInningPick(null);
+  };
+
   return (
     <div className="flex flex-col min-h-screen md:h-screen md:overflow-hidden select-none overflow-y-auto" style={{ background: 'var(--bg)' }}>
       {/* Top bar */}
@@ -166,9 +193,10 @@ export default function Home() {
                   numInnings={currentGame.num_innings}
                   completedInnings={currentGame.completed_innings || []}
                   onInningChange={handleInningChange}
-
+                  onToggleComplete={handleMarkComplete}
                   onShowRecommendations={() => setShowRecommendations(!showRecommendations)}
                   showRecommendations={showRecommendations}
+                  isLocked={isLocked}
                 />
                 {!isLocked && (
                   <div className="flex items-center gap-2 mt-1.5">
@@ -212,6 +240,16 @@ export default function Home() {
         <div className="md:hidden px-4 pb-4">
           <BattingOrder players={players} leadoffId={leadoffId} onSelectLeadoff={(id) => setLeadoffId(id === leadoffId ? null : id)} onUpdateBattingOrder={updateBattingOrder} />
         </div>
+      )}
+
+      {/* Last batter picker */}
+      {completedInningPick !== null && (
+        <LastBatterPicker
+          players={players}
+          completedInning={completedInningPick}
+          onSelect={handleLastBatterSelect}
+          onSkip={handleSkipLastBatter}
+        />
       )}
 
       {/* Diamond lock */}

@@ -5,8 +5,10 @@ interface InningNavProps {
   numInnings: number;
   completedInnings: number[];
   onInningChange: (inning: number) => void;
+  onToggleComplete: (inning: number) => void;
   onShowRecommendations: () => void;
   showRecommendations: boolean;
+  isLocked?: boolean;
 }
 
 export default function InningNav({
@@ -14,8 +16,10 @@ export default function InningNav({
   numInnings,
   completedInnings,
   onInningChange,
+  onToggleComplete,
   onShowRecommendations,
   showRecommendations,
+  isLocked,
 }: InningNavProps) {
   return (
     <div className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
@@ -53,6 +57,18 @@ export default function InningNav({
       >
         Recs
       </button>
+
+      {!isLocked && !completedInnings.includes(currentInning) && (
+        <>
+          <div className="w-px h-8 mx-1" style={{ background: 'var(--border)' }} />
+          <button
+            onClick={() => onToggleComplete(currentInning)}
+            className="h-10 px-3 rounded-lg font-semibold text-sm flex items-center justify-center touch-manipulation btn-secondary"
+          >
+            Done
+          </button>
+        </>
+      )}
     </div>
   );
 }
