@@ -25,7 +25,7 @@ export default function Home() {
   const [showLock, setShowLock] = useState<'set' | 'unlock' | null>(null);
   const [lockError, setLockError] = useState(false);
 
-  const { players, updateBattingOrder } = usePlayers();
+  const { players, updateBattingOrder, syncFromGameLineup } = usePlayers();
   const { games, currentGame, loading: gamesLoading, error: gameError, selectGame, createGame, toggleInningComplete } = useGame();
   const { assignments, getInningAssignments, assignPlayer, unassignPlayer, swapPositions, copyFromInning, undo, canUndo } = useLineup(currentGame?.id || null);
 
@@ -61,6 +61,12 @@ export default function Home() {
     // All complete — stay on last inning
     setCurrentInning(currentGame.num_innings);
   }, [currentGame?.id, currentGame?.completed_innings]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Sync batting order from Stats app game_lineup when game changes
+  useEffect(() => {
+    if (!currentGame) return;
+    syncFromGameLineup(currentGame.id);
+  }, [currentGame?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const currentAssignment = selectedPosition
     ? inningAssignments.find(a => a.position === selectedPosition)
