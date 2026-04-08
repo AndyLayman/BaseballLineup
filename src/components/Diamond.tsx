@@ -235,26 +235,11 @@ export default function Diamond({ assignments, players, onPositionTap, onSwapPos
       {/* Field */}
       <div className="relative w-full" style={{ aspectRatio: '10/9' }}>
         <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 90" preserveAspectRatio="xMidYMid meet">
-          <defs>
-            <linearGradient id="arcGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="var(--teal)" />
-              <stop offset="50%" stopColor="var(--teal)" />
-              <stop offset="100%" stopColor="var(--purple)" />
-            </linearGradient>
-            <linearGradient id="foulLeftGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="var(--teal)" stopOpacity="0.6" />
-              <stop offset="100%" stopColor="var(--teal)" stopOpacity="0.2" />
-            </linearGradient>
-            <linearGradient id="foulRightGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="var(--purple)" stopOpacity="0.6" />
-              <stop offset="100%" stopColor="var(--purple)" stopOpacity="0.2" />
-            </linearGradient>
-          </defs>
-          <polygon points={`${HOME.x},${HOME.y} ${FIRST.x},${FIRST.y} ${SECOND.x},${SECOND.y} ${THIRD.x},${THIRD.y}`} fill="var(--teal)" opacity="0.08" />
-          <line x1={HOME.x} y1={HOME.y} x2={FOUL_LEFT.x} y2={FOUL_LEFT.y} stroke="url(#foulLeftGradient)" strokeWidth="0.5" />
-          <line x1={HOME.x} y1={HOME.y} x2={FOUL_RIGHT.x} y2={FOUL_RIGHT.y} stroke="url(#foulRightGradient)" strokeWidth="0.5" />
-          <path d={`M ${FOUL_LEFT.x},${FOUL_LEFT.y} Q 50,2 ${FOUL_RIGHT.x},${FOUL_RIGHT.y}`} fill="none" stroke="url(#arcGradient)" strokeWidth="0.5" opacity="0.7" />
-          <polygon points={`${HOME.x},${HOME.y} ${FIRST.x},${FIRST.y} ${SECOND.x},${SECOND.y} ${THIRD.x},${THIRD.y}`} fill="none" stroke="var(--teal)" strokeWidth="0.5" opacity="0.5" />
+          <polygon points={`${HOME.x},${HOME.y} ${FIRST.x},${FIRST.y} ${SECOND.x},${SECOND.y} ${THIRD.x},${THIRD.y}`} fill="var(--clay)" opacity="0.08" />
+          <line x1={HOME.x} y1={HOME.y} x2={FOUL_LEFT.x} y2={FOUL_LEFT.y} stroke="var(--clay)" strokeWidth="0.5" opacity="0.4" />
+          <line x1={HOME.x} y1={HOME.y} x2={FOUL_RIGHT.x} y2={FOUL_RIGHT.y} stroke="var(--clay)" strokeWidth="0.5" opacity="0.4" />
+          <path d={`M ${FOUL_LEFT.x},${FOUL_LEFT.y} Q 50,2 ${FOUL_RIGHT.x},${FOUL_RIGHT.y}`} fill="none" stroke="var(--clay)" strokeWidth="0.5" opacity="0.4" />
+          <polygon points={`${HOME.x},${HOME.y} ${FIRST.x},${FIRST.y} ${SECOND.x},${SECOND.y} ${THIRD.x},${THIRD.y}`} fill="none" stroke="var(--clay)" strokeWidth="0.5" opacity="0.5" />
           <circle cx={MOUND.x} cy={MOUND.y} r="2.5" fill="none" stroke="var(--teal)" strokeWidth="0.4" opacity="0.3" />
           <rect x={HOME.x - 1.8} y={HOME.y - 1.8} width="3.6" height="3.6" fill="var(--teal)" transform={`rotate(45,${HOME.x},${HOME.y})`} opacity="0.8" />
           <rect x={FIRST.x - 1.4} y={FIRST.y - 1.4} width="2.8" height="2.8" fill="var(--teal)" transform={`rotate(45,${FIRST.x},${FIRST.y})`} opacity="0.8" />
