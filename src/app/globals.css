@@ -49,14 +49,14 @@
   --danger: var(--high-heat);
   --success: var(--fresh-cut);
 
-  /* Glows */
-  --glow-clay: 0 0 12px rgba(233, 215, 180, 0.3);
-  --glow-teal: var(--glow-clay);
-  --glow-green: 0 0 12px rgba(113, 163, 104, 0.4);
-  --glow-purple: 0 0 12px rgba(87, 79, 61, 0.3);
-  --glow-accent: 0 0 20px rgba(233, 215, 180, 0.25), 0 0 40px rgba(87, 79, 61, 0.15);
-  --glow-danger: 0 0 12px rgba(250, 77, 77, 0.4);
-  --glow-success: 0 0 12px rgba(113, 163, 104, 0.4);
+  /* Glows (disabled — flat design) */
+  --glow-clay: none;
+  --glow-teal: none;
+  --glow-green: none;
+  --glow-purple: none;
+  --glow-accent: none;
+  --glow-danger: none;
+  --glow-success: none;
 
   /* Motion */
   --duration-fast: 120ms;
