@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Game } from '@/lib/types';
+import { NavArrowDown, Check, Lock, LockSlash } from 'iconoir-react';
 
 interface GameSelectorProps {
   games: Game[];
@@ -152,12 +153,10 @@ export default function GameSelector({
                 ) : (
                   <span style={{ color: 'var(--text-muted)' }}>Select game...</span>
                 )}
-                <svg
+                <NavArrowDown
                   className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none"
-                  width="10" height="10" viewBox="0 0 12 12" fill="none"
-                >
-                  <path d="M3 4.5L6 7.5L9 4.5" stroke="var(--text-muted)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+                  width={10} height={10} color="var(--text-muted)"
+                />
               </button>
 
               {showDropdown && (
@@ -213,9 +212,7 @@ export default function GameSelector({
                             </span>
                           </div>
                           {isActive && (
-                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                              <path d="M3 7L6 10L11 4" stroke="var(--teal)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
+                            <Check width={14} height={14} color="var(--teal)" />
                           )}
                         </button>
                       );
@@ -253,15 +250,9 @@ export default function GameSelector({
           title={isLocked ? 'Unlock' : 'Lock'}
         >
           {isLocked ? (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-            </svg>
+            <Lock width={16} height={16} color="var(--teal)" />
           ) : (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-              <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
-            </svg>
+            <LockSlash width={16} height={16} color="var(--text-muted)" />
           )}
         </button>
       )}
