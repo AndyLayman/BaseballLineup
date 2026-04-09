@@ -45,7 +45,7 @@ function formatShareText(game: Game, data: PracticeNotes): string {
 
 export default function PracticeSummary({ game, onClose, onSave }: Props) {
   const initial = game.practice_notes;
-  const [mode, setMode] = useState<'edit' | 'paper'>(initial ? 'paper' : 'edit');
+  const [mode, setMode] = useState<'edit' | 'paper'>('paper');
   const [notes, setNotes] = useState(initial?.notes || '');
   const [itemsCovered, setItemsCovered] = useState<string[]>(initial?.items_covered || []);
   const [teamNotes, setTeamNotes] = useState(initial?.team_notes || '');
@@ -101,22 +101,25 @@ export default function PracticeSummary({ game, onClose, onSave }: Props) {
     return (
       <div className="flex-1 flex flex-col min-h-0" style={{ background: '#E8E8E8' }}>
         {/* Toolbar */}
-        <div className="flex items-center justify-between px-3 py-2 shrink-0" style={{ background: 'var(--bg-deep)', borderBottom: '1px solid var(--border)' }}>
+        <div className="flex items-center justify-between px-3 py-2 shrink-0" style={{ background: '#F5F5F5', borderBottom: '1px solid #DDD' }}>
           <button
             onClick={() => setMode('edit')}
-            className="h-9 px-3 rounded-lg text-xs font-medium touch-manipulation btn-secondary"
+            className="h-9 px-3 rounded-lg text-xs font-medium touch-manipulation"
+            style={{ background: '#FFF', color: '#333', border: '1px solid #CCC' }}
           >
             ← Edit
           </button>
           <button
             onClick={onClose}
-            className="h-9 px-3 rounded-lg text-xs font-medium touch-manipulation btn-secondary"
+            className="h-9 px-3 rounded-lg text-xs font-medium touch-manipulation"
+            style={{ background: '#FFF', color: '#333', border: '1px solid #CCC' }}
           >
             Done
           </button>
           <button
             onClick={handleShare}
-            className="h-9 px-4 rounded-lg text-xs font-semibold touch-manipulation btn-primary"
+            className="h-9 px-4 rounded-lg text-xs font-semibold touch-manipulation"
+            style={{ background: '#111', color: '#FFF' }}
           >
             {copied ? '✓ Copied!' : 'Share'}
           </button>
@@ -212,7 +215,7 @@ export default function PracticeSummary({ game, onClose, onSave }: Props) {
     <div className="flex-1 overflow-y-auto p-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
-        <h2 className="text-xl font-semibold" style={{ color: 'var(--clay)' }}>Practice Summary</h2>
+        <h2 className="text-xl font-semibold" style={{ color: 'var(--text)' }}>Practice Summary</h2>
         <button
           onClick={onClose}
           className="w-10 h-10 rounded-lg text-lg flex items-center justify-center touch-manipulation btn-secondary"
@@ -245,7 +248,7 @@ export default function PracticeSummary({ game, onClose, onSave }: Props) {
                 <button
                   onClick={() => removeFromList(i, itemsCovered, setItemsCovered)}
                   className="opacity-50 hover:opacity-100 text-sm leading-none"
-                  style={{ color: 'var(--danger)' }}
+                  style={{ color: 'var(--text-muted)' }}
                 >&times;</button>
               </span>
             ))}
@@ -293,7 +296,7 @@ export default function PracticeSummary({ game, onClose, onSave }: Props) {
                 <button
                   onClick={() => removeFromList(i, actionItems, setActionItems)}
                   className="opacity-50 hover:opacity-100 text-sm leading-none"
-                  style={{ color: 'var(--danger)' }}
+                  style={{ color: 'var(--text-muted)' }}
                 >&times;</button>
               </span>
             ))}
