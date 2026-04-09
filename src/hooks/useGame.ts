@@ -104,5 +104,33 @@ export function useGame() {
     }
   }, [currentGame]);
 
-  return { games, currentGame, loading, error, selectGame, createGame, toggleInningComplete };
+  const refetchCurrentGame = useCallback(async () => {
+    if (!isSupabaseConfigured || !currentGame) return;
+    const { data } = await supabase
+      .from('games')
+      .select('*')
+      .eq('id', currentGame.id)
+      .single();
+    if (data) {
+      setCurrentGame(data);
+      setGames(prev => prev.map(g => g.id === data.id ? data : g));
+    }
+  }, [currentGame?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const refetchGames = useCallback(async () => {
+    if (!isSupabaseConfigured) return;
+    const { data } = await supabase
+      .from('games')
+      .select('*')
+      .order('date', { ascending: false });
+    if (data) {
+      setGames(data);
+      if (currentGame) {
+        const updated = data.find(g => g.id === currentGame.id);
+        if (updated) setCurrentGame(updated);
+      }
+    }
+  }, [currentGame?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return { games, currentGame, loading, error, selectGame, createGame, toggleInningComplete, refetchCurrentGame, refetchGames };
 }

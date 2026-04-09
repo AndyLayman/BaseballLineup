@@ -8,30 +8,27 @@ export function usePlayers() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchPlayers = useCallback(async () => {
     if (!isSupabaseConfigured) {
       setPlayers([]);
       setLoading(false);
       return;
     }
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('players')
+      .select('*')
+      .order('number');
 
-    const fetchPlayers = async () => {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('players')
-        .select('*')
-        .order('number');
-
-      if (error) {
-        console.error('Error fetching players:', error);
-      } else {
-        setPlayers(data || []);
-      }
-      setLoading(false);
-    };
-
-    fetchPlayers();
+    if (error) {
+      console.error('Error fetching players:', error);
+    } else {
+      setPlayers(data || []);
+    }
+    setLoading(false);
   }, []);
+
+  useEffect(() => { fetchPlayers(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const updateBattingOrder = useCallback(async (orderedIds: number[], removedIds: number[]) => {
     if (!isSupabaseConfigured) return;
@@ -81,5 +78,5 @@ export function usePlayers() {
     }));
   }, [players]);
 
-  return { players, loading, updateBattingOrder, syncFromGameLineup };
+  return { players, loading, updateBattingOrder, syncFromGameLineup, refetchPlayers: fetchPlayers };
 }

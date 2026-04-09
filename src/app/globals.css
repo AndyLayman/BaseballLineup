@@ -101,6 +101,10 @@ html.light {
 html { color-scheme: dark; }
 html.light { color-scheme: light; }
 
+html, body {
+  overscroll-behavior-y: contain;
+}
+
 body {
   background: var(--bg);
   color: var(--text);

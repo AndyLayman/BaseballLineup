@@ -48,6 +48,15 @@ export function useLineup(gameId: string | null) {
     fetchAssignments();
   }, [gameId]);
 
+  const refetchAssignments = useCallback(async () => {
+    if (!gameId || !isSupabaseConfigured) return;
+    const { data } = await supabase
+      .from('lineup_assignments')
+      .select('*, player:players(*)')
+      .eq('game_id', gameId);
+    if (data) setAssignments(data);
+  }, [gameId]);
+
   const getInningAssignments = useCallback(
     (inning: number) => assignments.filter(a => a.inning === inning),
     [assignments]
@@ -341,5 +350,5 @@ export function useLineup(gameId: string | null) {
     }
   }, []);
 
-  return { assignments, loading, canUndo, getInningAssignments, assignPlayer, unassignPlayer, swapPositions, copyFromInning, undo };
+  return { assignments, loading, canUndo, getInningAssignments, assignPlayer, unassignPlayer, swapPositions, copyFromInning, undo, refetchAssignments };
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Position } from '@/lib/types';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { usePlayers } from '@/hooks/usePlayers';
@@ -14,6 +14,7 @@ import GameSelector from '@/components/GameSelector';
 import Recommendations from '@/components/Recommendations';
 import BattingOrder from '@/components/BattingOrder';
 import DiamondLock from '@/components/DiamondLock';
+import PullToRefresh from '@/components/PullToRefresh';
 
 export default function Home() {
   const [currentInning, setCurrentInning] = useState(1);
@@ -25,9 +26,13 @@ export default function Home() {
   const [showLock, setShowLock] = useState<'set' | 'unlock' | null>(null);
   const [lockError, setLockError] = useState(false);
 
-  const { players, updateBattingOrder, syncFromGameLineup } = usePlayers();
-  const { games, currentGame, loading: gamesLoading, error: gameError, selectGame, createGame, toggleInningComplete } = useGame();
-  const { assignments, getInningAssignments, assignPlayer, unassignPlayer, swapPositions, copyFromInning, undo, canUndo } = useLineup(currentGame?.id || null);
+  const { players, updateBattingOrder, syncFromGameLineup, refetchPlayers } = usePlayers();
+  const { games, currentGame, loading: gamesLoading, error: gameError, selectGame, createGame, toggleInningComplete, refetchCurrentGame, refetchGames } = useGame();
+  const { assignments, getInningAssignments, assignPlayer, unassignPlayer, swapPositions, copyFromInning, undo, canUndo, refetchAssignments } = useLineup(currentGame?.id || null);
+
+  const handlePullRefresh = useCallback(async () => {
+    await Promise.all([refetchGames(), refetchPlayers(), refetchAssignments()]);
+  }, [refetchGames, refetchPlayers, refetchAssignments]);
 
   // Subscribe to live scoring updates from the Stats app
   useGameSync(
@@ -38,6 +43,8 @@ export default function Home() {
         setCurrentInning(inning);
         setShowRecommendations(false);
       }
+      // Refetch game data after a short delay so completed_innings updates
+      setTimeout(() => refetchCurrentGame(), 1500);
     },
     // When the Stats app identifies the leadoff batter, select them
     (playerId) => {
@@ -137,6 +144,7 @@ export default function Home() {
   };
 
   return (
+    <PullToRefresh onRefresh={handlePullRefresh}>
     <div className="flex flex-col min-h-screen md:h-screen md:overflow-hidden select-none overflow-y-auto" style={{ background: 'var(--bg)' }}>
       {/* Top bar */}
       <GameSelector
@@ -260,5 +268,6 @@ export default function Home() {
         />
       )}
     </div>
+    </PullToRefresh>
   );
 }
