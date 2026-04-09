@@ -52,7 +52,7 @@ export default function PositionSlot({ position, label, player, onTap, small, is
                 {player.number}
               </span>
             </div>
-            <span className="text-[10px] font-medium leading-tight text-center max-w-[48px] truncate rounded px-1" style={{ color: 'var(--text)', background: 'var(--bg-deep)' }}>
+            <span className="text-[10px] font-medium leading-tight text-center max-w-[48px] truncate rounded px-1" style={{ color: 'var(--text)', background: 'var(--bg-card)' }}>
               {player.first_name}
             </span>
           </>
@@ -111,7 +111,7 @@ export default function PositionSlot({ position, label, player, onTap, small, is
               {player.number}
             </span>
           </div>
-          <div className="flex flex-col items-center rounded px-1.5 py-0.5" style={{ background: 'var(--bg-deep)' }}>
+          <div className="flex flex-col items-center rounded px-1.5 py-0.5" style={{ background: 'var(--bg-card)' }}>
             <span className="text-xs font-medium leading-tight text-center max-w-[80px] truncate" style={{ color: 'var(--text)' }}>
               {player.first_name}
             </span>
