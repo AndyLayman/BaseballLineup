@@ -52,7 +52,7 @@ export default function PositionSlot({ position, label, player, onTap, small, is
                 {player.number}
               </span>
             </div>
-            <span className="text-[10px] font-medium leading-tight text-center max-w-[48px] truncate rounded px-1" style={{ color: 'var(--text)', background: 'rgba(17, 17, 17, 0.8)' }}>
+            <span className="text-[10px] font-medium leading-tight text-center max-w-[48px] truncate rounded px-1" style={{ color: 'var(--text)', background: 'var(--bg-deep)' }}>
               {player.first_name}
             </span>
           </>
@@ -60,7 +60,7 @@ export default function PositionSlot({ position, label, player, onTap, small, is
           <>
             <div className="w-9 h-9 rounded-full border-2 border-dashed flex items-center justify-center" style={{
               borderColor: isDropTarget ? 'rgba(255,255,255,0.6)' : 'var(--gray-600)',
-              background: isDropTarget ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.2)',
+              background: isDropTarget ? 'var(--hover)' : 'var(--bg-input)',
             }}>
               <span className="text-[10px] font-semibold" style={{ color: isDropTarget ? 'var(--white)' : 'var(--gray-400)' }}>{position}</span>
             </div>
@@ -111,7 +111,7 @@ export default function PositionSlot({ position, label, player, onTap, small, is
               {player.number}
             </span>
           </div>
-          <div className="flex flex-col items-center rounded px-1.5 py-0.5" style={{ background: 'rgba(17, 17, 17, 0.8)' }}>
+          <div className="flex flex-col items-center rounded px-1.5 py-0.5" style={{ background: 'var(--bg-deep)' }}>
             <span className="text-xs font-medium leading-tight text-center max-w-[80px] truncate" style={{ color: 'var(--text)' }}>
               {player.first_name}
             </span>
@@ -124,7 +124,7 @@ export default function PositionSlot({ position, label, player, onTap, small, is
         <>
           <div className="w-14 h-14 rounded-full border-2 border-dashed flex items-center justify-center" style={{
             borderColor: isDropTarget ? 'rgba(255,255,255,0.6)' : 'var(--gray-600)',
-            background: isDropTarget ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.2)',
+            background: isDropTarget ? 'var(--hover)' : 'var(--bg-input)',
           }}>
             <span className="text-lg font-semibold" style={{ color: isDropTarget ? 'var(--white)' : 'var(--gray-400)' }}>{position}</span>
           </div>
