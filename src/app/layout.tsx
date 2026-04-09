@@ -7,8 +7,8 @@ export const metadata: Metadata = {
   title: isStaging ? "[STAGE] Baseball Lineup" : "Baseball Lineup",
   description: "Baseball lineup management tool for coaches",
   icons: {
-    icon: isStaging ? '/favicon-stage.png' : '/favicon.png',
-    apple: '/apple-touch-icon.png',
+    icon: isStaging ? '/favicon-stage.png' : '/Favicon.png',
+    apple: '/Lineup_128-128.png',
   },
   appleWebApp: {
     capable: true,
