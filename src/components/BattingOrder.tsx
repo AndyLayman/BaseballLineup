@@ -63,20 +63,18 @@ export default function BattingOrder({ players, leadoffId, onSelectLeadoff, onUp
     itemRects.current = Array.from(items).map(el => el.getBoundingClientRect());
   }, []);
 
-  const handleTouchStart = useCallback((index: number, e: React.TouchEvent) => {
+  const handleDragStart = useCallback((index: number, clientY: number) => {
     captureRects();
-    startY.current = e.touches[0].clientY;
-    currentY.current = e.touches[0].clientY;
+    startY.current = clientY;
+    currentY.current = clientY;
     originalIndex.current = index;
     setDraggingIndex(index);
     setDragOffset(0);
   }, [captureRects]);
 
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+  const handleDragMove = useCallback((clientY: number) => {
     if (draggingIndex === null) return;
-    e.preventDefault();
-    const touch = e.touches[0];
-    currentY.current = touch.clientY;
+    currentY.current = clientY;
     const offset = currentY.current - startY.current;
     setDragOffset(offset);
 
@@ -113,12 +111,46 @@ export default function BattingOrder({ players, leadoffId, onSelectLeadoff, onUp
     }
   }, [draggingIndex, captureRects]);
 
-  const handleTouchEnd = useCallback(() => {
+  const handleDragEnd = useCallback(() => {
     setDraggingIndex(null);
     setDragOffset(0);
   }, []);
 
-  // Prevent body scroll when dragging
+  // Touch handlers
+  const handleTouchStart = useCallback((index: number, e: React.TouchEvent) => {
+    handleDragStart(index, e.touches[0].clientY);
+  }, [handleDragStart]);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    e.preventDefault();
+    handleDragMove(e.touches[0].clientY);
+  }, [handleDragMove]);
+
+  // Mouse handlers
+  const handleMouseDown = useCallback((index: number, e: React.MouseEvent) => {
+    e.preventDefault();
+    handleDragStart(index, e.clientY);
+  }, [handleDragStart]);
+
+  // Global mouse listeners when dragging (mouse events need to be on document)
+  useEffect(() => {
+    if (draggingIndex === null) return;
+
+    const onMouseMove = (e: MouseEvent) => {
+      e.preventDefault();
+      handleDragMove(e.clientY);
+    };
+    const onMouseUp = () => handleDragEnd();
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+    return () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+  }, [draggingIndex, handleDragMove, handleDragEnd]);
+
+  // Prevent body scroll when touch-dragging
   useEffect(() => {
     if (draggingIndex === null) return;
     const prevent = (e: TouchEvent) => {
@@ -173,7 +205,8 @@ export default function BattingOrder({ players, leadoffId, onSelectLeadoff, onUp
               className="relative"
               onTouchStart={reordering ? (e) => handleTouchStart(i, e) : undefined}
               onTouchMove={reordering ? handleTouchMove : undefined}
-              onTouchEnd={reordering ? handleTouchEnd : undefined}
+              onTouchEnd={reordering ? handleDragEnd : undefined}
+              onMouseDown={reordering ? (e) => handleMouseDown(i, e) : undefined}
               style={{
                 transform: isDragging ? `translateY(${dragOffset}px)` : undefined,
                 zIndex: isDragging ? 50 : undefined,
