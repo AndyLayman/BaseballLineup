@@ -35,22 +35,20 @@ export default function PositionSlot({ position, label, player, onTap, small, is
                   alt={player.first_name}
                   className="w-9 h-9 rounded-full object-cover"
                   style={{
-                    border: isDropTarget ? '3px solid var(--purple)' : '2px solid var(--teal)',
-                    boxShadow: isDropTarget ? '0 0 10px var(--purple)' : undefined,
+                    border: isDropTarget ? '3px solid rgba(255,255,255,0.6)' : '2px solid var(--clay)',
                   }}
                 />
               ) : (
                 <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{
                   background: 'var(--gray-800)',
-                  border: isDropTarget ? '3px solid var(--purple)' : '2px solid var(--teal)',
-                  boxShadow: isDropTarget ? '0 0 10px var(--purple)' : undefined,
+                  border: isDropTarget ? '3px solid rgba(255,255,255,0.6)' : '2px solid var(--clay)',
                 }}>
                   <span className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
                     {player.first_name.charAt(0)}
                   </span>
                 </div>
               )}
-              <span className="absolute -top-0.5 -right-0.5 text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center" style={{ background: 'var(--teal)', color: 'var(--black)' }}>
+              <span className="absolute -top-0.5 -right-0.5 text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center" style={{ background: 'var(--clay)', color: 'var(--black)' }}>
                 {player.number}
               </span>
             </div>
@@ -61,11 +59,10 @@ export default function PositionSlot({ position, label, player, onTap, small, is
         ) : (
           <>
             <div className="w-9 h-9 rounded-full border-2 border-dashed flex items-center justify-center" style={{
-              borderColor: isDropTarget ? 'var(--teal)' : 'var(--gray-600)',
-              background: isDropTarget ? 'rgba(8,221,200,0.15)' : 'rgba(0,0,0,0.2)',
-              boxShadow: isDropTarget ? '0 0 10px var(--teal)' : undefined,
+              borderColor: isDropTarget ? 'rgba(255,255,255,0.6)' : 'var(--gray-600)',
+              background: isDropTarget ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.2)',
             }}>
-              <span className="text-[10px] font-semibold" style={{ color: isDropTarget ? 'var(--teal)' : 'var(--gray-400)' }}>{position}</span>
+              <span className="text-[10px] font-semibold" style={{ color: isDropTarget ? 'var(--white)' : 'var(--gray-400)' }}>{position}</span>
             </div>
             <span className="text-[8px] font-light drop-shadow-md" style={{ color: 'var(--gray-400)' }}>
               {label}
@@ -96,23 +93,21 @@ export default function PositionSlot({ position, label, player, onTap, small, is
                 alt={player.name}
                 className="w-14 h-14 rounded-full object-cover hover:scale-105"
                 style={{
-                  border: isDropTarget ? '3px solid var(--purple)' : '2px solid var(--teal)',
-                  boxShadow: isDropTarget ? '0 0 12px var(--purple)' : undefined,
-                  transition: 'transform var(--duration-fast) var(--ease-in-out), border-color 0.2s, box-shadow 0.2s',
+                  border: isDropTarget ? '3px solid rgba(255,255,255,0.6)' : '2px solid var(--clay)',
+                  transition: 'transform var(--duration-fast) var(--ease-in-out), border-color 0.2s',
                 }}
               />
             ) : (
               <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{
                 background: 'var(--gray-800)',
-                border: isDropTarget ? '3px solid var(--purple)' : '2px solid var(--teal)',
-                boxShadow: isDropTarget ? '0 0 12px var(--purple)' : undefined,
+                border: isDropTarget ? '3px solid rgba(255,255,255,0.6)' : '2px solid var(--clay)',
               }}>
                 <span className="text-xl font-semibold" style={{ color: 'var(--text)' }}>
                   {player.first_name.charAt(0)}
                 </span>
               </div>
             )}
-            <span className="absolute -top-1 -right-1 text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center" style={{ background: 'var(--teal)', color: 'var(--black)' }}>
+            <span className="absolute -top-1 -right-1 text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center" style={{ background: 'var(--clay)', color: 'var(--black)' }}>
               {player.number}
             </span>
           </div>
@@ -128,11 +123,10 @@ export default function PositionSlot({ position, label, player, onTap, small, is
       ) : (
         <>
           <div className="w-14 h-14 rounded-full border-2 border-dashed flex items-center justify-center" style={{
-            borderColor: isDropTarget ? 'var(--teal)' : 'var(--gray-600)',
-            background: isDropTarget ? 'rgba(8,221,200,0.15)' : 'rgba(0,0,0,0.2)',
-            boxShadow: isDropTarget ? '0 0 12px var(--teal)' : undefined,
+            borderColor: isDropTarget ? 'rgba(255,255,255,0.6)' : 'var(--gray-600)',
+            background: isDropTarget ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.2)',
           }}>
-            <span className="text-lg font-semibold" style={{ color: isDropTarget ? 'var(--teal)' : 'var(--gray-400)' }}>{position}</span>
+            <span className="text-lg font-semibold" style={{ color: isDropTarget ? 'var(--white)' : 'var(--gray-400)' }}>{position}</span>
           </div>
           <span className="text-[10px] font-light drop-shadow-md" style={{ color: 'var(--gray-400)' }}>
             {label}
