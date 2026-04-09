@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Game } from '@/lib/types';
 import { NavArrowDown, Check, Lock, LockSlash } from 'iconoir-react';
+import ThemeToggle from './ThemeToggle';
 
 interface GameSelectorProps {
   games: Game[];
@@ -67,7 +68,8 @@ export default function GameSelector({
   return (
     <div className="flex items-center gap-2 px-3 py-2" style={{ background: 'var(--bg-deep)', borderBottom: '1px solid var(--border)' }}>
       {/* Logo */}
-      <img src="/logos/Lineup-White.svg" alt="Lineup" className="shrink-0" style={{ height: '24px', width: 'auto' }} />
+      <img src="/logos/Lineup-White.svg" alt="Lineup" className="shrink-0 dark-only" style={{ height: '24px', width: 'auto' }} />
+      <img src="/logos/Lineup-Black.svg" alt="Lineup" className="shrink-0 light-only" style={{ height: '24px', width: 'auto' }} />
 
       {/* STG badge */}
       {process.env.NEXT_PUBLIC_IS_STAGING === 'true' && (
@@ -106,7 +108,7 @@ export default function GameSelector({
               value={gameDate}
               onChange={e => setGameDate(e.target.value)}
               className="h-9 px-2 rounded-lg text-xs outline-none shrink-0"
-              style={{ background: 'var(--bg-input)', color: 'var(--text)', border: '1px solid var(--border)', colorScheme: 'dark' }}
+              style={{ background: 'var(--bg-input)', color: 'var(--text)', border: '1px solid var(--border)' }}
             />
             <button
               onClick={() => setShowNew(false)}
@@ -243,6 +245,9 @@ export default function GameSelector({
           )}
         </button>
       )}
+
+      {/* Theme toggle */}
+      {!showNew && <ThemeToggle />}
     </div>
   );
 }
