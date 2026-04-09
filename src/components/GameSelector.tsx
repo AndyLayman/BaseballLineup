@@ -13,6 +13,7 @@ interface GameSelectorProps {
   loading: boolean;
   isLocked: boolean;
   onToggleLock: () => void;
+  onShowSummary: () => void;
 }
 
 function formatDate(dateStr: string): string {
@@ -28,6 +29,7 @@ export default function GameSelector({
   loading,
   isLocked,
   onToggleLock,
+  onShowSummary,
 }: GameSelectorProps) {
   const [showNew, setShowNew] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -229,6 +231,21 @@ export default function GameSelector({
             </button>
           )}
         </>
+      )}
+
+      {/* Summary */}
+      {currentGame && !showNew && (
+        <button
+          onClick={onShowSummary}
+          className="h-9 w-9 rounded-lg flex items-center justify-center touch-manipulation shrink-0 btn-secondary"
+          title="Practice Summary"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 4a2 2 0 0 1 2-2h8l6 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4z"/>
+            <path d="M14 2v6h6"/>
+            <path d="M8 13h8M8 17h5"/>
+          </svg>
+        </button>
       )}
 
       {/* Lock */}

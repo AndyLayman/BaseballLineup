@@ -10,12 +10,20 @@ export interface Player {
   sort_order: number | null;
 }
 
+export interface PracticeNotes {
+  notes: string;
+  items_covered: string[];
+  team_notes: string;
+  action_items: string[];
+}
+
 export interface Game {
   id: string;
   opponent: string | null;
   date: string;
   num_innings: number;
   completed_innings: number[];
+  practice_notes?: PracticeNotes | null;
 }
 
 export interface LineupAssignment {

@@ -15,6 +15,7 @@ import Recommendations from '@/components/Recommendations';
 import BattingOrder from '@/components/BattingOrder';
 import DiamondLock from '@/components/DiamondLock';
 import PullToRefresh from '@/components/PullToRefresh';
+import PracticeSummary from '@/components/PracticeSummary';
 
 export default function Home() {
   const [currentInning, setCurrentInning] = useState(1);
@@ -25,9 +26,10 @@ export default function Home() {
   const [lockPattern, setLockPattern] = useState<string[] | null>(null);
   const [showLock, setShowLock] = useState<'set' | 'unlock' | null>(null);
   const [lockError, setLockError] = useState(false);
+  const [showPracticeSummary, setShowPracticeSummary] = useState(false);
 
   const { players, updateBattingOrder, syncFromGameLineup, refetchPlayers } = usePlayers();
-  const { games, currentGame, loading: gamesLoading, error: gameError, selectGame, createGame, toggleInningComplete, refetchCurrentGame, refetchGames } = useGame();
+  const { games, currentGame, loading: gamesLoading, error: gameError, selectGame, createGame, toggleInningComplete, refetchCurrentGame, refetchGames, savePracticeNotes } = useGame();
   const { assignments, getInningAssignments, assignPlayer, unassignPlayer, swapPositions, copyFromInning, undo, canUndo, refetchAssignments } = useLineup(currentGame?.id || null);
 
   const handlePullRefresh = useCallback(async () => {
@@ -155,11 +157,18 @@ export default function Home() {
         loading={gamesLoading}
         isLocked={isLocked}
         onToggleLock={handleToggleLock}
+        onShowSummary={() => setShowPracticeSummary(true)}
       />
 
       {/* Main content */}
       <div className="flex-1 flex flex-col min-h-0">
-        {!currentGame ? (
+        {showPracticeSummary && currentGame ? (
+          <PracticeSummary
+            game={currentGame}
+            onClose={() => setShowPracticeSummary(false)}
+            onSave={savePracticeNotes}
+          />
+        ) : !currentGame ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
               {gameError ? (
@@ -239,7 +248,7 @@ export default function Home() {
       </div>
 
       {/* Batting order on mobile */}
-      {currentGame && !showRecommendations && (
+      {currentGame && !showRecommendations && !showPracticeSummary && (
         <div className="md:hidden px-4 pb-4">
           <BattingOrder players={players} leadoffId={leadoffId} onSelectLeadoff={(id) => setLeadoffId(id === leadoffId ? null : id)} onUpdateBattingOrder={updateBattingOrder} />
         </div>

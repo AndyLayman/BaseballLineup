@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
-import { Game } from '@/lib/types';
+import { Game, PracticeNotes } from '@/lib/types';
 
 export function useGame() {
   const [games, setGames] = useState<Game[]>([]);
@@ -132,5 +132,19 @@ export function useGame() {
     }
   }, [currentGame?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  return { games, currentGame, loading, error, selectGame, createGame, toggleInningComplete, refetchCurrentGame, refetchGames };
+  const savePracticeNotes = useCallback(async (practiceNotes: PracticeNotes) => {
+    if (!isSupabaseConfigured || !currentGame) return;
+    const { error } = await supabase
+      .from('games')
+      .update({ practice_notes: practiceNotes })
+      .eq('id', currentGame.id);
+
+    if (!error) {
+      const updated = { ...currentGame, practice_notes: practiceNotes };
+      setCurrentGame(updated);
+      setGames(prev => prev.map(g => g.id === currentGame.id ? updated : g));
+    }
+  }, [currentGame]);
+
+  return { games, currentGame, loading, error, selectGame, createGame, toggleInningComplete, refetchCurrentGame, refetchGames, savePracticeNotes };
 }
