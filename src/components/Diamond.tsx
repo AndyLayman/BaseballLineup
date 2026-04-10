@@ -11,6 +11,7 @@ interface DiamondProps {
   players: Player[];
   onPositionTap: (position: Position) => void;
   onSwapPositions?: (fromPosition: Position, toPosition: Position) => void;
+  runners?: { first: boolean; second: boolean; third: boolean };
 }
 
 const HOME = { x: 50, y: 80 };
@@ -23,7 +24,7 @@ const FOUL_RIGHT = { x: 95, y: 35 };
 
 const DRAG_THRESHOLD = 8;
 
-export default function Diamond({ assignments, players, onPositionTap, onSwapPositions }: DiamondProps) {
+export default function Diamond({ assignments, players, onPositionTap, onSwapPositions, runners }: DiamondProps) {
   const [dragFrom, setDragFrom] = useState<Position | null>(null);
   const [dropTarget, setDropTarget] = useState<Position | null>(null);
   const [ghostPos, setGhostPos] = useState<{ x: number; y: number } | null>(null);
@@ -243,17 +244,17 @@ export default function Diamond({ assignments, players, onPositionTap, onSwapPos
           <circle cx={MOUND.x} cy={MOUND.y} r="2.5" fill="none" stroke="var(--teal)" strokeWidth="0.4" opacity="0.3" />
           <rect x={HOME.x - 1.8} y={HOME.y - 1.8} width="3.6" height="3.6" fill="var(--teal)" transform={`rotate(45,${HOME.x},${HOME.y})`} />
           <rect x={FIRST.x - 1.4} y={FIRST.y - 1.4} width="2.8" height="2.8"
-            fill={getPlayerForPosition('1B') ? "var(--teal)" : "var(--night-game)"}
+            fill={runners?.first ? "var(--teal)" : "var(--night-game)"}
             stroke="var(--teal)" strokeWidth="0.4"
             transform={`rotate(45,${FIRST.x},${FIRST.y})`}
           />
           <rect x={SECOND.x - 1.4} y={SECOND.y - 1.4} width="2.8" height="2.8"
-            fill={getPlayerForPosition('2B') ? "var(--teal)" : "var(--night-game)"}
+            fill={runners?.second ? "var(--teal)" : "var(--night-game)"}
             stroke="var(--teal)" strokeWidth="0.4"
             transform={`rotate(45,${SECOND.x},${SECOND.y})`}
           />
           <rect x={THIRD.x - 1.4} y={THIRD.y - 1.4} width="2.8" height="2.8"
-            fill={getPlayerForPosition('3B') ? "var(--teal)" : "var(--night-game)"}
+            fill={runners?.third ? "var(--teal)" : "var(--night-game)"}
             stroke="var(--teal)" strokeWidth="0.4"
             transform={`rotate(45,${THIRD.x},${THIRD.y})`}
           />

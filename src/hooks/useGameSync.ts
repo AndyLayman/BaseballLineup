@@ -12,6 +12,10 @@ interface GameSyncState {
   syncedLeadoffId: number | null;
   /** Current batter index in the batting order */
   syncedBatterIndex: number | null;
+  /** Base runners from live scoring */
+  runnerFirst: boolean;
+  runnerSecond: boolean;
+  runnerThird: boolean;
 }
 
 /**
@@ -29,6 +33,9 @@ export function useGameSync(
     syncedHalf: null,
     syncedLeadoffId: null,
     syncedBatterIndex: null,
+    runnerFirst: false,
+    runnerSecond: false,
+    runnerThird: false,
   });
 
   // Keep callback refs stable to avoid re-subscribing
@@ -44,7 +51,7 @@ export function useGameSync(
     async function fetchInitial() {
       const { data } = await supabase
         .from('game_state')
-        .select('current_inning, current_half, leadoff_player_id, current_batter_index')
+        .select('current_inning, current_half, leadoff_player_id, current_batter_index, runner_first, runner_second, runner_third')
         .eq('game_id', gameId)
         .single();
 
@@ -54,6 +61,9 @@ export function useGameSync(
           syncedHalf: data.current_half,
           syncedLeadoffId: data.leadoff_player_id,
           syncedBatterIndex: data.current_batter_index,
+          runnerFirst: !!data.runner_first,
+          runnerSecond: !!data.runner_second,
+          runnerThird: !!data.runner_third,
         });
         if (data.leadoff_player_id != null) {
           onLeadoffChangeRef.current?.(data.leadoff_player_id);
@@ -79,6 +89,9 @@ export function useGameSync(
             current_half: 'top' | 'bottom';
             leadoff_player_id: number | null;
             current_batter_index: number | null;
+            runner_first: boolean;
+            runner_second: boolean;
+            runner_third: boolean;
           };
 
           setSync((prev) => {
@@ -100,6 +113,9 @@ export function useGameSync(
               syncedHalf: row.current_half,
               syncedLeadoffId: row.leadoff_player_id,
               syncedBatterIndex: row.current_batter_index,
+              runnerFirst: !!row.runner_first,
+              runnerSecond: !!row.runner_second,
+              runnerThird: !!row.runner_third,
             };
           });
         }

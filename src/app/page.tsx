@@ -235,6 +235,7 @@ export default function Home() {
                   players={players}
                   onPositionTap={handlePositionTap}
                   onSwapPositions={handleSwapPositions}
+                  runners={{ first: gameSync.runnerFirst, second: gameSync.runnerSecond, third: gameSync.runnerThird }}
                 />
               </div>
             </div>
