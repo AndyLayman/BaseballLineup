@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 
 interface GameSyncState {
@@ -38,7 +38,9 @@ export function useGameSync(
     runnerThird: false,
   });
 
-  // Keep callback refs stable to avoid re-subscribing
+  // Keep refs in sync for use in Realtime callback
+  const syncRef = useRef(sync);
+  syncRef.current = sync;
   const onInningChangeRef = useRef(onInningChange);
   onInningChangeRef.current = onInningChange;
   const onLeadoffChangeRef = useRef(onLeadoffChange);
@@ -94,30 +96,32 @@ export function useGameSync(
             runner_third: boolean;
           };
 
-          setSync((prev) => {
-            const inningChanged =
-              prev.syncedInning !== row.current_inning ||
-              prev.syncedHalf !== row.current_half;
-            const leadoffChanged =
-              prev.syncedLeadoffId !== row.leadoff_player_id;
+          // Read previous state via ref to avoid side effects inside setter
+          const prev = syncRef.current;
+          const inningChanged =
+            prev.syncedInning !== row.current_inning ||
+            prev.syncedHalf !== row.current_half;
+          const leadoffChanged =
+            prev.syncedLeadoffId !== row.leadoff_player_id;
 
-            if (inningChanged) {
-              onInningChangeRef.current?.(row.current_inning, row.current_half);
-            }
-            if (leadoffChanged) {
-              onLeadoffChangeRef.current?.(row.leadoff_player_id);
-            }
+          const next: GameSyncState = {
+            syncedInning: row.current_inning,
+            syncedHalf: row.current_half,
+            syncedLeadoffId: row.leadoff_player_id,
+            syncedBatterIndex: row.current_batter_index,
+            runnerFirst: !!row.runner_first,
+            runnerSecond: !!row.runner_second,
+            runnerThird: !!row.runner_third,
+          };
+          setSync(next);
 
-            return {
-              syncedInning: row.current_inning,
-              syncedHalf: row.current_half,
-              syncedLeadoffId: row.leadoff_player_id,
-              syncedBatterIndex: row.current_batter_index,
-              runnerFirst: !!row.runner_first,
-              runnerSecond: !!row.runner_second,
-              runnerThird: !!row.runner_third,
-            };
-          });
+          // Fire callbacks after state update
+          if (inningChanged) {
+            onInningChangeRef.current?.(row.current_inning, row.current_half);
+          }
+          if (leadoffChanged) {
+            onLeadoffChangeRef.current?.(row.leadoff_player_id);
+          }
         }
       )
       .subscribe();

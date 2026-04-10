@@ -67,7 +67,7 @@ export default function Home() {
   const inningAssignments = getInningAssignments(currentInning);
   const assignedPlayerIds = new Set(inningAssignments.map(a => a.player_id));
 
-  // Default to first incomplete inning when game changes
+  // Default to first incomplete inning when game changes (not on every completed_innings update)
   useEffect(() => {
     if (!currentGame) return;
     const completed = currentGame.completed_innings || [];
@@ -79,7 +79,7 @@ export default function Home() {
     }
     // All complete — stay on last inning
     setCurrentInning(numInnings);
-  }, [currentGame?.id, currentGame?.completed_innings, numInnings]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [currentGame?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Sync batting order from Stats app game_lineup when game changes
   useEffect(() => {
