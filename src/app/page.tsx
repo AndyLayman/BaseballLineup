@@ -52,7 +52,7 @@ export default function Home() {
     }
   );
 
-  const numInnings = currentGame?.num_innings || 6;
+  const numInnings = currentGame?.num_innings || 5;
   const inningAssignments = getInningAssignments(currentInning);
   const assignedPlayerIds = new Set(inningAssignments.map(a => a.player_id));
 
