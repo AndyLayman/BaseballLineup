@@ -65,7 +65,7 @@ export function useGameSync(
       .on(
         'postgres_changes',
         {
-          event: 'UPDATE',
+          event: '*',
           schema: 'public',
           table: 'game_state',
           filter: `game_id=eq.${gameId}`,
