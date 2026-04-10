@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Position } from '@/lib/types';
-import { isSupabaseConfigured } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { usePlayers } from '@/hooks/usePlayers';
 import { useGame } from '@/hooks/useGame';
 import { useLineup } from '@/hooks/useLineup';
@@ -81,10 +81,22 @@ export default function Home() {
     setCurrentInning(numInnings);
   }, [currentGame?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Sync batting order from Stats app game_lineup when game changes
+  // Sync batting order from Stats app game_lineup when game changes,
+  // and subscribe to realtime changes so it updates without a reload
   useEffect(() => {
     if (!currentGame) return;
     syncFromGameLineup(currentGame.id);
+
+    const channel = supabase
+      .channel(`lineup-sync-${currentGame.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'game_lineup', filter: `game_id=eq.${currentGame.id}` },
+        () => { syncFromGameLineup(currentGame.id); }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, [currentGame?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const currentAssignment = selectedPosition
