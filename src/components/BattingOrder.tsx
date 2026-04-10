@@ -221,7 +221,7 @@ export default function BattingOrder({ players, leadoffId, showLeadoffBadge = fa
                 style={{
                   background: isDragging ? 'var(--bg-card)' : 'var(--bg-deep)',
                   ...(isDragging ? { border: '1px solid var(--teal)', boxShadow: 'var(--glow-teal)' } : {}),
-                  ...(isLeadoff && showLeadoffBadge && !reordering ? { outline: '2px solid var(--teal)', outlineOffset: '-2px' } : {}),
+                  ...(isLeadoff && !reordering ? { outline: '2px solid var(--teal)', outlineOffset: '-2px' } : {}),
                 }}
               >
                 {reordering && (
