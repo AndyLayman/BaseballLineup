@@ -28,7 +28,7 @@ export default function PositionSlot({ position, label, player, onTap, small, is
       >
         {player ? (
           <>
-            <span className="text-[10px] font-medium leading-tight text-center max-w-[56px] truncate rounded px-1" style={{ color: 'var(--text)', background: 'var(--bg-card)' }}>
+            <span className="text-[10px] font-medium leading-tight text-center whitespace-nowrap rounded px-1" style={{ color: 'var(--text)', background: 'var(--bg-card)' }}>
               {player.first_name} <span style={{ opacity: 0.7 }}>•</span> {position}
             </span>
             <div className="relative">
@@ -83,7 +83,7 @@ export default function PositionSlot({ position, label, player, onTap, small, is
     >
       {player ? (
         <>
-          <span className="text-xs font-medium leading-tight text-center max-w-[80px] truncate rounded px-1.5 py-0.5" style={{ color: 'var(--text)', background: 'var(--bg-card)' }}>
+          <span className="text-xs font-medium leading-tight text-center whitespace-nowrap rounded px-1.5 py-0.5" style={{ color: 'var(--text)', background: 'var(--bg-card)' }}>
             {player.first_name} <span style={{ opacity: 0.7 }}>•</span> {position}
           </span>
           <div className="relative">
