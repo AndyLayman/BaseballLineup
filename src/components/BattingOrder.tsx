@@ -7,11 +7,13 @@ import { getPhotoUrl } from '@/lib/supabase';
 interface BattingOrderProps {
   players: Player[];
   leadoffId: number | null;
+  currentBatterId?: number | null;
+  showLeadoffBadge?: boolean;
   onSelectLeadoff: (playerId: number) => void;
   onUpdateBattingOrder: (orderedIds: number[], removedIds: number[]) => void;
 }
 
-export default function BattingOrder({ players, leadoffId, onSelectLeadoff, onUpdateBattingOrder }: BattingOrderProps) {
+export default function BattingOrder({ players, leadoffId, currentBatterId, showLeadoffBadge = false, onSelectLeadoff, onUpdateBattingOrder }: BattingOrderProps) {
   const [reordering, setReordering] = useState(false);
   const [dragOrder, setDragOrder] = useState<Player[]>([]);
   const [removed, setRemoved] = useState<Player[]>([]);
@@ -197,6 +199,7 @@ export default function BattingOrder({ players, leadoffId, onSelectLeadoff, onUp
       <div className="flex-1 space-y-1" ref={listRef}>
         {displayList.map((player, i) => {
           const isLeadoff = player.id === leadoffId;
+          const isCurrentBatter = player.id === currentBatterId;
           const isDragging = reordering && draggingIndex === i;
           return (
             <div
@@ -220,7 +223,7 @@ export default function BattingOrder({ players, leadoffId, onSelectLeadoff, onUp
                 style={{
                   background: isDragging ? 'var(--bg-card)' : 'var(--bg-deep)',
                   ...(isDragging ? { border: '1px solid var(--teal)', boxShadow: 'var(--glow-teal)' } : {}),
-                  ...(isLeadoff && !reordering ? { outline: '2px solid var(--teal)', outlineOffset: '-2px' } : {}),
+                  ...(isCurrentBatter && !reordering ? { outline: '2px solid var(--teal)', outlineOffset: '-2px' } : {}),
                 }}
               >
                 {reordering && (
@@ -259,7 +262,7 @@ export default function BattingOrder({ players, leadoffId, onSelectLeadoff, onUp
                   </span>
                 )}
               </button>
-              {isLeadoff && !reordering && (
+              {isLeadoff && showLeadoffBadge && !reordering && (
                 <span className="absolute -right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold uppercase px-2 py-0.5 rounded-full whitespace-nowrap z-10" style={{ background: 'var(--teal)', color: 'var(--black)' }}>
                   Lead Off
                 </span>

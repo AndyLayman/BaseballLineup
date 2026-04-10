@@ -10,6 +10,8 @@ interface GameSyncState {
   syncedHalf: 'top' | 'bottom' | null;
   /** The leadoff batter player_id for the current bottom half */
   syncedLeadoffId: number | null;
+  /** Current batter index in the batting order */
+  syncedBatterIndex: number | null;
 }
 
 /**
@@ -26,6 +28,7 @@ export function useGameSync(
     syncedInning: null,
     syncedHalf: null,
     syncedLeadoffId: null,
+    syncedBatterIndex: null,
   });
 
   // Keep callback refs stable to avoid re-subscribing
@@ -41,7 +44,7 @@ export function useGameSync(
     async function fetchInitial() {
       const { data } = await supabase
         .from('game_state')
-        .select('current_inning, current_half, leadoff_player_id')
+        .select('current_inning, current_half, leadoff_player_id, current_batter_index')
         .eq('game_id', gameId)
         .single();
 
@@ -50,6 +53,7 @@ export function useGameSync(
           syncedInning: data.current_inning,
           syncedHalf: data.current_half,
           syncedLeadoffId: data.leadoff_player_id,
+          syncedBatterIndex: data.current_batter_index,
         });
       }
     }
@@ -61,7 +65,7 @@ export function useGameSync(
       .on(
         'postgres_changes',
         {
-          event: 'UPDATE',
+          event: '*',
           schema: 'public',
           table: 'game_state',
           filter: `game_id=eq.${gameId}`,
@@ -71,6 +75,7 @@ export function useGameSync(
             current_inning: number;
             current_half: 'top' | 'bottom';
             leadoff_player_id: number | null;
+            current_batter_index: number | null;
           };
 
           setSync((prev) => {
@@ -91,6 +96,7 @@ export function useGameSync(
               syncedInning: row.current_inning,
               syncedHalf: row.current_half,
               syncedLeadoffId: row.leadoff_player_id,
+              syncedBatterIndex: row.current_batter_index,
             };
           });
         }

@@ -35,7 +35,7 @@ export default function Home() {
   }, [refetchGames, refetchPlayers, refetchAssignments]);
 
   // Subscribe to live scoring updates from the Stats app
-  useGameSync(
+  const gameSync = useGameSync(
     currentGame?.id || null,
     // When the Stats app advances the inning, switch to it
     (inning, half) => {
@@ -52,6 +52,13 @@ export default function Home() {
     }
   );
 
+  // Resolve current batter from game_lineup batting order + batter index
+  const battingOrderPlayers = players.filter(p => p.sort_order != null).sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+  const currentBatterId = gameSync.syncedBatterIndex != null && gameSync.syncedHalf === 'bottom' && battingOrderPlayers.length > 0
+    ? battingOrderPlayers[gameSync.syncedBatterIndex % battingOrderPlayers.length]?.id ?? null
+    : null;
+
+  const numInnings = currentGame?.num_innings || 5;
   const inningAssignments = getInningAssignments(currentInning);
   const assignedPlayerIds = new Set(inningAssignments.map(a => a.player_id));
 
@@ -59,15 +66,15 @@ export default function Home() {
   useEffect(() => {
     if (!currentGame) return;
     const completed = currentGame.completed_innings || [];
-    for (let i = 1; i <= currentGame.num_innings; i++) {
+    for (let i = 1; i <= numInnings; i++) {
       if (!completed.includes(i)) {
         setCurrentInning(i);
         return;
       }
     }
     // All complete — stay on last inning
-    setCurrentInning(currentGame.num_innings);
-  }, [currentGame?.id, currentGame?.completed_innings]); // eslint-disable-line react-hooks/exhaustive-deps
+    setCurrentInning(numInnings);
+  }, [currentGame?.id, currentGame?.completed_innings, numInnings]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Sync batting order from Stats app game_lineup when game changes
   useEffect(() => {
@@ -184,7 +191,7 @@ export default function Home() {
           <Recommendations
             players={players}
             assignments={assignments}
-            numInnings={currentGame.num_innings}
+            numInnings={numInnings}
             completedInnings={currentGame.completed_innings || []}
             onClose={() => setShowRecommendations(false)}
           />
@@ -194,7 +201,7 @@ export default function Home() {
               <div className="flex flex-col items-center z-20 py-2 md:absolute md:top-2 md:left-0 md:right-0 md:py-0">
                 <InningNav
                   currentInning={currentInning}
-                  numInnings={currentGame.num_innings}
+                  numInnings={numInnings}
                   completedInnings={currentGame.completed_innings || []}
                   onInningChange={handleInningChange}
 
@@ -232,7 +239,7 @@ export default function Home() {
               </div>
             </div>
             <div className="hidden md:flex w-72 lg:w-80 shrink-0 self-stretch overflow-y-auto py-2 pl-2" style={{ borderLeft: '1px solid var(--border)' }}>
-              <BattingOrder players={players} leadoffId={leadoffId} onSelectLeadoff={(id) => setLeadoffId(id === leadoffId ? null : id)} onUpdateBattingOrder={updateBattingOrder} />
+              <BattingOrder players={players} leadoffId={leadoffId} currentBatterId={currentBatterId} showLeadoffBadge={gameSync.syncedLeadoffId != null && leadoffId === gameSync.syncedLeadoffId} onSelectLeadoff={(id) => setLeadoffId(id === leadoffId ? null : id)} onUpdateBattingOrder={updateBattingOrder} />
             </div>
           </div>
         )}
@@ -241,7 +248,7 @@ export default function Home() {
       {/* Batting order on mobile */}
       {currentGame && !showRecommendations && (
         <div className="md:hidden px-4 pb-4">
-          <BattingOrder players={players} leadoffId={leadoffId} onSelectLeadoff={(id) => setLeadoffId(id === leadoffId ? null : id)} onUpdateBattingOrder={updateBattingOrder} />
+          <BattingOrder players={players} leadoffId={leadoffId} currentBatterId={currentBatterId} showLeadoffBadge={gameSync.syncedLeadoffId != null && leadoffId === gameSync.syncedLeadoffId} onSelectLeadoff={(id) => setLeadoffId(id === leadoffId ? null : id)} onUpdateBattingOrder={updateBattingOrder} />
         </div>
       )}
 
