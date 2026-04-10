@@ -58,7 +58,8 @@ export function useGameSync(
         .single();
 
       if (data) {
-        setSync({
+        const prev = syncRef.current;
+        const next: GameSyncState = {
           syncedInning: data.current_inning,
           syncedHalf: data.current_half,
           syncedLeadoffId: data.leadoff_player_id,
@@ -66,17 +67,27 @@ export function useGameSync(
           runnerFirst: !!data.runner_first,
           runnerSecond: !!data.runner_second,
           runnerThird: !!data.runner_third,
-        });
-        // Fire callbacks on initial load so lineup jumps to the right inning
-        if (data.current_inning != null && data.current_half != null) {
-          onInningChangeRef.current?.(data.current_inning, data.current_half);
+        };
+        syncRef.current = next;
+        setSync(next);
+
+        const inningChanged = prev.syncedInning !== next.syncedInning || prev.syncedHalf !== next.syncedHalf;
+        const leadoffChanged = prev.syncedLeadoffId !== next.syncedLeadoffId;
+        if (inningChanged && next.syncedInning != null && next.syncedHalf != null) {
+          onInningChangeRef.current?.(next.syncedInning, next.syncedHalf);
         }
-        if (data.leadoff_player_id != null) {
-          onLeadoffChangeRef.current?.(data.leadoff_player_id);
+        if (leadoffChanged && next.syncedLeadoffId != null) {
+          onLeadoffChangeRef.current?.(next.syncedLeadoffId);
         }
       }
     }
     fetchInitial();
+
+    // Poll when tab becomes visible as a Realtime fallback
+    function handleVisibility() {
+      if (document.visibilityState === 'visible') fetchInitial();
+    }
+    document.addEventListener('visibilitychange', handleVisibility);
 
     // Subscribe to realtime changes
     const channel = supabase
@@ -117,6 +128,8 @@ export function useGameSync(
             runnerSecond: !!row.runner_second,
             runnerThird: !!row.runner_third,
           };
+          // Update ref immediately so rapid events don't compare stale state
+          syncRef.current = next;
           setSync(next);
 
           // Fire callbacks after state update
@@ -130,8 +143,13 @@ export function useGameSync(
       )
       .subscribe();
 
+    // Also poll periodically as a safety net
+    const poll = setInterval(fetchInitial, 15000);
+
     return () => {
       supabase.removeChannel(channel);
+      document.removeEventListener('visibilitychange', handleVisibility);
+      clearInterval(poll);
     };
   }, [gameId]);
 
