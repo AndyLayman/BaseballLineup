@@ -7,11 +7,12 @@ import { getPhotoUrl } from '@/lib/supabase';
 interface BattingOrderProps {
   players: Player[];
   leadoffId: number | null;
+  showLeadoffBadge?: boolean;
   onSelectLeadoff: (playerId: number) => void;
   onUpdateBattingOrder: (orderedIds: number[], removedIds: number[]) => void;
 }
 
-export default function BattingOrder({ players, leadoffId, onSelectLeadoff, onUpdateBattingOrder }: BattingOrderProps) {
+export default function BattingOrder({ players, leadoffId, showLeadoffBadge = false, onSelectLeadoff, onUpdateBattingOrder }: BattingOrderProps) {
   const [reordering, setReordering] = useState(false);
   const [dragOrder, setDragOrder] = useState<Player[]>([]);
   const [removed, setRemoved] = useState<Player[]>([]);
@@ -220,7 +221,7 @@ export default function BattingOrder({ players, leadoffId, onSelectLeadoff, onUp
                 style={{
                   background: isDragging ? 'var(--bg-card)' : 'var(--bg-deep)',
                   ...(isDragging ? { border: '1px solid var(--teal)', boxShadow: 'var(--glow-teal)' } : {}),
-                  ...(isLeadoff && !reordering ? { outline: '2px solid var(--teal)', outlineOffset: '-2px' } : {}),
+                  ...(isLeadoff && showLeadoffBadge && !reordering ? { outline: '2px solid var(--teal)', outlineOffset: '-2px' } : {}),
                 }}
               >
                 {reordering && (
@@ -259,7 +260,7 @@ export default function BattingOrder({ players, leadoffId, onSelectLeadoff, onUp
                   </span>
                 )}
               </button>
-              {isLeadoff && !reordering && (
+              {isLeadoff && showLeadoffBadge && !reordering && (
                 <span className="absolute -right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold uppercase px-2 py-0.5 rounded-full whitespace-nowrap z-10" style={{ background: 'var(--teal)', color: 'var(--black)' }}>
                   Lead Off
                 </span>

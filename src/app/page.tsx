@@ -233,7 +233,7 @@ export default function Home() {
               </div>
             </div>
             <div className="hidden md:flex w-72 lg:w-80 shrink-0 self-stretch overflow-y-auto py-2 pl-2" style={{ borderLeft: '1px solid var(--border)' }}>
-              <BattingOrder players={players} leadoffId={leadoffId} onSelectLeadoff={(id) => setLeadoffId(id === leadoffId ? null : id)} onUpdateBattingOrder={updateBattingOrder} />
+              <BattingOrder players={players} leadoffId={leadoffId} showLeadoffBadge={(currentGame?.completed_innings || []).includes(currentInning)} onSelectLeadoff={(id) => setLeadoffId(id === leadoffId ? null : id)} onUpdateBattingOrder={updateBattingOrder} />
             </div>
           </div>
         )}
@@ -242,7 +242,7 @@ export default function Home() {
       {/* Batting order on mobile */}
       {currentGame && !showRecommendations && (
         <div className="md:hidden px-4 pb-4">
-          <BattingOrder players={players} leadoffId={leadoffId} onSelectLeadoff={(id) => setLeadoffId(id === leadoffId ? null : id)} onUpdateBattingOrder={updateBattingOrder} />
+          <BattingOrder players={players} leadoffId={leadoffId} showLeadoffBadge={(currentGame?.completed_innings || []).includes(currentInning)} onSelectLeadoff={(id) => setLeadoffId(id === leadoffId ? null : id)} onUpdateBattingOrder={updateBattingOrder} />
         </div>
       )}
 
