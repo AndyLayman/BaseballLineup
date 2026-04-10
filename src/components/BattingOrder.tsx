@@ -200,6 +200,7 @@ export default function BattingOrder({ players, leadoffId, currentBatterId, show
         {displayList.map((player, i) => {
           const isLeadoff = player.id === leadoffId;
           const isCurrentBatter = player.id === currentBatterId;
+          const isHighlighted = (isCurrentBatter || isLeadoff) && !reordering;
           const isDragging = reordering && draggingIndex === i;
           return (
             <div
@@ -221,15 +222,14 @@ export default function BattingOrder({ players, leadoffId, currentBatterId, show
                 onClick={reordering ? undefined : () => onSelectLeadoff(player.id)}
                 className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md touch-manipulation transition-all text-left ${reordering ? 'cursor-grab active:cursor-grabbing' : ''}`}
                 style={{
-                  background: isCurrentBatter && !reordering ? 'var(--teal)' : isDragging ? 'var(--bg-card)' : 'var(--bg-deep)',
+                  background: isHighlighted ? 'var(--teal)' : isDragging ? 'var(--bg-card)' : 'var(--bg-deep)',
                   ...(isDragging ? { border: '1px solid var(--teal)', boxShadow: 'var(--glow-teal)' } : {}),
-                  ...(isLeadoff && !isCurrentBatter && !reordering ? { outline: '2px solid var(--teal)', outlineOffset: '-2px' } : {}),
                 }}
               >
                 {reordering && (
                   <span className="text-sm shrink-0" style={{ color: 'var(--text-muted)' }}>&#9776;</span>
                 )}
-                <span className="font-bold text-sm w-5 text-center shrink-0" style={{ color: isCurrentBatter && !reordering ? 'var(--black)' : 'var(--teal)' }}>
+                <span className="font-bold text-sm w-5 text-center shrink-0" style={{ color: isHighlighted ? 'var(--black)' : 'var(--teal)' }}>
                   {i + 1}
                 </span>
                 {getPhotoUrl(player.id) ? (
@@ -246,10 +246,10 @@ export default function BattingOrder({ players, leadoffId, currentBatterId, show
                     </span>
                   </div>
                 )}
-                <span className="text-xs font-medium shrink-0" style={{ color: isCurrentBatter && !reordering ? 'var(--black)' : 'var(--text-sub)' }}>
+                <span className="text-xs font-medium shrink-0" style={{ color: isHighlighted ? 'var(--black)' : 'var(--text-sub)' }}>
                   #{player.number}
                 </span>
-                <span className="text-sm font-medium truncate flex-1" style={{ color: isCurrentBatter && !reordering ? 'var(--black)' : 'var(--text)' }}>
+                <span className="text-sm font-medium truncate flex-1" style={{ color: isHighlighted ? 'var(--black)' : 'var(--text)' }}>
                   {player.first_name} {player.last_name}
                 </span>
                 {reordering && (
