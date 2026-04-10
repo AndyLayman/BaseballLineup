@@ -52,6 +52,7 @@ export default function Home() {
     }
   );
 
+  const numInnings = currentGame?.num_innings || 6;
   const inningAssignments = getInningAssignments(currentInning);
   const assignedPlayerIds = new Set(inningAssignments.map(a => a.player_id));
 
@@ -59,15 +60,15 @@ export default function Home() {
   useEffect(() => {
     if (!currentGame) return;
     const completed = currentGame.completed_innings || [];
-    for (let i = 1; i <= currentGame.num_innings; i++) {
+    for (let i = 1; i <= numInnings; i++) {
       if (!completed.includes(i)) {
         setCurrentInning(i);
         return;
       }
     }
     // All complete — stay on last inning
-    setCurrentInning(currentGame.num_innings);
-  }, [currentGame?.id, currentGame?.completed_innings]); // eslint-disable-line react-hooks/exhaustive-deps
+    setCurrentInning(numInnings);
+  }, [currentGame?.id, currentGame?.completed_innings, numInnings]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Sync batting order from Stats app game_lineup when game changes
   useEffect(() => {
@@ -184,7 +185,7 @@ export default function Home() {
           <Recommendations
             players={players}
             assignments={assignments}
-            numInnings={currentGame.num_innings}
+            numInnings={numInnings}
             completedInnings={currentGame.completed_innings || []}
             onClose={() => setShowRecommendations(false)}
           />
@@ -194,7 +195,7 @@ export default function Home() {
               <div className="flex flex-col items-center z-20 py-2 md:absolute md:top-2 md:left-0 md:right-0 md:py-0">
                 <InningNav
                   currentInning={currentInning}
-                  numInnings={currentGame.num_innings}
+                  numInnings={numInnings}
                   completedInnings={currentGame.completed_innings || []}
                   onInningChange={handleInningChange}
 
