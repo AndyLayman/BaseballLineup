@@ -67,6 +67,10 @@ export function useGameSync(
           runnerSecond: !!data.runner_second,
           runnerThird: !!data.runner_third,
         });
+        // Fire callbacks on initial load so lineup jumps to the right inning
+        if (data.current_inning != null && data.current_half != null) {
+          onInningChangeRef.current?.(data.current_inning, data.current_half);
+        }
         if (data.leadoff_player_id != null) {
           onLeadoffChangeRef.current?.(data.leadoff_player_id);
         }
