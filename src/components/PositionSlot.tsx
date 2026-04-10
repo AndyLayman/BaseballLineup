@@ -28,8 +28,8 @@ export default function PositionSlot({ position, label, player, onTap, small, is
       >
         {player ? (
           <>
-            <span className="text-[10px] font-medium leading-tight text-center max-w-[48px] truncate rounded px-1" style={{ color: 'var(--text)', background: 'var(--bg-card)' }}>
-              {player.first_name}
+            <span className="text-[10px] font-medium leading-tight text-center max-w-[56px] truncate rounded px-1" style={{ color: 'var(--clay)', background: 'var(--bg-card)' }}>
+              {player.first_name} <span style={{ opacity: 0.7 }}>•</span> {position}
             </span>
             <div className="relative">
               {getPhotoUrl(player.id) ? (
@@ -86,14 +86,9 @@ export default function PositionSlot({ position, label, player, onTap, small, is
     >
       {player ? (
         <>
-          <div className="flex flex-col items-center rounded px-1.5 py-0.5" style={{ background: 'var(--bg-card)' }}>
-            <span className="text-xs font-medium leading-tight text-center max-w-[80px] truncate" style={{ color: 'var(--text)' }}>
-              {player.first_name}
-            </span>
-            <span className="text-[10px] font-light" style={{ color: 'var(--gray-200)' }}>
-              {label}
-            </span>
-          </div>
+          <span className="text-xs font-medium leading-tight text-center max-w-[80px] truncate rounded px-1.5 py-0.5" style={{ color: 'var(--clay)', background: 'var(--bg-card)' }}>
+            {player.first_name} <span style={{ opacity: 0.7 }}>•</span> {position}
+          </span>
           <div className="relative">
             {getPhotoUrl(player.id) ? (
               <img
