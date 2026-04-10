@@ -58,9 +58,6 @@ export default function PositionSlot({ position, label, player, onTap, small, is
           </>
         ) : (
           <>
-            <span className="text-[8px] font-light drop-shadow-md" style={{ color: 'var(--gray-400)' }}>
-              {label}
-            </span>
             <div className="w-9 h-9 rounded-full border-2 border-dashed flex items-center justify-center" style={{
               borderColor: isDropTarget ? 'rgba(255,255,255,0.6)' : 'var(--gray-600)',
               background: isDropTarget ? 'var(--hover)' : 'var(--bg-input)',
@@ -117,9 +114,6 @@ export default function PositionSlot({ position, label, player, onTap, small, is
         </>
       ) : (
         <>
-          <span className="text-[10px] font-light drop-shadow-md" style={{ color: 'var(--gray-400)' }}>
-            {label}
-          </span>
           <div className="w-14 h-14 rounded-full border-2 border-dashed flex items-center justify-center" style={{
             borderColor: isDropTarget ? 'rgba(255,255,255,0.6)' : 'var(--gray-600)',
             background: isDropTarget ? 'var(--hover)' : 'var(--bg-input)',
