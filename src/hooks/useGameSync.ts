@@ -55,6 +55,9 @@ export function useGameSync(
           syncedLeadoffId: data.leadoff_player_id,
           syncedBatterIndex: data.current_batter_index,
         });
+        if (data.leadoff_player_id != null) {
+          onLeadoffChangeRef.current?.(data.leadoff_player_id);
+        }
       }
     }
     fetchInitial();

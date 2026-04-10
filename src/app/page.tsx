@@ -20,14 +20,7 @@ export default function Home() {
   const [currentInning, setCurrentInning] = useState(1);
   const [selectedPosition, setSelectedPosition] = useState<Position | null>(null);
   const [showRecommendations, setShowRecommendations] = useState(false);
-  const [leadoffId, _setLeadoffId] = useState<number | null>(null);
-  const setLeadoffId = useCallback((id: number | null) => {
-    _setLeadoffId(id);
-    if (currentGame?.id) {
-      if (id != null) localStorage.setItem(`leadoff-${currentGame.id}`, String(id));
-      else localStorage.removeItem(`leadoff-${currentGame.id}`);
-    }
-  }, [currentGame?.id]);
+  const [leadoffId, setLeadoffId] = useState<number | null>(null);
   const [isLocked, setIsLocked] = useState(false);
   const [lockPattern, setLockPattern] = useState<string[] | null>(null);
   const [showLock, setShowLock] = useState<'set' | 'unlock' | null>(null);
@@ -82,13 +75,6 @@ export default function Home() {
     // All complete — stay on last inning
     setCurrentInning(numInnings);
   }, [currentGame?.id, currentGame?.completed_innings, numInnings]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Restore cached leadoff when game changes
-  useEffect(() => {
-    if (!currentGame) return;
-    const cached = localStorage.getItem(`leadoff-${currentGame.id}`);
-    _setLeadoffId(cached ? Number(cached) : null);
-  }, [currentGame?.id]);
 
   // Sync batting order from Stats app game_lineup when game changes
   useEffect(() => {
