@@ -40,11 +40,16 @@ export default function Home() {
     // When the Stats app advances the inning, switch to it
     (inning, half) => {
       if (half === 'bottom') {
+        // Bottom of inning N — our team bats, show inning N's lineup
+        setCurrentInning(inning);
+        setShowRecommendations(false);
+      } else if (half === 'top') {
+        // Top of inning N — opponent bats. If this is top of inning 2+,
+        // the previous inning's bottom just ended, so stay on inning N
+        // (lineup app shows defensive positions for this inning)
         setCurrentInning(inning);
         setShowRecommendations(false);
       }
-      // Refetch game data after a short delay so completed_innings updates
-      setTimeout(() => refetchCurrentGame(), 1500);
     },
     // When the Stats app identifies the leadoff batter, select them
     (playerId) => {

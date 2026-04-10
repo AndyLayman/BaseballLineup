@@ -51,6 +51,33 @@ export function useGame() {
     fetchGames();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Subscribe to realtime changes on the games table so completed_innings
+  // updates from the Stats app propagate immediately
+  useEffect(() => {
+    if (!isSupabaseConfigured || !currentGame) return;
+    const channel = supabase
+      .channel(`game-updates-${currentGame.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'games',
+          filter: `id=eq.${currentGame.id}`,
+        },
+        (payload) => {
+          const row = payload.new as Game;
+          setCurrentGame(row);
+          setGames(prev => prev.map(g => g.id === row.id ? row : g));
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [currentGame?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const selectGame = useCallback((gameId: string) => {
     const game = games.find(g => g.id === gameId);
     if (game) setCurrentGame(game);
