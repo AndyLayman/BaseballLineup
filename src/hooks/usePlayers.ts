@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { Player } from '@/lib/types';
+import { showToast } from '@/components/Toast';
 
 export function usePlayers() {
   const [players, setPlayers] = useState<Player[]>([]);
@@ -21,7 +22,7 @@ export function usePlayers() {
       .order('number');
 
     if (error) {
-      console.error('Error fetching players:', error);
+      showToast('Failed to load players', 'error');
     } else {
       setPlayers(data || []);
     }

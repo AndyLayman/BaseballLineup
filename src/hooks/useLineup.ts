@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { LineupAssignment, Position } from '@/lib/types';
+import { showToast } from '@/components/Toast';
 
 type UndoAction =
   | { type: 'assign'; assignmentId: string; previousPlayerId: number | null; previousAssignment: LineupAssignment | null }
@@ -38,7 +39,7 @@ export function useLineup(gameId: string | null) {
         .eq('game_id', gameId);
 
       if (error) {
-        console.error('Error fetching assignments:', error);
+        showToast('Failed to load lineup', 'error');
       } else {
         setAssignments(data || []);
       }
@@ -80,7 +81,7 @@ export function useLineup(gameId: string | null) {
         .single();
 
       if (error) {
-        console.error('Error updating assignment:', error);
+        showToast('Failed to save assignment', 'error');
         undoStack.current.pop();
         setCanUndo(undoStack.current.length > 0);
       } else if (data) {
@@ -94,7 +95,7 @@ export function useLineup(gameId: string | null) {
         .single();
 
       if (error) {
-        console.error('Error creating assignment:', error);
+        showToast('Failed to save assignment', 'error');
       } else if (data) {
         pushUndo({ type: 'assign', assignmentId: data.id, previousPlayerId: null, previousAssignment: null });
         setAssignments(prev => [...prev, data]);
@@ -118,7 +119,7 @@ export function useLineup(gameId: string | null) {
         .eq('id', existing.id);
 
       if (error) {
-        console.error('Error deleting assignment:', error);
+        showToast('Failed to remove player', 'error');
         undoStack.current.pop();
         setCanUndo(undoStack.current.length > 0);
       } else {
@@ -158,7 +159,7 @@ export function useLineup(gameId: string | null) {
       ]);
 
       if (fromResult.error || toResult.error) {
-        console.error('Error swapping positions:', fromResult.error || toResult.error);
+        showToast('Failed to swap positions', 'error');
         undoStack.current.pop();
         setCanUndo(undoStack.current.length > 0);
       } else {
@@ -179,7 +180,7 @@ export function useLineup(gameId: string | null) {
         .single();
 
       if (error) {
-        console.error('Error moving position:', error);
+        showToast('Failed to move position', 'error');
         undoStack.current.pop();
         setCanUndo(undoStack.current.length > 0);
       } else if (data) {
@@ -204,7 +205,7 @@ export function useLineup(gameId: string | null) {
         .in('id', existing.map(a => a.id));
 
       if (error) {
-        console.error('Error clearing target inning:', error);
+        showToast('Failed to clear inning', 'error');
         return;
       }
     }
@@ -223,7 +224,7 @@ export function useLineup(gameId: string | null) {
       .select('*, player:players(*)');
 
     if (error) {
-      console.error('Error copying inning:', error);
+      showToast('Failed to copy inning', 'error');
     } else if (data) {
       pushUndo({ type: 'copyInning', createdIds: data.map(d => d.id), overwrittenAssignments: existing });
       setAssignments(prev => [
