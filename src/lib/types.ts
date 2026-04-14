@@ -16,6 +16,9 @@ export interface Game {
   date: string;
   num_innings: number;
   completed_innings: number[];
+  opponent_logo_svg: string | null;
+  opponent_color_fg: string | null;
+  opponent_color_bg: string | null;
 }
 
 export interface LineupAssignment {

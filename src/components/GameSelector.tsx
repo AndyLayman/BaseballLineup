@@ -134,7 +134,22 @@ export default function GameSelector({
                 style={{ background: 'var(--bg-input)', color: 'var(--text)', border: '1px solid var(--border)' }}
               >
                 {currentGame ? (
-                  <span className="truncate">
+                  <span className="flex items-center gap-1.5 truncate">
+                    <span
+                      className="w-6 h-6 rounded flex items-center justify-center overflow-hidden shrink-0"
+                      style={{ backgroundColor: currentGame.opponent_color_bg || '#1a1a1a' }}
+                    >
+                      {currentGame.opponent_logo_svg ? (
+                        <span
+                          className="w-4 h-4 [&>svg]:w-full [&>svg]:h-full"
+                          dangerouslySetInnerHTML={{ __html: currentGame.opponent_logo_svg }}
+                        />
+                      ) : (
+                        <span className="text-[10px] font-bold" style={{ color: currentGame.opponent_color_fg || '#ffffff' }}>
+                          {currentGame.opponent?.[0]?.toUpperCase() || '?'}
+                        </span>
+                      )}
+                    </span>
                     <span className="font-medium">{formatDate(currentGame.date)}</span>
                     <span style={{ color: 'var(--text-muted)' }}> vs </span>
                     <span>{currentGame.opponent || 'TBD'}</span>
@@ -185,6 +200,21 @@ export default function GameSelector({
                             if (!isActive) (e.currentTarget as HTMLElement).style.background = 'transparent';
                           }}
                         >
+                          <span
+                            className="w-8 h-8 rounded-md flex items-center justify-center overflow-hidden shrink-0"
+                            style={{ backgroundColor: g.opponent_color_bg || '#1a1a1a' }}
+                          >
+                            {g.opponent_logo_svg ? (
+                              <span
+                                className="w-5 h-5 [&>svg]:w-full [&>svg]:h-full"
+                                dangerouslySetInnerHTML={{ __html: g.opponent_logo_svg }}
+                              />
+                            ) : (
+                              <span className="text-xs font-bold" style={{ color: g.opponent_color_fg || '#ffffff' }}>
+                                {g.opponent?.[0]?.toUpperCase() || '?'}
+                              </span>
+                            )}
+                          </span>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
                               <span className="text-sm font-medium" style={{ color: isActive ? 'var(--teal)' : 'var(--text)' }}>
