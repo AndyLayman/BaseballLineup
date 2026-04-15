@@ -15,6 +15,7 @@ import Recommendations from '@/components/Recommendations';
 import BattingOrder from '@/components/BattingOrder';
 import DiamondLock from '@/components/DiamondLock';
 import PullToRefresh from '@/components/PullToRefresh';
+import BottomNav, { Tab } from '@/components/BottomNav';
 
 export default function Home() {
   const [currentInning, setCurrentInning] = useState(1);
@@ -25,6 +26,7 @@ export default function Home() {
   const [lockPattern, setLockPattern] = useState<string[] | null>(null);
   const [showLock, setShowLock] = useState<'set' | 'unlock' | null>(null);
   const [lockError, setLockError] = useState(false);
+  const [activeTab, setActiveTab] = useState<Tab>('field');
 
   const { players, updateBattingOrder, syncFromGameLineup, refetchPlayers } = usePlayers();
   const { games, currentGame, loading: gamesLoading, error: gameError, selectGame, createGame, toggleInningComplete, refetchCurrentGame, refetchGames } = useGame();
@@ -43,12 +45,14 @@ export default function Home() {
         // Bottom of inning N — our team bats, show inning N's lineup
         setCurrentInning(inning);
         setShowRecommendations(false);
+        setActiveTab('field');
       } else if (half === 'top') {
         // Top of inning N — opponent bats. If this is top of inning 2+,
         // the previous inning's bottom just ended, so stay on inning N
         // (lineup app shows defensive positions for this inning)
         setCurrentInning(inning);
         setShowRecommendations(false);
+        setActiveTab('field');
       }
     },
     // When the Stats app identifies the leadoff batter, select them
@@ -170,8 +174,88 @@ export default function Home() {
 
   const handleInningChange = (inning: number) => {
     setShowRecommendations(false);
+    setActiveTab('field');
     setCurrentInning(inning);
   };
+
+  const handleTabChange = (tab: Tab) => {
+    setActiveTab(tab);
+    if (tab === 'recs') {
+      setShowRecommendations(true);
+    } else {
+      setShowRecommendations(false);
+    }
+  };
+
+  const fieldContent = currentGame && (
+    <div className="flex-1 flex flex-col items-center px-4 min-w-0 relative md:justify-center">
+      <div className="flex flex-col items-center z-20 py-2 md:absolute md:top-2 md:left-0 md:right-0 md:py-0">
+        <InningNav
+          currentInning={currentInning}
+          numInnings={numInnings}
+          completedInnings={currentGame.completed_innings || []}
+          onInningChange={handleInningChange}
+          onShowRecommendations={() => {
+            const next = !showRecommendations;
+            setShowRecommendations(next);
+            setActiveTab(next ? 'recs' : 'field');
+          }}
+          showRecommendations={showRecommendations}
+        />
+        {!isLocked && (
+          <div className="flex items-center gap-2 mt-1.5">
+            <button
+              onClick={handleAutoFill}
+              className="h-7 px-3 rounded-md text-xs font-medium touch-manipulation btn-primary"
+            >
+              Auto
+            </button>
+            {currentInning > 1 && (
+              <button
+                onClick={handleCopyPrevious}
+                className="h-7 px-3 rounded-md text-xs font-medium touch-manipulation btn-secondary"
+              >
+                Copy Inning {currentInning - 1}
+              </button>
+            )}
+            {canUndo && (
+              <button
+                onClick={undo}
+                className="h-7 px-3 rounded-md text-xs font-medium touch-manipulation btn-secondary"
+              >
+                Undo
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+      <div className="w-full max-w-4xl md:max-w-none flex items-start md:items-center md:justify-center md:flex-1 diamond-container">
+        <Diamond
+          assignments={inningAssignments}
+          players={players}
+          onPositionTap={handlePositionTap}
+          onSwapPositions={handleSwapPositions}
+          runners={{ first: gameSync.runnerFirst, second: gameSync.runnerSecond, third: gameSync.runnerThird }}
+        />
+      </div>
+    </div>
+  );
+
+  const recsContent = currentGame && (
+    <Recommendations
+      players={players}
+      assignments={assignments}
+      numInnings={numInnings}
+      completedInnings={currentGame.completed_innings || []}
+      onClose={() => { setShowRecommendations(false); setActiveTab('field'); }}
+    />
+  );
+
+  const orderContent = currentGame && (
+    <div className="flex-1 overflow-y-auto">
+      <BattingOrder players={players} leadoffId={leadoffId} currentBatterId={currentBatterId} showLeadoffBadge={gameSync.syncedLeadoffId != null && leadoffId === gameSync.syncedLeadoffId} onSelectLeadoff={(id) => setLeadoffId(id === leadoffId ? null : id)} onUpdateBattingOrder={updateBattingOrder} />
+    </div>
+  );
 
   return (
     <PullToRefresh onRefresh={handlePullRefresh}>
@@ -210,76 +294,35 @@ export default function Home() {
               )}
             </div>
           </div>
-        ) : showRecommendations ? (
-          <Recommendations
-            players={players}
-            assignments={assignments}
-            numInnings={numInnings}
-            completedInnings={currentGame.completed_innings || []}
-            onClose={() => setShowRecommendations(false)}
-          />
         ) : (
-          <div className="flex-1 flex items-start md:items-stretch min-h-0">
-            <div className="flex-1 flex flex-col items-center px-4 min-w-0 relative md:justify-center">
-              <div className="flex flex-col items-center z-20 py-2 md:absolute md:top-2 md:left-0 md:right-0 md:py-0">
-                <InningNav
-                  currentInning={currentInning}
-                  numInnings={numInnings}
-                  completedInnings={currentGame.completed_innings || []}
-                  onInningChange={handleInningChange}
+          <>
+            {/* Mobile: tab-based content */}
+            <div className="md:hidden flex-1 flex flex-col min-h-0 pb-14">
+              {activeTab === 'field' && fieldContent}
+              {activeTab === 'order' && orderContent}
+              {activeTab === 'recs' && recsContent}
+            </div>
 
-                  onShowRecommendations={() => setShowRecommendations(!showRecommendations)}
-                  showRecommendations={showRecommendations}
-                />
-                {!isLocked && (
-                  <div className="flex items-center gap-2 mt-1.5">
-                    <button
-                      onClick={handleAutoFill}
-                      className="h-7 px-3 rounded-md text-xs font-medium touch-manipulation btn-primary"
-                    >
-                      Auto
-                    </button>
-                    {currentInning > 1 && (
-                      <button
-                        onClick={handleCopyPrevious}
-                        className="h-7 px-3 rounded-md text-xs font-medium touch-manipulation btn-secondary"
-                      >
-                        Copy Inning {currentInning - 1}
-                      </button>
-                    )}
-                    {canUndo && (
-                      <button
-                        onClick={undo}
-                        className="h-7 px-3 rounded-md text-xs font-medium touch-manipulation btn-secondary"
-                      >
-                        Undo
-                      </button>
-                    )}
+            {/* Desktop: original layout */}
+            <div className="hidden md:flex flex-1 items-stretch min-h-0">
+              {showRecommendations ? (
+                recsContent
+              ) : (
+                <>
+                  {fieldContent}
+                  <div className="w-72 lg:w-80 shrink-0 self-stretch overflow-y-auto py-2 pl-2" style={{ borderLeft: '1px solid var(--border)' }}>
+                    <BattingOrder players={players} leadoffId={leadoffId} currentBatterId={currentBatterId} showLeadoffBadge={gameSync.syncedLeadoffId != null && leadoffId === gameSync.syncedLeadoffId} onSelectLeadoff={(id) => setLeadoffId(id === leadoffId ? null : id)} onUpdateBattingOrder={updateBattingOrder} />
                   </div>
-                )}
-              </div>
-              <div className="w-full max-w-4xl md:max-w-none flex items-start md:items-center md:justify-center md:flex-1 diamond-container">
-                <Diamond
-                  assignments={inningAssignments}
-                  players={players}
-                  onPositionTap={handlePositionTap}
-                  onSwapPositions={handleSwapPositions}
-                  runners={{ first: gameSync.runnerFirst, second: gameSync.runnerSecond, third: gameSync.runnerThird }}
-                />
-              </div>
+                </>
+              )}
             </div>
-            <div className="hidden md:flex w-72 lg:w-80 shrink-0 self-stretch overflow-y-auto py-2 pl-2" style={{ borderLeft: '1px solid var(--border)' }}>
-              <BattingOrder players={players} leadoffId={leadoffId} currentBatterId={currentBatterId} showLeadoffBadge={gameSync.syncedLeadoffId != null && leadoffId === gameSync.syncedLeadoffId} onSelectLeadoff={(id) => setLeadoffId(id === leadoffId ? null : id)} onUpdateBattingOrder={updateBattingOrder} />
-            </div>
-          </div>
+          </>
         )}
       </div>
 
-      {/* Batting order on mobile */}
-      {currentGame && !showRecommendations && (
-        <div className="md:hidden px-4 pb-4">
-          <BattingOrder players={players} leadoffId={leadoffId} currentBatterId={currentBatterId} showLeadoffBadge={gameSync.syncedLeadoffId != null && leadoffId === gameSync.syncedLeadoffId} onSelectLeadoff={(id) => setLeadoffId(id === leadoffId ? null : id)} onUpdateBattingOrder={updateBattingOrder} />
-        </div>
+      {/* Bottom tab bar (mobile only) */}
+      {currentGame && (
+        <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
       )}
 
       {/* Diamond lock */}
