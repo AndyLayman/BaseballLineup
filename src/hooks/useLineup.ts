@@ -2,8 +2,78 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
-import { LineupAssignment, Position } from '@/lib/types';
+import { LineupAssignment, Position, Player } from '@/lib/types';
+import { FIELD_POSITIONS, BENCH_POSITIONS } from '@/lib/positions';
 import { showToast } from '@/components/Toast';
+
+const FIELD_KEYS = FIELD_POSITIONS.map(p => p.key);
+const BENCH_KEYS = BENCH_POSITIONS.map(p => p.key);
+
+/** Normalize bench slots to a single "BN" for coverage tracking */
+function normalizePos(pos: Position): string {
+  return pos.startsWith('BN') ? 'BN' : pos;
+}
+
+/**
+ * Compute auto-fill assignments for an inning.
+ * Tries to place each player in a position they haven't played yet (in other innings).
+ * All bench positions (BN1-BN4) count as one "bench" position for coverage purposes.
+ */
+function computeAutoFill(
+  players: Player[],
+  allAssignments: LineupAssignment[],
+  gameId: string,
+  targetInning: number,
+): { position: Position; playerId: number }[] {
+  // Build played-positions for each player from OTHER innings
+  const playedMap = new Map<number, Set<string>>();
+  for (const a of allAssignments) {
+    if (a.game_id !== gameId || a.inning === targetInning) continue;
+    if (!playedMap.has(a.player_id)) playedMap.set(a.player_id, new Set());
+    playedMap.get(a.player_id)!.add(normalizePos(a.position));
+  }
+
+  // Use players with sort_order (in batting order) if available, else all
+  const active = players.filter(p => p.sort_order != null)
+    .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+  const roster = active.length > 0 ? active : [...players];
+
+  // Positions to fill: field first, then bench — limited by roster size
+  const allSlots: Position[] = [...FIELD_KEYS, ...BENCH_KEYS];
+  const slotsToFill = allSlots.slice(0, roster.length);
+  const playersToPlace = roster.slice(0, allSlots.length);
+
+  // Greedy assignment: most-constrained player first
+  const remaining = new Set(slotsToFill);
+  const result: { position: Position; playerId: number }[] = [];
+
+  // Score each player by how many unplayed positions are available to them
+  const scored = playersToPlace.map(player => {
+    const played = playedMap.get(player.id) ?? new Set<string>();
+    const unplayedSlots = slotsToFill.filter(s => !played.has(normalizePos(s)));
+    return { player, played, unplayedCount: unplayedSlots.length };
+  });
+
+  // Sort: fewest unplayed options first (most constrained)
+  scored.sort((a, b) => a.unplayedCount - b.unplayedCount);
+
+  for (const { player, played } of scored) {
+    const available = [...remaining];
+    // Prefer unplayed positions
+    const unplayed = available.filter(s => !played.has(normalizePos(s)));
+    // Among unplayed, prefer field positions over bench
+    const unplayedField = unplayed.filter(s => !s.startsWith('BN'));
+    const unplayedBench = unplayed.filter(s => s.startsWith('BN'));
+
+    const pick = unplayedField[0] ?? unplayedBench[0] ?? available[0];
+    if (pick) {
+      result.push({ position: pick, playerId: player.id });
+      remaining.delete(pick);
+    }
+  }
+
+  return result;
+}
 
 type UndoAction =
   | { type: 'assign'; assignmentId: string; previousPlayerId: number | null; previousAssignment: LineupAssignment | null }
@@ -234,6 +304,51 @@ export function useLineup(gameId: string | null) {
     }
   }, [gameId, assignments]);
 
+  const autoFillInning = useCallback(async (inning: number, players: Player[]) => {
+    if (!gameId || !isSupabaseConfigured) return;
+
+    const fills = computeAutoFill(players, assignments, gameId, inning);
+    if (fills.length === 0) return;
+
+    // Save existing assignments for undo
+    const existing = assignments.filter(a => a.game_id === gameId && a.inning === inning);
+
+    // Delete existing assignments for this inning
+    if (existing.length > 0) {
+      const { error } = await supabase
+        .from('lineup_assignments')
+        .delete()
+        .in('id', existing.map(a => a.id));
+      if (error) {
+        showToast('Failed to clear inning', 'error');
+        return;
+      }
+    }
+
+    // Insert auto-fill assignments
+    const inserts = fills.map(f => ({
+      game_id: gameId,
+      inning,
+      position: f.position,
+      player_id: f.playerId,
+    }));
+
+    const { data, error } = await supabase
+      .from('lineup_assignments')
+      .insert(inserts)
+      .select('*, player:players(*)');
+
+    if (error) {
+      showToast('Failed to auto-fill', 'error');
+    } else if (data) {
+      pushUndo({ type: 'copyInning', createdIds: data.map(d => d.id), overwrittenAssignments: existing });
+      setAssignments(prev => [
+        ...prev.filter(a => !(a.game_id === gameId && a.inning === inning)),
+        ...data,
+      ]);
+    }
+  }, [gameId, assignments]);
+
   const undo = useCallback(async () => {
     const action = undoStack.current.pop();
     setCanUndo(undoStack.current.length > 0);
@@ -351,5 +466,5 @@ export function useLineup(gameId: string | null) {
     }
   }, []);
 
-  return { assignments, loading, canUndo, getInningAssignments, assignPlayer, unassignPlayer, swapPositions, copyFromInning, undo, refetchAssignments };
+  return { assignments, loading, canUndo, getInningAssignments, assignPlayer, unassignPlayer, swapPositions, copyFromInning, autoFillInning, undo, refetchAssignments };
 }

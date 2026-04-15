@@ -28,7 +28,7 @@ export default function Home() {
 
   const { players, updateBattingOrder, syncFromGameLineup, refetchPlayers } = usePlayers();
   const { games, currentGame, loading: gamesLoading, error: gameError, selectGame, createGame, toggleInningComplete, refetchCurrentGame, refetchGames } = useGame();
-  const { assignments, getInningAssignments, assignPlayer, unassignPlayer, swapPositions, copyFromInning, undo, canUndo, refetchAssignments } = useLineup(currentGame?.id || null);
+  const { assignments, getInningAssignments, assignPlayer, unassignPlayer, swapPositions, copyFromInning, autoFillInning, undo, canUndo, refetchAssignments } = useLineup(currentGame?.id || null);
 
   const handlePullRefresh = useCallback(async () => {
     await Promise.all([refetchGames(), refetchPlayers(), refetchAssignments()]);
@@ -134,6 +134,12 @@ export default function Home() {
     }
   };
 
+  const handleAutoFill = async () => {
+    if (currentGame && !isLocked) {
+      await autoFillInning(currentInning, players);
+    }
+  };
+
   const handleToggleLock = () => {
     if (isLocked) {
       // Show unlock dialog
@@ -227,6 +233,12 @@ export default function Home() {
                 />
                 {!isLocked && (
                   <div className="flex items-center gap-2 mt-1.5">
+                    <button
+                      onClick={handleAutoFill}
+                      className="h-7 px-3 rounded-md text-xs font-medium touch-manipulation btn-primary"
+                    >
+                      Auto
+                    </button>
                     {currentInning > 1 && (
                       <button
                         onClick={handleCopyPrevious}
