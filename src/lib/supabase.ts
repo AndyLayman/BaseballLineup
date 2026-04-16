@@ -10,7 +10,7 @@ export const supabase = createBrowserClient(
   supabaseAnonKey || "placeholder",
   {
     auth: {
-      lock: false,
+      flowType: "implicit",
     },
   }
 );
