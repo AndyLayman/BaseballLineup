@@ -1,47 +1,36 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { Suspense } from "react";
 
-function CallbackHandler() {
+export default function AuthCallbackPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   useEffect(() => {
-    const code = searchParams.get("code");
-    const nextParam = searchParams.get("next") ?? "/";
-    const next = nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : "/";
+    // With implicit flow, Supabase appends tokens as a hash fragment.
+    // The client auto-detects and sets the session. We just wait for it.
+    supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN") {
+        // Extract "next" from the URL (could be in query or hash params)
+        const params = new URLSearchParams(window.location.search);
+        const hashParams = new URLSearchParams(window.location.hash.replace("#", "?"));
+        const next = params.get("next") ?? hashParams.get("next") ?? "/";
+        router.replace(next.startsWith("/") && !next.startsWith("//") ? next : "/");
+      }
+    });
 
-    if (code) {
-      supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
-        if (error) {
-          router.replace("/login?error=auth");
-        } else {
-          router.replace(next);
-        }
-      });
-    } else {
+    // Fallback: if no sign-in event after 5 seconds, redirect to login
+    const timeout = setTimeout(() => {
       router.replace("/login?error=auth");
-    }
-  }, [router, searchParams]);
+    }, 5000);
+
+    return () => clearTimeout(timeout);
+  }, [router]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="text-muted-foreground animate-pulse">Signing in...</div>
     </div>
-  );
-}
-
-export default function AuthCallbackPage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-muted-foreground animate-pulse">Signing in...</div>
-      </div>
-    }>
-      <CallbackHandler />
-    </Suspense>
   );
 }
