@@ -4,14 +4,14 @@ import { useEffect, useState, useCallback } from 'react';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { Game } from '@/lib/types';
 
-export function useGame() {
+export function useGame(teamId: string | null) {
   const [games, setGames] = useState<Game[]>([]);
   const [currentGame, setCurrentGame] = useState<Game | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isSupabaseConfigured) {
+    if (!isSupabaseConfigured || !teamId) {
       setGames([]);
       setCurrentGame(null);
       setLoading(false);
@@ -23,6 +23,7 @@ export function useGame() {
       const { data, error } = await supabase
         .from('games')
         .select('*')
+        .eq('team_id', teamId)
         .order('date', { ascending: false });
 
       if (error) {
@@ -49,7 +50,7 @@ export function useGame() {
     };
 
     fetchGames();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [teamId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Subscribe to realtime changes on the games table so completed_innings
   // updates from the Stats app propagate immediately
@@ -84,7 +85,7 @@ export function useGame() {
   }, [games]);
 
   const createGame = useCallback(async (opponent: string, date: string) => {
-    if (!isSupabaseConfigured) return;
+    if (!isSupabaseConfigured || !teamId) return;
     setError(null);
     const { data, error } = await supabase
       .from('games')
@@ -92,6 +93,7 @@ export function useGame() {
         opponent,
         date,
         num_innings: 5,
+        team_id: teamId,
       })
       .select()
       .single();
@@ -145,10 +147,11 @@ export function useGame() {
   }, [currentGame?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const refetchGames = useCallback(async () => {
-    if (!isSupabaseConfigured) return;
+    if (!isSupabaseConfigured || !teamId) return;
     const { data } = await supabase
       .from('games')
       .select('*')
+      .eq('team_id', teamId)
       .order('date', { ascending: false });
     if (data) {
       setGames(data);

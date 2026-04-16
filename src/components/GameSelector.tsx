@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Game } from '@/lib/types';
 import { NavArrowDown, Check, Lock, LockSlash } from 'iconoir-react';
 import ThemeToggle from './ThemeToggle';
+import { UserMenu } from './user-menu';
 
 interface GameSelectorProps {
   games: Game[];
@@ -278,6 +279,9 @@ export default function GameSelector({
 
       {/* Theme toggle */}
       {!showNew && <ThemeToggle />}
+
+      {/* User menu */}
+      {!showNew && <UserMenu />}
     </div>
   );
 }

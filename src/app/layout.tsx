@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { ToastContainer } from "@/components/Toast";
+import { AuthProvider } from "@/components/auth-provider";
 import "./globals.css";
 
 const isStaging = process.env.NEXT_PUBLIC_IS_STAGING === 'true';
@@ -41,8 +42,10 @@ export default function RootLayout({
         />
       </head>
       <body className="h-full md:overflow-hidden overscroll-none">
-        {children}
-        <ToastContainer />
+        <AuthProvider>
+          {children}
+          <ToastContainer />
+        </AuthProvider>
       </body>
     </html>
   );

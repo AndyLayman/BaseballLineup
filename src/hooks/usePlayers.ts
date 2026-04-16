@@ -5,12 +5,12 @@ import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { Player } from '@/lib/types';
 import { showToast } from '@/components/Toast';
 
-export function usePlayers() {
+export function usePlayers(teamId: string | null) {
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchPlayers = useCallback(async () => {
-    if (!isSupabaseConfigured) {
+    if (!isSupabaseConfigured || !teamId) {
       setPlayers([]);
       setLoading(false);
       return;
@@ -19,6 +19,7 @@ export function usePlayers() {
     const { data, error } = await supabase
       .from('players')
       .select('*')
+      .eq('team_id', teamId)
       .order('number');
 
     if (error) {
@@ -27,9 +28,9 @@ export function usePlayers() {
       setPlayers(data || []);
     }
     setLoading(false);
-  }, []);
+  }, [teamId]);
 
-  useEffect(() => { fetchPlayers(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { fetchPlayers(); }, [fetchPlayers]);
 
   const updateBattingOrder = useCallback(async (orderedIds: number[], removedIds: number[]) => {
     if (!isSupabaseConfigured) return;

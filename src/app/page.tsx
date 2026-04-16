@@ -7,6 +7,8 @@ import { usePlayers } from '@/hooks/usePlayers';
 import { useGame } from '@/hooks/useGame';
 import { useLineup } from '@/hooks/useLineup';
 import { useGameSync } from '@/hooks/useGameSync';
+import { useAuth } from '@/components/auth-provider';
+import { useRouter } from 'next/navigation';
 import Diamond from '@/components/Diamond';
 import InningNav from '@/components/InningNav';
 import PlayerPicker from '@/components/PlayerPicker';
@@ -17,6 +19,15 @@ import DiamondLock from '@/components/DiamondLock';
 import PullToRefresh from '@/components/PullToRefresh';
 
 export default function Home() {
+  const { user, activeTeam, loading: authLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.replace('/login');
+    }
+  }, [authLoading, user, router]);
+
   const [currentInning, setCurrentInning] = useState(1);
   const [selectedPosition, setSelectedPosition] = useState<Position | null>(null);
   const [showRecommendations, setShowRecommendations] = useState(false);
@@ -26,8 +37,9 @@ export default function Home() {
   const [showLock, setShowLock] = useState<'set' | 'unlock' | null>(null);
   const [lockError, setLockError] = useState(false);
 
-  const { players, updateBattingOrder, syncFromGameLineup, refetchPlayers } = usePlayers();
-  const { games, currentGame, loading: gamesLoading, error: gameError, selectGame, createGame, toggleInningComplete, refetchCurrentGame, refetchGames } = useGame();
+  const teamId = activeTeam?.team_id ?? null;
+  const { players, updateBattingOrder, syncFromGameLineup, refetchPlayers } = usePlayers(teamId);
+  const { games, currentGame, loading: gamesLoading, error: gameError, selectGame, createGame, toggleInningComplete, refetchCurrentGame, refetchGames } = useGame(teamId);
   const { assignments, getInningAssignments, assignPlayer, unassignPlayer, swapPositions, copyFromInning, autoFillInning, undo, canUndo, refetchAssignments } = useLineup(currentGame?.id || null);
 
   const handlePullRefresh = useCallback(async () => {
@@ -172,6 +184,14 @@ export default function Home() {
     setShowRecommendations(false);
     setCurrentInning(inning);
   };
+
+  if (authLoading || !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-muted-foreground animate-pulse">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <PullToRefresh onRefresh={handlePullRefresh}>
