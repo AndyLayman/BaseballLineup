@@ -7,7 +7,15 @@ export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey && su
 
 export const supabase = createClient(
   supabaseUrl || "https://placeholder.supabase.co",
-  supabaseAnonKey || "placeholder"
+  supabaseAnonKey || "placeholder",
+  {
+    auth: {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      lock: async (_name: string, _acquireTimeout: number, fn: () => Promise<any>) => {
+        return fn();
+      },
+    },
+  }
 );
 
 export function getPhotoUrl(playerId: number): string | null {
