@@ -105,18 +105,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let mounted = true;
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!mounted) return;
-      const u = session?.user ?? null;
-      setUser(u);
-      if (u) {
-        loadMemberships(u.id).finally(() => { if (mounted) setLoading(false); });
-      } else {
-        setLoading(false);
+    async function initSession(retries = 3): Promise<void> {
+      for (let i = 0; i < retries; i++) {
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (!mounted) return;
+          const u = session?.user ?? null;
+          setUser(u);
+          if (u) {
+            await loadMemberships(u.id);
+          }
+          setLoading(false);
+          return;
+        } catch (err) {
+          // Lock contention — wait briefly and retry
+          if (i < retries - 1) {
+            await new Promise(r => setTimeout(r, 200 * (i + 1)));
+          } else {
+            console.error("Auth init failed after retries:", err);
+            if (mounted) setLoading(false);
+          }
+        }
       }
-    }).catch(() => {
-      if (mounted) setLoading(false);
-    });
+    }
+    initSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
