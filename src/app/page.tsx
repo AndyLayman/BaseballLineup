@@ -24,7 +24,11 @@ export default function Home() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      router.replace('/login');
+      const current = window.location.pathname + window.location.search;
+      const target = current && current !== '/'
+        ? `/login?next=${encodeURIComponent(current)}`
+        : '/login';
+      router.replace(target);
     }
   }, [authLoading, user, router]);
 
