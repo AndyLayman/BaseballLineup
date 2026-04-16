@@ -7,7 +7,12 @@ export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey && su
 
 export const supabase = createBrowserClient(
   supabaseUrl || "https://placeholder.supabase.co",
-  supabaseAnonKey || "placeholder"
+  supabaseAnonKey || "placeholder",
+  {
+    auth: {
+      lock: false,
+    },
+  }
 );
 
 export function getPhotoUrl(playerId: number): string | null {
