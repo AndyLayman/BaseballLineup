@@ -35,7 +35,7 @@ export function UserMenu() {
         {initial}
       </button>
       {open && (
-        <div className="absolute right-0 top-full mt-1.5 w-56 rounded-xl bg-card border border-border/50 shadow-lg z-50 overflow-hidden">
+        <div className="fixed right-2 top-12 w-56 rounded-xl border shadow-lg overflow-hidden" style={{ background: 'var(--gray-900, #1a1a1a)', borderColor: 'var(--border)', zIndex: 9999, boxShadow: '0 8px 24px rgba(0,0,0,0.5)' }}>
           <div className="px-4 py-3 border-b border-border/30">
             <p className="text-sm font-medium text-foreground truncate">{user.email}</p>
             {roleLabel && (
