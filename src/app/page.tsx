@@ -7,6 +7,7 @@ import { usePlayers } from '@/hooks/usePlayers';
 import { useGame } from '@/hooks/useGame';
 import { useLineup } from '@/hooks/useLineup';
 import { useGameSync } from '@/hooks/useGameSync';
+import { useSeasonPositionStats } from '@/hooks/useSeasonPositionStats';
 import { useAuth } from '@/components/auth-provider';
 import { useRouter } from 'next/navigation';
 import Diamond from '@/components/Diamond';
@@ -45,10 +46,11 @@ export default function Home() {
   const { players, updateBattingOrder, syncFromGameLineup, refetchPlayers } = usePlayers(teamId);
   const { games, currentGame, loading: gamesLoading, error: gameError, selectGame, createGame, toggleInningComplete, refetchCurrentGame, refetchGames } = useGame(teamId);
   const { assignments, getInningAssignments, assignPlayer, unassignPlayer, swapPositions, copyFromInning, autoFillInning, undo, canUndo, refetchAssignments } = useLineup(currentGame?.id || null);
+  const { seasonStats, refetchSeasonStats } = useSeasonPositionStats(teamId);
 
   const handlePullRefresh = useCallback(async () => {
-    await Promise.all([refetchGames(), refetchPlayers(), refetchAssignments()]);
-  }, [refetchGames, refetchPlayers, refetchAssignments]);
+    await Promise.all([refetchGames(), refetchPlayers(), refetchAssignments(), refetchSeasonStats()]);
+  }, [refetchGames, refetchPlayers, refetchAssignments, refetchSeasonStats]);
 
   // Subscribe to live scoring updates from the Stats app
   const gameSync = useGameSync(
@@ -240,6 +242,7 @@ export default function Home() {
             assignments={assignments}
             numInnings={numInnings}
             completedInnings={currentGame.completed_innings || []}
+            seasonStats={seasonStats}
             onClose={() => setShowRecommendations(false)}
           />
         ) : (
