@@ -45,8 +45,8 @@ export default function SyncIndicator() {
 
   return (
     <div
-      className="flex items-center gap-1 shrink-0 px-2 h-7 rounded-md text-[10px] font-medium"
-      style={{ color, background: 'var(--bg-input)', border: '1px solid var(--border)' }}
+      className="flex items-center gap-1.5 shrink-0 px-2 h-9 rounded-lg text-[11px] font-medium btn-secondary"
+      style={{ color }}
       title={state.lastSyncAt ? `Last sync: ${new Date(state.lastSyncAt).toLocaleTimeString()}` : label}
     >
       {icon}
