@@ -7,6 +7,7 @@ import { usePlayers } from '@/hooks/usePlayers';
 import { useGame } from '@/hooks/useGame';
 import { useLineup } from '@/hooks/useLineup';
 import { useGameSync } from '@/hooks/useGameSync';
+import { useSeasonHistory } from '@/hooks/useSeasonHistory';
 import { useAuth } from '@/components/auth-provider';
 import { useRouter } from 'next/navigation';
 import Diamond from '@/components/Diamond';
@@ -45,6 +46,7 @@ export default function Home() {
   const { players, updateBattingOrder, syncFromGameLineup, refetchPlayers } = usePlayers(teamId);
   const { games, currentGame, loading: gamesLoading, error: gameError, selectGame, createGame, toggleInningComplete, refetchCurrentGame, refetchGames } = useGame(teamId);
   const { assignments, getInningAssignments, assignPlayer, unassignPlayer, swapPositions, copyFromInning, autoFillInning, undo, canUndo, refetchAssignments } = useLineup(currentGame?.id || null);
+  const { seasonPositions, fieldingByPosition } = useSeasonHistory(games.map(g => g.id));
 
   const handlePullRefresh = useCallback(async () => {
     await Promise.all([refetchGames(), refetchPlayers(), refetchAssignments()]);
@@ -152,7 +154,7 @@ export default function Home() {
 
   const handleAutoFill = async () => {
     if (currentGame && !isLocked) {
-      await autoFillInning(currentInning, players);
+      await autoFillInning(currentInning, players, seasonPositions, fieldingByPosition);
     }
   };
 

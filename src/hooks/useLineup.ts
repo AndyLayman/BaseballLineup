@@ -5,6 +5,7 @@ import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { LineupAssignment, Position, Player } from '@/lib/types';
 import { FIELD_POSITIONS, BENCH_POSITIONS } from '@/lib/positions';
 import { showToast } from '@/components/Toast';
+import type { FieldingStat } from '@/hooks/useSeasonHistory';
 
 const FIELD_KEYS = FIELD_POSITIONS.map(p => p.key);
 const BENCH_KEYS = BENCH_POSITIONS.map(p => p.key);
@@ -16,17 +17,30 @@ function normalizePos(pos: Position): string {
 
 /**
  * Compute auto-fill assignments for an inning.
- * Tries to place each player in a position they haven't played yet (in other innings).
- * All bench positions (BN1-BN4) count as one "bench" position for coverage purposes.
+ *
+ * Phase 1 (variety): Place players in positions they haven't played yet
+ * across the entire season. Nobody repeats a position until they've tried
+ * all of them.
+ *
+ * Phase 2 (optimize): Once a player has played every position, pick the
+ * position where they have the best fielding stats (fewest errors relative
+ * to total chances).
+ *
+ * All bench positions (BN1-BN4) count as one "bench" position for coverage.
  */
 function computeAutoFill(
   players: Player[],
   allAssignments: LineupAssignment[],
   gameId: string,
   targetInning: number,
+  seasonPositions: Map<number, Set<string>>,
+  fieldingByPosition: Map<number, Map<string, FieldingStat>>,
 ): { position: Position; playerId: number }[] {
-  // Build played-positions for each player from OTHER innings
+  // Merge season-wide history with current game's other innings
   const playedMap = new Map<number, Set<string>>();
+  for (const [playerId, positions] of seasonPositions) {
+    playedMap.set(playerId, new Set(positions));
+  }
   for (const a of allAssignments) {
     if (a.game_id !== gameId || a.inning === targetInning) continue;
     if (!playedMap.has(a.player_id)) playedMap.set(a.player_id, new Set());
@@ -41,38 +55,82 @@ function computeAutoFill(
   // Positions to fill: field first, then bench — limited by roster size
   const allSlots: Position[] = [...FIELD_KEYS, ...BENCH_KEYS];
   const slotsToFill = allSlots.slice(0, roster.length);
+  const allNormalized = new Set(slotsToFill.map(normalizePos));
   const playersToPlace = roster.slice(0, allSlots.length);
 
   // Greedy assignment: most-constrained player first
   const remaining = new Set(slotsToFill);
   const result: { position: Position; playerId: number }[] = [];
 
-  // Score each player by how many unplayed positions are available to them
+  // Score each player by how many unplayed positions are available
   const scored = playersToPlace.map(player => {
     const played = playedMap.get(player.id) ?? new Set<string>();
     const unplayedSlots = slotsToFill.filter(s => !played.has(normalizePos(s)));
-    return { player, played, unplayedCount: unplayedSlots.length };
+    const hasPlayedAll = [...allNormalized].every(p => played.has(p));
+    return { player, played, unplayedCount: unplayedSlots.length, hasPlayedAll };
   });
 
   // Sort: fewest unplayed options first (most constrained)
   scored.sort((a, b) => a.unplayedCount - b.unplayedCount);
 
-  for (const { player, played } of scored) {
+  for (const { player, played, hasPlayedAll } of scored) {
     const available = [...remaining];
-    // Prefer unplayed positions
-    const unplayed = available.filter(s => !played.has(normalizePos(s)));
-    // Among unplayed, prefer field positions over bench
-    const unplayedField = unplayed.filter(s => !s.startsWith('BN'));
-    const unplayedBench = unplayed.filter(s => s.startsWith('BN'));
 
-    const pick = unplayedField[0] ?? unplayedBench[0] ?? available[0];
-    if (pick) {
-      result.push({ position: pick, playerId: player.id });
-      remaining.delete(pick);
+    if (!hasPlayedAll) {
+      // Phase 1: pick an unplayed position
+      const unplayed = available.filter(s => !played.has(normalizePos(s)));
+      const unplayedField = unplayed.filter(s => !s.startsWith('BN'));
+      const unplayedBench = unplayed.filter(s => s.startsWith('BN'));
+      const pick = unplayedField[0] ?? unplayedBench[0] ?? available[0];
+      if (pick) {
+        result.push({ position: pick, playerId: player.id });
+        remaining.delete(pick);
+      }
+    } else {
+      // Phase 2: pick position with best fielding stats
+      const playerFielding = fieldingByPosition.get(player.id);
+      const pick = pickBestPosition(available, playerFielding);
+      if (pick) {
+        result.push({ position: pick, playerId: player.id });
+        remaining.delete(pick);
+      }
     }
   }
 
   return result;
+}
+
+/** Pick the available position with the best fielding percentage. Field > bench. */
+function pickBestPosition(
+  available: Position[],
+  playerFielding: Map<string, FieldingStat> | undefined,
+): Position | undefined {
+  if (available.length === 0) return undefined;
+  if (!playerFielding || playerFielding.size === 0) {
+    // No stats — prefer field over bench
+    return available.find(s => !s.startsWith('BN')) ?? available[0];
+  }
+
+  let bestScore = -1;
+  let bestPick: Position | undefined;
+
+  for (const slot of available) {
+    const norm = slot.startsWith('BN') ? 'BN' : slot;
+    const stat = playerFielding.get(norm);
+    // Score: fielding pct (higher is better), with field positions getting a small bonus
+    const total = stat ? stat.putouts + stat.assists + stat.errors : 0;
+    const success = stat ? stat.putouts + stat.assists : 0;
+    const pct = total > 0 ? success / total : 0.5; // default 0.5 if no data for this position
+    const fieldBonus = slot.startsWith('BN') ? 0 : 0.001; // slight preference for field
+    const score = pct + fieldBonus;
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestPick = slot;
+    }
+  }
+
+  return bestPick ?? available[0];
 }
 
 type UndoAction =
@@ -304,10 +362,15 @@ export function useLineup(gameId: string | null) {
     }
   }, [gameId, assignments]);
 
-  const autoFillInning = useCallback(async (inning: number, players: Player[]) => {
+  const autoFillInning = useCallback(async (
+    inning: number,
+    players: Player[],
+    seasonPositions: Map<number, Set<string>>,
+    fieldingByPosition: Map<number, Map<string, FieldingStat>>,
+  ) => {
     if (!gameId || !isSupabaseConfigured) return;
 
-    const fills = computeAutoFill(players, assignments, gameId, inning);
+    const fills = computeAutoFill(players, assignments, gameId, inning, seasonPositions, fieldingByPosition);
     if (fills.length === 0) return;
 
     // Save existing assignments for undo
