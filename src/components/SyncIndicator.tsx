@@ -26,31 +26,31 @@ export default function SyncIndicator() {
   let color: string;
 
   if (!state.online) {
-    icon = <WarningTriangle width={12} height={12} />;
+    icon = <WarningTriangle width={16} height={16} />;
     label = state.pending > 0 ? `Offline · ${state.pending} pending` : 'Offline';
     color = 'var(--purple)';
   } else if (state.syncing || state.pending > 0) {
-    icon = <CloudSync width={12} height={12} />;
+    icon = <CloudSync width={16} height={16} />;
     label = state.pending > 0 ? `Syncing · ${state.pending}` : 'Syncing';
     color = 'var(--teal)';
   } else if (state.primed) {
-    icon = <CheckCircle width={12} height={12} />;
+    icon = <CheckCircle width={16} height={16} />;
     label = 'Saved for offline';
     color = 'var(--green)';
   } else {
-    icon = <Cloud width={12} height={12} />;
+    icon = <Cloud width={16} height={16} />;
     label = 'Online';
     color = 'var(--text-muted)';
   }
 
   return (
     <div
-      className="flex items-center gap-1.5 shrink-0 px-2 h-9 rounded-lg text-[11px] font-medium btn-secondary"
+      className="h-9 w-9 rounded-lg flex items-center justify-center shrink-0 btn-secondary"
       style={{ color }}
-      title={state.lastSyncAt ? `Last sync: ${new Date(state.lastSyncAt).toLocaleTimeString()}` : label}
+      title={state.lastSyncAt ? `${label} · last sync ${new Date(state.lastSyncAt).toLocaleTimeString()}` : label}
+      aria-label={label}
     >
       {icon}
-      <span className="hidden sm:inline">{label}</span>
     </div>
   );
 }
