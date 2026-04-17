@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { ToastContainer } from "@/components/Toast";
 import { AuthProvider } from "@/components/auth-provider";
+import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
 import "./globals.css";
 
 const isStaging = process.env.NEXT_PUBLIC_IS_STAGING === 'true';
@@ -8,6 +9,7 @@ const isStaging = process.env.NEXT_PUBLIC_IS_STAGING === 'true';
 export const metadata: Metadata = {
   title: isStaging ? "[STAGE] Baseball Lineup" : "Baseball Lineup",
   description: "Baseball lineup management tool for coaches",
+  manifest: "/manifest.webmanifest",
   icons: {
     icon: isStaging ? '/favicon-stage.png' : '/Favicon.png',
     apple: '/Lineup_128-128.png',
@@ -45,6 +47,7 @@ export default function RootLayout({
         <AuthProvider>
           {children}
           <ToastContainer />
+          <ServiceWorkerRegistrar />
         </AuthProvider>
       </body>
     </html>

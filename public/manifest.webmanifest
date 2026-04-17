@@ -1,0 +1,24 @@
+{
+  "name": "Baseball Lineup",
+  "short_name": "Lineup",
+  "description": "Baseball lineup management tool for coaches",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#111111",
+  "theme_color": "#181818",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/Lineup_128-128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

@@ -5,6 +5,7 @@ import { Game } from '@/lib/types';
 import { NavArrowDown, Check, Lock, LockSlash } from 'iconoir-react';
 import ThemeToggle from './ThemeToggle';
 import { UserMenu } from './user-menu';
+import SyncIndicator from './SyncIndicator';
 
 interface GameSelectorProps {
   games: Game[];
@@ -276,6 +277,9 @@ export default function GameSelector({
           )}
         </button>
       )}
+
+      {/* Sync indicator */}
+      {!showNew && <SyncIndicator />}
 
       {/* Theme toggle */}
       {!showNew && <ThemeToggle />}
