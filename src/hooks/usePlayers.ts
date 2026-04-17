@@ -4,6 +4,12 @@ import { useEffect, useState, useCallback } from 'react';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { Player } from '@/lib/types';
 import { showToast } from '@/components/Toast';
+import {
+  getCachedPlayers,
+  replacePlayersCache,
+  enqueueWrite,
+} from '@/lib/offline-db';
+import { refreshPending, markPrimed } from '@/lib/sync-state';
 
 export function usePlayers(teamId: string | null) {
   const [players, setPlayers] = useState<Player[]>([]);
@@ -15,7 +21,19 @@ export function usePlayers(teamId: string | null) {
       setLoading(false);
       return;
     }
-    setLoading(true);
+
+    // Cache-first: show whatever we have locally immediately.
+    try {
+      const cached = await getCachedPlayers(teamId);
+      if (cached.length > 0) {
+        setPlayers(cached.slice().sort((a, b) => a.number - b.number));
+        setLoading(false);
+      }
+    } catch {
+      // ignore cache errors
+    }
+
+    // Then refresh from server. If offline or fails, keep cached values.
     const { data, error } = await supabase
       .from('players')
       .select('*')
@@ -23,37 +41,64 @@ export function usePlayers(teamId: string | null) {
       .order('number');
 
     if (error) {
-      showToast('Failed to load players', 'error');
-    } else {
-      setPlayers(data || []);
+      if (players.length === 0) showToast('Failed to load players', 'error');
+      setLoading(false);
+      return;
     }
+
+    const fresh = (data || []) as Player[];
+    setPlayers(fresh);
     setLoading(false);
+    try {
+      await replacePlayersCache(teamId, fresh);
+      markPrimed();
+    } catch {
+      // ignore
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [teamId]);
 
   useEffect(() => { fetchPlayers(); }, [fetchPlayers]);
 
   const updateBattingOrder = useCallback(async (orderedIds: number[], removedIds: number[]) => {
-    if (!isSupabaseConfigured) return;
-    const updates = [
-      ...orderedIds.map((id, index) =>
-        supabase.from('players').update({ sort_order: index + 1 }).eq('id', id)
-      ),
-      ...removedIds.map(id =>
-        supabase.from('players').update({ sort_order: null }).eq('id', id)
-      ),
-    ];
-    await Promise.all(updates);
-    setPlayers(prev => prev.map(p => {
+    if (!isSupabaseConfigured || !teamId) return;
+
+    // Optimistic local state + cache update.
+    const nextPlayers = players.map(p => {
       const idx = orderedIds.indexOf(p.id);
       if (idx >= 0) return { ...p, sort_order: idx + 1 };
       if (removedIds.includes(p.id)) return { ...p, sort_order: null };
       return p;
-    }));
-  }, []);
+    });
+    setPlayers(nextPlayers);
+    void replacePlayersCache(teamId, nextPlayers);
 
-  // Sync batting order from a game_lineup (set in the Stats app)
+    // Enqueue server mutations; drainer will flush them.
+    for (let i = 0; i < orderedIds.length; i++) {
+      await enqueueWrite({
+        table: 'players',
+        op: 'update',
+        set: { sort_order: i + 1 },
+        whereIdEq: orderedIds[i],
+        label: `batting-order-set-${orderedIds[i]}`,
+      });
+    }
+    for (const id of removedIds) {
+      await enqueueWrite({
+        table: 'players',
+        op: 'update',
+        set: { sort_order: null },
+        whereIdEq: id,
+        label: `batting-order-clear-${id}`,
+      });
+    }
+    await refreshPending();
+  }, [players, teamId]);
+
+  // Sync batting order from a game_lineup (set in the Stats app). Read-only
+  // sync — no need to queue anything. Best-effort when online.
   const syncFromGameLineup = useCallback(async (gameId: string) => {
-    if (!isSupabaseConfigured) return;
+    if (!isSupabaseConfigured || !teamId) return;
     const { data } = await supabase
       .from('game_lineup')
       .select('player_id, batting_order')
@@ -62,23 +107,39 @@ export function usePlayers(teamId: string | null) {
     if (!data || data.length === 0) return;
 
     const lineupPlayerIds = new Set(data.map(d => d.player_id));
-    const updates = [
-      ...data.map(d =>
-        supabase.from('players').update({ sort_order: d.batting_order }).eq('id', d.player_id)
-      ),
-      // Null out sort_order for players not in this game's lineup
-      ...players
-        .filter(p => !lineupPlayerIds.has(p.id) && p.sort_order != null)
-        .map(p => supabase.from('players').update({ sort_order: null }).eq('id', p.id)),
-    ];
-    await Promise.all(updates);
 
-    setPlayers(prev => prev.map(p => {
+    // Optimistically update local state + cache.
+    const nextPlayers = players.map(p => {
       const entry = data.find(d => d.player_id === p.id);
       if (entry) return { ...p, sort_order: entry.batting_order };
       return { ...p, sort_order: null };
-    }));
-  }, [players]);
+    });
+    setPlayers(nextPlayers);
+    void replacePlayersCache(teamId, nextPlayers);
+
+    // Enqueue writes back to `players.sort_order` so other apps see the order.
+    for (const d of data) {
+      await enqueueWrite({
+        table: 'players',
+        op: 'update',
+        set: { sort_order: d.batting_order },
+        whereIdEq: d.player_id,
+        label: `game-lineup-sync-${d.player_id}`,
+      });
+    }
+    for (const p of players) {
+      if (!lineupPlayerIds.has(p.id) && p.sort_order != null) {
+        await enqueueWrite({
+          table: 'players',
+          op: 'update',
+          set: { sort_order: null },
+          whereIdEq: p.id,
+          label: `game-lineup-clear-${p.id}`,
+        });
+      }
+    }
+    await refreshPending();
+  }, [players, teamId]);
 
   return { players, loading, updateBattingOrder, syncFromGameLineup, refetchPlayers: fetchPlayers };
 }

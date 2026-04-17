@@ -4,6 +4,13 @@ import { useEffect, useState, useCallback } from 'react';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { Position } from '@/lib/types';
 import { FIELD_POSITIONS } from '@/lib/positions';
+import {
+  getCachedGames,
+  getCachedAssignmentsForGames,
+  getCachedFieldingPlaysForGames,
+  replaceFieldingPlaysCacheForGames,
+} from '@/lib/offline-db';
+import { markPrimed } from '@/lib/sync-state';
 
 export interface PositionPerformance {
   innings: number;
@@ -14,15 +21,12 @@ export interface PositionPerformance {
 
 export type PerformanceTier = 'good' | 'mixed' | 'poor' | 'unknown' | 'unplayed';
 
-// Per-position performance thresholds. Tuned for youth baseball.
 export const MIN_CHANCES_FOR_VERDICT = 3;
 export const GOOD_RATE = 0.75;
 export const POOR_RATE = 0.5;
 
 const FIELD_KEYS = new Set<string>(FIELD_POSITIONS.map(p => p.key));
 
-// Classify a fielding_plays.play_type as an error or a good play.
-// Conservative: match "e", "error", or anything starting with "error_"/"e_".
 function isErrorPlay(playType: string): boolean {
   const t = (playType || '').toLowerCase().trim();
   if (!t) return false;
@@ -46,6 +50,40 @@ export function statsKey(playerId: number, position: Position): string {
   return `${playerId}:${position}`;
 }
 
+interface AssignmentShape { game_id: string; inning: number; player_id: number; position: string }
+interface FieldingPlayShape { game_id: string; inning: number; player_id: number; play_type: string }
+
+function buildStats(
+  assignments: AssignmentShape[],
+  plays: FieldingPlayShape[],
+): SeasonStatsMap {
+  const positionLookup = new Map<string, Position>();
+  const result: SeasonStatsMap = new Map();
+
+  for (const a of assignments) {
+    if (!FIELD_KEYS.has(a.position)) continue;
+    const pos = a.position as Position;
+    positionLookup.set(`${a.game_id}|${a.inning}|${a.player_id}`, pos);
+    const key = statsKey(a.player_id, pos);
+    const existing = result.get(key) ?? { innings: 0, goodPlays: 0, errorPlays: 0, totalPlays: 0 };
+    existing.innings += 1;
+    result.set(key, existing);
+  }
+
+  for (const p of plays) {
+    const pos = positionLookup.get(`${p.game_id}|${p.inning}|${p.player_id}`);
+    if (!pos) continue;
+    const key = statsKey(p.player_id, pos);
+    const existing = result.get(key) ?? { innings: 0, goodPlays: 0, errorPlays: 0, totalPlays: 0 };
+    if (isErrorPlay(p.play_type)) existing.errorPlays += 1;
+    else existing.goodPlays += 1;
+    existing.totalPlays += 1;
+    result.set(key, existing);
+  }
+
+  return result;
+}
+
 export function useSeasonPositionStats(teamId: string | null) {
   const [stats, setStats] = useState<SeasonStatsMap>(new Map());
   const [loading, setLoading] = useState(true);
@@ -58,6 +96,25 @@ export function useSeasonPositionStats(teamId: string | null) {
     }
     setLoading(true);
 
+    // Cache-first: build from IDB if we have anything.
+    try {
+      const cachedGames = await getCachedGames(teamId);
+      if (cachedGames.length > 0) {
+        const gameIds = cachedGames.map(g => g.id);
+        const [cachedAssignments, cachedPlays] = await Promise.all([
+          getCachedAssignmentsForGames(gameIds),
+          getCachedFieldingPlaysForGames(gameIds),
+        ]);
+        if (cachedAssignments.length > 0 || cachedPlays.length > 0) {
+          setStats(buildStats(cachedAssignments, cachedPlays));
+          setLoading(false);
+        }
+      }
+    } catch {
+      // ignore
+    }
+
+    // Then refresh from server.
     const { data: gameRows } = await supabase
       .from('games')
       .select('id')
@@ -77,40 +134,22 @@ export function useSeasonPositionStats(teamId: string | null) {
         .in('game_id', gameIds),
       supabase
         .from('fielding_plays')
-        .select('game_id, inning, player_id, play_type')
+        .select('id, game_id, inning, player_id, play_type')
         .in('game_id', gameIds),
     ]);
 
-    const assignments = assignmentsRes.data || [];
-    const plays = playsRes.data || [];
+    const assignments = (assignmentsRes.data || []) as AssignmentShape[];
+    const plays = (playsRes.data || []) as (FieldingPlayShape & { id: string })[];
 
-    // Map (game_id, inning, player_id) -> position, for joining plays to position.
-    const positionLookup = new Map<string, Position>();
-    const result: SeasonStatsMap = new Map();
-
-    for (const a of assignments) {
-      if (!FIELD_KEYS.has(a.position)) continue;
-      const pos = a.position as Position;
-      positionLookup.set(`${a.game_id}|${a.inning}|${a.player_id}`, pos);
-      const key = statsKey(a.player_id, pos);
-      const existing = result.get(key) ?? { innings: 0, goodPlays: 0, errorPlays: 0, totalPlays: 0 };
-      existing.innings += 1;
-      result.set(key, existing);
-    }
-
-    for (const p of plays) {
-      const pos = positionLookup.get(`${p.game_id}|${p.inning}|${p.player_id}`);
-      if (!pos) continue;
-      const key = statsKey(p.player_id, pos);
-      const existing = result.get(key) ?? { innings: 0, goodPlays: 0, errorPlays: 0, totalPlays: 0 };
-      if (isErrorPlay(p.play_type)) existing.errorPlays += 1;
-      else existing.goodPlays += 1;
-      existing.totalPlays += 1;
-      result.set(key, existing);
-    }
-
-    setStats(result);
+    setStats(buildStats(assignments, plays));
     setLoading(false);
+
+    try {
+      await replaceFieldingPlaysCacheForGames(gameIds, plays);
+      markPrimed();
+    } catch {
+      // ignore
+    }
   }, [teamId]);
 
   useEffect(() => { fetchStats(); }, [fetchStats]);

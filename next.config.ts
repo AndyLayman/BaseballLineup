@@ -1,4 +1,13 @@
+import withSerwistInit from "@serwist/next";
 import type { NextConfig } from "next";
+
+const withSerwist = withSerwistInit({
+  swSrc: "src/sw.ts",
+  swDest: "public/sw.js",
+  cacheOnNavigation: true,
+  reloadOnOnline: false,
+  disable: process.env.NODE_ENV !== "production",
+});
 
 const nextConfig: NextConfig = {
   images: {
@@ -12,4 +21,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSerwist(nextConfig);
