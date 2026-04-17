@@ -154,7 +154,7 @@ export default function Home() {
 
   const handleAutoFill = async () => {
     if (currentGame && !isLocked) {
-      await autoFillInning(currentInning, players);
+      await autoFillInning(currentInning, players, seasonStats);
     }
   };
 
