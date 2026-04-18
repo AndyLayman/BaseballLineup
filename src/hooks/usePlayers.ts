@@ -112,48 +112,42 @@ export function usePlayers(teamId: string | null) {
     scheduleDrain();
   }, [players, teamId]);
 
-  // Sync batting order from a game_lineup (set in the Stats app). Read-only
-  // sync — no need to queue anything. Best-effort when online.
+  // Seed batting order from game_lineup (written by the Stats app) only on
+  // a team that has never set one here. Lineup is authoritative per
+  // CLAUDE.md — we check the DB freshly (not in-memory state) so no amount
+  // of React timing can let a stale snapshot clobber a saved order.
   const syncFromGameLineup = useCallback(async (gameId: string) => {
     if (!isSupabaseConfigured || !teamId) return;
-    const { data } = await supabase
+
+    const { data: current } = await supabase
+      .from('players')
+      .select('sort_order')
+      .eq('team_id', teamId);
+    if ((current || []).some(p => p.sort_order != null)) return;
+
+    const { data: lineup } = await supabase
       .from('game_lineup')
       .select('player_id, batting_order')
       .eq('game_id', gameId)
       .order('batting_order');
-    if (!data || data.length === 0) return;
+    if (!lineup || lineup.length === 0) return;
 
-    const lineupPlayerIds = new Set(data.map(d => d.player_id));
-
-    // Optimistically update local state + cache.
     const nextPlayers = players.map(p => {
-      const entry = data.find(d => d.player_id === p.id);
+      const entry = lineup.find(d => d.player_id === p.id);
       if (entry) return { ...p, sort_order: entry.batting_order };
-      return { ...p, sort_order: null };
+      return p;
     });
     setPlayers(nextPlayers);
     void replacePlayersCache(teamId, nextPlayers);
 
-    // Enqueue writes back to `players.sort_order` so other apps see the order.
-    for (const d of data) {
+    for (const d of lineup) {
       await enqueueWrite({
         table: 'players',
         op: 'update',
         set: { sort_order: d.batting_order },
         whereIdEq: d.player_id,
-        label: `game-lineup-sync-${d.player_id}`,
+        label: `game-lineup-import-${d.player_id}`,
       });
-    }
-    for (const p of players) {
-      if (!lineupPlayerIds.has(p.id) && p.sort_order != null) {
-        await enqueueWrite({
-          table: 'players',
-          op: 'update',
-          set: { sort_order: null },
-          whereIdEq: p.id,
-          label: `game-lineup-clear-${p.id}`,
-        });
-      }
     }
     await refreshPending();
     scheduleDrain();
