@@ -8,37 +8,47 @@ import {
 } from '@/lib/offline-db';
 import { refreshPending, setSyncing } from '@/lib/sync-state';
 
-// Best-effort replay of a single queue entry against Supabase.
-// Returns true if the entry was successfully applied (or is poison — in which
-// case we drop it). Returns false if the failure looks transient (likely a
-// network error) so the drainer can stop and try again later.
+// Tables that have a natural-key uniqueness constraint we want upsert
+// to merge on instead of failing.
+const UPSERT_CONFLICT_TARGETS: Partial<Record<QueueEntry['table'], string>> = {
+  lineup_assignments: 'game_id,inning,position',
+};
+
 async function applyEntry(entry: QueueEntry): Promise<boolean> {
   const table = entry.table;
   try {
     if (entry.op === 'insert' && entry.values) {
-      const { error } = await supabase.from(table).insert(entry.values);
+      const conflictTarget = UPSERT_CONFLICT_TARGETS[table];
+      const { error } = conflictTarget
+        ? await supabase.from(table).upsert(entry.values, { onConflict: conflictTarget })
+        : await supabase.from(table).insert(entry.values);
       if (!error) return true;
-      return !isNetworkError(error);
+      if (isNetworkError(error)) return false;
+      console.warn('[offline-queue] dropping insert (non-network error)', { entry, error });
+      return true;
     }
     if (entry.op === 'update' && entry.set) {
       let q = supabase.from(table).update(entry.set);
       if (entry.whereIdEq != null) q = q.eq('id', entry.whereIdEq);
       const { error } = await q;
       if (!error) return true;
-      return !isNetworkError(error);
+      if (isNetworkError(error)) return false;
+      console.warn('[offline-queue] dropping update (non-network error)', { entry, error });
+      return true;
     }
     if (entry.op === 'delete') {
       let q = supabase.from(table).delete();
       if (entry.whereIdEq != null) q = q.eq('id', entry.whereIdEq);
       else if (entry.whereIdIn && entry.whereIdIn.length > 0) q = q.in('id', entry.whereIdIn);
-      else return true; // nothing to do
+      else return true;
       const { error } = await q;
       if (!error) return true;
-      return !isNetworkError(error);
+      if (isNetworkError(error)) return false;
+      console.warn('[offline-queue] dropping delete (non-network error)', { entry, error });
+      return true;
     }
-    return true; // unknown op — drop rather than block forever
+    return true;
   } catch (e) {
-    // Assume network failure; keep entry.
     console.warn('[offline-queue] apply threw', e);
     return false;
   }
@@ -65,7 +75,6 @@ export async function drainQueue(): Promise<void> {
       if (ok && entry.id != null) {
         await removeQueueEntry(entry.id);
       } else if (!ok) {
-        // Transient — stop and retry on next trigger.
         break;
       }
     }
@@ -76,13 +85,23 @@ export async function drainQueue(): Promise<void> {
   }
 }
 
-// Install listeners once; kicks the drainer on reconnect and on focus.
+// Coalesce many rapid enqueues (e.g. autoFillInning's 13 inserts) into a
+// single drain pass.
+let drainTimer: ReturnType<typeof setTimeout> | null = null;
+export function scheduleDrain(delayMs = 50): void {
+  if (typeof window === 'undefined') return;
+  if (drainTimer) return;
+  drainTimer = setTimeout(() => {
+    drainTimer = null;
+    void drainQueue();
+  }, delayMs);
+}
+
 let installed = false;
 export function installQueueDrainer() {
   if (installed || typeof window === 'undefined') return;
   installed = true;
   window.addEventListener('online', () => { void drainQueue(); });
   window.addEventListener('focus', () => { void drainQueue(); });
-  // Kick it at startup in case writes were queued from a previous session.
   void drainQueue();
 }

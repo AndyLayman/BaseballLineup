@@ -10,6 +10,7 @@ import {
   enqueueWrite,
 } from '@/lib/offline-db';
 import { refreshPending, markPrimed } from '@/lib/sync-state';
+import { scheduleDrain } from '@/lib/offline-queue';
 
 export function usePlayers(teamId: string | null) {
   const [players, setPlayers] = useState<Player[]>([]);
@@ -93,6 +94,7 @@ export function usePlayers(teamId: string | null) {
       });
     }
     await refreshPending();
+    scheduleDrain();
   }, [players, teamId]);
 
   // Sync batting order from a game_lineup (set in the Stats app). Read-only
@@ -139,6 +141,7 @@ export function usePlayers(teamId: string | null) {
       }
     }
     await refreshPending();
+    scheduleDrain();
   }, [players, teamId]);
 
   return { players, loading, updateBattingOrder, syncFromGameLineup, refetchPlayers: fetchPlayers };

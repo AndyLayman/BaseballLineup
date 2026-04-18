@@ -10,6 +10,7 @@ import {
   enqueueWrite,
 } from '@/lib/offline-db';
 import { refreshPending, markPrimed } from '@/lib/sync-state';
+import { scheduleDrain } from '@/lib/offline-queue';
 
 function pickDefaultGame(games: Game[]): Game | null {
   if (games.length === 0) return null;
@@ -158,6 +159,7 @@ export function useGame(teamId: string | null) {
       label: `toggle-inning-${inning}`,
     });
     await refreshPending();
+    scheduleDrain();
   }, [currentGame, teamId]);
 
   const refetchCurrentGame = useCallback(async () => {
