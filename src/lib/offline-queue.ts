@@ -9,10 +9,6 @@ import {
 import { refreshPending, setSyncing } from '@/lib/sync-state';
 import { showToast } from '@/components/Toast';
 
-const UPSERT_CONFLICT_TARGETS: Partial<Record<QueueEntry['table'], string>> = {
-  lineup_assignments: 'game_id,inning,position',
-};
-
 interface SupabaseLikeError {
   message?: string;
   code?: string;
@@ -35,11 +31,10 @@ async function applyEntry(entry: QueueEntry): Promise<boolean> {
   const table = entry.table;
   try {
     if (entry.op === 'insert' && entry.values) {
-      const conflictTarget = UPSERT_CONFLICT_TARGETS[table];
-      const query = conflictTarget
-        ? supabase.from(table).upsert(entry.values, { onConflict: conflictTarget }).select('id')
-        : supabase.from(table).insert(entry.values).select('id');
-      const { data, error } = await query;
+      // Plain insert. The deployed schema doesn't have a (game_id, inning,
+      // position) unique constraint to upsert on, and rows already use
+      // client-generated UUIDs so retries never duplicate by primary key.
+      const { data, error } = await supabase.from(table).insert(entry.values).select('id');
       if (error) {
         if (isNetworkError(error)) return false;
         reportFailure(entry, error);
