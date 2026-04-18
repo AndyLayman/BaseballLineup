@@ -21,8 +21,25 @@ import { scheduleDrain } from '@/lib/offline-queue';
 const FIELD_KEYS = FIELD_POSITIONS.map(p => p.key);
 const BENCH_KEYS = BENCH_POSITIONS.map(p => p.key);
 
+const INFIELD_KEYS = new Set<Position>(['P', 'C', '1B', '2B', '3B', 'SS']);
+type Region = 'IF' | 'OF' | 'BN';
+
+function regionOf(pos: Position): Region {
+  if (pos.startsWith('BN')) return 'BN';
+  return INFIELD_KEYS.has(pos) ? 'IF' : 'OF';
+}
+
 function normalizePos(pos: Position): string {
   return pos.startsWith('BN') ? 'BN' : pos;
+}
+
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
 }
 
 function newId(): string {
@@ -37,11 +54,17 @@ function newId(): string {
 /**
  * Auto-fill assignments for an inning.
  *
- * Phase 1 (variety): place players in positions they haven't played across
- * the season. Nobody repeats until they've tried every position.
+ * Region rotation (top preference): if a player was in the infield last
+ * inning, prefer to put them in the outfield or bench this inning, and vice
+ * versa. Random shuffle between OF and BN keeps the bench from feeling
+ * deterministic.
  *
- * Phase 2 (optimize): once a player has played every position, prefer the
- * position with the best fielding stats.
+ * Within the preferred region:
+ * - Phase 1 (variety): pick positions the player hasn't played all season.
+ * - Phase 2 (optimize): once they've played every position, pick the one
+ *   with the best fielding stats.
+ *
+ * If the preferred region is full, fall through to the next region preference.
  */
 function computeAutoFill(
   players: Player[],
@@ -62,6 +85,25 @@ function computeAutoFill(
     if (!playedMap.has(a.player_id)) playedMap.set(a.player_id, new Set());
     playedMap.get(a.player_id)!.add(normalizePos(a.position));
   }
+
+  // Last-inning region per player (only earlier innings of this game).
+  const lastInningSeen = new Map<number, number>();
+  const lastRegion = new Map<number, Region>();
+  for (const a of allAssignments) {
+    if (a.game_id !== gameId || a.inning >= targetInning) continue;
+    const prev = lastInningSeen.get(a.player_id);
+    if (prev == null || a.inning > prev) {
+      lastInningSeen.set(a.player_id, a.inning);
+      lastRegion.set(a.player_id, regionOf(a.position));
+    }
+  }
+
+  const preferredRegions = (playerId: number): Region[] => {
+    const last = lastRegion.get(playerId);
+    if (last === 'IF') return [...shuffle<Region>(['OF', 'BN']), 'IF'];
+    if (last === 'OF' || last === 'BN') return ['IF', ...shuffle<Region>(['OF', 'BN'])];
+    return shuffle<Region>(['IF', 'OF', 'BN']);
+  };
 
   const active = players.filter(p => p.sort_order != null)
     .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
@@ -85,22 +127,27 @@ function computeAutoFill(
 
   for (const { player, played, hasPlayedAll } of scored) {
     const available = [...remaining];
+    const prefs = preferredRegions(player.id);
 
-    if (!hasPlayedAll) {
-      const unplayed = available.filter(s => !played.has(normalizePos(s)));
-      const unplayedField = unplayed.filter(s => !s.startsWith('BN'));
-      const unplayedBench = unplayed.filter(s => s.startsWith('BN'));
-      const pick = unplayedField[0] ?? unplayedBench[0] ?? available[0];
-      if (pick) {
-        result.push({ position: pick, playerId: player.id });
-        remaining.delete(pick);
+    let pick: Position | undefined;
+    for (const region of prefs) {
+      const inRegion = available.filter(s => regionOf(s) === region);
+      if (inRegion.length === 0) continue;
+      if (!hasPlayedAll) {
+        const unplayed = inRegion.filter(s => !played.has(normalizePos(s)));
+        const candidates = unplayed.length > 0 ? unplayed : inRegion;
+        pick = shuffle(candidates)[0];
+      } else {
+        pick = pickBestPosition(inRegion, player.id, seasonStats);
       }
-    } else {
-      const pick = pickBestPosition(available, player.id, seasonStats);
-      if (pick) {
-        result.push({ position: pick, playerId: player.id });
-        remaining.delete(pick);
-      }
+      if (pick) break;
+    }
+
+    if (!pick) pick = available[0];
+
+    if (pick) {
+      result.push({ position: pick, playerId: player.id });
+      remaining.delete(pick);
     }
   }
 
