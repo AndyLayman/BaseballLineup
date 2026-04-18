@@ -16,6 +16,7 @@ import {
   enqueueWrite,
 } from '@/lib/offline-db';
 import { refreshPending, markPrimed } from '@/lib/sync-state';
+import { scheduleDrain } from '@/lib/offline-queue';
 
 const FIELD_KEYS = FIELD_POSITIONS.map(p => p.key);
 const BENCH_KEYS = BENCH_POSITIONS.map(p => p.key);
@@ -209,6 +210,23 @@ export function useLineup(gameId: string | null) {
     return () => { cancelled = true; };
   }, [gameId]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Realtime: when another device changes assignments for this game, refetch
+  // so this device's cache + UI reflect the latest state.
+  useEffect(() => {
+    if (!gameId || !isSupabaseConfigured) return;
+    const channel = supabase
+      .channel(`lineup-assignments-${gameId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'lineup_assignments', filter: `game_id=eq.${gameId}` },
+        () => { void refetchAssignmentsRef.current?.(); },
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [gameId]);
+
+  const refetchAssignmentsRef = useRef<(() => Promise<void>) | null>(null);
+
   const refetchAssignments = useCallback(async () => {
     if (!gameId || !isSupabaseConfigured) return;
     const { data } = await supabase
@@ -225,6 +243,10 @@ export function useLineup(gameId: string | null) {
       }
     }
   }, [gameId]);
+
+  useEffect(() => {
+    refetchAssignmentsRef.current = refetchAssignments;
+  }, [refetchAssignments]);
 
   const assignPlayer = useCallback(async (inning: number, position: Position, playerId: number) => {
     if (!gameId || !isSupabaseConfigured) return;
@@ -260,6 +282,7 @@ export function useLineup(gameId: string | null) {
       });
     }
     await refreshPending();
+    scheduleDrain();
   }, [gameId, assignments]);
 
   const unassignPlayer = useCallback(async (inning: number, position: Position) => {
@@ -280,6 +303,7 @@ export function useLineup(gameId: string | null) {
       label: `unassign-${existing.id}`,
     });
     await refreshPending();
+    scheduleDrain();
   }, [gameId, assignments]);
 
   const swapPositions = useCallback(async (inning: number, fromPosition: Position, toPosition: Position) => {
@@ -333,6 +357,7 @@ export function useLineup(gameId: string | null) {
       });
     }
     await refreshPending();
+    scheduleDrain();
   }, [gameId, assignments]);
 
   const copyFromInning = useCallback(async (sourceInning: number, targetInning: number) => {
@@ -378,6 +403,7 @@ export function useLineup(gameId: string | null) {
       });
     }
     await refreshPending();
+    scheduleDrain();
   }, [gameId, assignments]);
 
   const autoFillInning = useCallback(async (
@@ -429,6 +455,7 @@ export function useLineup(gameId: string | null) {
       });
     }
     await refreshPending();
+    scheduleDrain();
   }, [gameId, assignments]);
 
   const undo = useCallback(async () => {
@@ -553,6 +580,7 @@ export function useLineup(gameId: string | null) {
       }
     }
     await refreshPending();
+    scheduleDrain();
   }, [assignments]);
 
   const getInningAssignments = useCallback(
