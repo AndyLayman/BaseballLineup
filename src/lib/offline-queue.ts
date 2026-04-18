@@ -7,33 +7,64 @@ import {
   removeQueueEntry,
 } from '@/lib/offline-db';
 import { refreshPending, setSyncing } from '@/lib/sync-state';
+import { showToast } from '@/components/Toast';
 
-// Tables that have a natural-key uniqueness constraint we want upsert
-// to merge on instead of failing.
 const UPSERT_CONFLICT_TARGETS: Partial<Record<QueueEntry['table'], string>> = {
   lineup_assignments: 'game_id,inning,position',
 };
+
+interface SupabaseLikeError {
+  message?: string;
+  code?: string;
+  details?: string;
+  hint?: string;
+}
+
+function describeError(err: SupabaseLikeError | null | undefined): string {
+  if (!err) return 'no rows affected (likely blocked by RLS)';
+  return [err.message, err.code ? `(${err.code})` : null, err.details].filter(Boolean).join(' ');
+}
+
+function reportFailure(entry: QueueEntry, err: SupabaseLikeError | null | undefined) {
+  const msg = `Couldn't save ${entry.table} ${entry.op}${entry.label ? ` [${entry.label}]` : ''}: ${describeError(err)}`;
+  console.warn('[offline-queue]', msg, { entry, err });
+  showToast(msg, 'error');
+}
 
 async function applyEntry(entry: QueueEntry): Promise<boolean> {
   const table = entry.table;
   try {
     if (entry.op === 'insert' && entry.values) {
       const conflictTarget = UPSERT_CONFLICT_TARGETS[table];
-      const { error } = conflictTarget
-        ? await supabase.from(table).upsert(entry.values, { onConflict: conflictTarget })
-        : await supabase.from(table).insert(entry.values);
-      if (!error) return true;
-      if (isNetworkError(error)) return false;
-      console.warn('[offline-queue] dropping insert (non-network error)', { entry, error });
+      const query = conflictTarget
+        ? supabase.from(table).upsert(entry.values, { onConflict: conflictTarget }).select('id')
+        : supabase.from(table).insert(entry.values).select('id');
+      const { data, error } = await query;
+      if (error) {
+        if (isNetworkError(error)) return false;
+        reportFailure(entry, error);
+        return true;
+      }
+      if (!data || data.length === 0) {
+        // Likely RLS blocked the write silently.
+        reportFailure(entry, null);
+        return true;
+      }
       return true;
     }
     if (entry.op === 'update' && entry.set) {
       let q = supabase.from(table).update(entry.set);
       if (entry.whereIdEq != null) q = q.eq('id', entry.whereIdEq);
-      const { error } = await q;
-      if (!error) return true;
-      if (isNetworkError(error)) return false;
-      console.warn('[offline-queue] dropping update (non-network error)', { entry, error });
+      const { data, error } = await q.select('id');
+      if (error) {
+        if (isNetworkError(error)) return false;
+        reportFailure(entry, error);
+        return true;
+      }
+      if (!data || data.length === 0) {
+        reportFailure(entry, null);
+        return true;
+      }
       return true;
     }
     if (entry.op === 'delete') {
@@ -42,9 +73,11 @@ async function applyEntry(entry: QueueEntry): Promise<boolean> {
       else if (entry.whereIdIn && entry.whereIdIn.length > 0) q = q.in('id', entry.whereIdIn);
       else return true;
       const { error } = await q;
-      if (!error) return true;
-      if (isNetworkError(error)) return false;
-      console.warn('[offline-queue] dropping delete (non-network error)', { entry, error });
+      if (error) {
+        if (isNetworkError(error)) return false;
+        reportFailure(entry, error);
+        return true;
+      }
       return true;
     }
     return true;
@@ -54,7 +87,7 @@ async function applyEntry(entry: QueueEntry): Promise<boolean> {
   }
 }
 
-function isNetworkError(error: { message?: string; code?: string } | null | undefined): boolean {
+function isNetworkError(error: SupabaseLikeError | null | undefined): boolean {
   if (!error) return false;
   const msg = (error.message || '').toLowerCase();
   if (msg.includes('fetch') || msg.includes('network') || msg.includes('failed to fetch')) return true;
@@ -85,8 +118,6 @@ export async function drainQueue(): Promise<void> {
   }
 }
 
-// Coalesce many rapid enqueues (e.g. autoFillInning's 13 inserts) into a
-// single drain pass.
 let drainTimer: ReturnType<typeof setTimeout> | null = null;
 export function scheduleDrain(delayMs = 50): void {
   if (typeof window === 'undefined') return;
