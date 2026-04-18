@@ -61,6 +61,21 @@ export function usePlayers(teamId: string | null) {
 
   useEffect(() => { fetchPlayers(); }, [fetchPlayers]);
 
+  // Realtime: when another device changes a player (e.g. batting order on
+  // desktop), refetch so this device's UI reflects the latest state.
+  useEffect(() => {
+    if (!isSupabaseConfigured || !teamId) return;
+    const channel = supabase
+      .channel(`players-${teamId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'players', filter: `team_id=eq.${teamId}` },
+        () => { void fetchPlayers(); },
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [teamId, fetchPlayers]);
+
   const updateBattingOrder = useCallback(async (orderedIds: number[], removedIds: number[]) => {
     if (!isSupabaseConfigured || !teamId) return;
 
